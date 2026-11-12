@@ -20,11 +20,12 @@ import { CONFIG_FILE, STATE_DIR, loadConfig, makeDirs, readState, writeState } f
 import { advance, startCursor } from '../lib/cursor.mjs';
 import { followEvents } from '../lib/events.mjs';
 import { bindTag, chunk, createChat, createClient, createTag, recallMessage, replyMention, setChatAvatar, tagName, unbindTag, doneCard, downloadImage, menuCard, messageParts, renameChat, sendCard, sendMarkdown, startEvents, textCard, updateCard, uploadImage } from '../lib/feishu.mjs';
-import { getTerminal, hc, keys, machineOf, machines, put, run, screenTail, send, splitWhere } from '../lib/hc.mjs';
+import { cores, getTerminal, hc, keys, machineOf, machines, put, run, screenTail, send, splitWhere } from '../lib/hc.mjs';
 import { menuOf } from '../lib/menu.mjs';
 import { createLog } from '../lib/log.mjs';
 import { readerFor } from '../lib/readers/index.mjs';
 import { createUserAuth } from '../lib/userauth.mjs';
+import { coreViews } from '../lib/views.mjs';
 
 const SHELLS = new Set(['zsh', 'bash', 'sh', 'fish', 'nu', 'dash']);
 const SHELL_ECHO_MS = 1500;
@@ -53,10 +54,25 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 const views = new Map(); // session -> followEvents handle (its live terminal records)
 
-// A terminal on another machine shows up in every session connected to that machine.
-// It belongs to the machine: one group, tagged with the machine, run by the first
-// session (in config order) that sees it. A terminal's key in state.json is
-// "<session>|tN", or "@<machine>|<machine>/tN" for one on another machine.
+// One terminal can be seen through several sessions (lib/views.mjs): hc's core ids say
+// which views are the same terminal, and only one of them is followed. They are read at
+// start and again every SWEEP_MS, as machines come and go.
+let topology = coreViews(cfg.sessions, new Map());
+async function readCores() {
+  const found = new Map();
+  for (const session of cfg.sessions) {
+    try {
+      found.set(session, await cores(session));
+    } catch (err) {
+      logWarn(`cores of ${session}: ${err.message}`);
+    }
+  }
+  topology = coreViews(cfg.sessions, found);
+}
+const coresRead = readCores();
+
+// A terminal's key in state.json is "<session>|tN", or "@<machine>|<machine>/tN" for one
+// on another machine, as named by the view that follows it.
 function scopeOf(session, address) {
   return machineOf(address) || session;
 }
@@ -66,6 +82,9 @@ const scopeOfKey = (k) => k.slice(k.startsWith('@') ? 1 : 0, k.indexOf('|'));
 const addressOfKey = (k) => k.slice(k.indexOf('|') + 1);
 
 function handles(session, address) {
+  const owns = topology.owns(session, address);
+  if (owns !== null) return owns;
+  // cores unknown: a terminal here is ours, one on a machine is the first session's that sees it
   if (!machineOf(address)) return true;
   return cfg.sessions.find((s) => views.get(s)?.terminals.get(address)?.state === 'live') === session;
 }
@@ -79,7 +98,7 @@ const firstSnapshot = new Map(cfg.sessions.map((s) => {
   const promise = new Promise((r) => { done = r; });
   return [s, { promise, done }];
 }));
-const ready = Promise.all([...firstSnapshot.values()].map((x) => x.promise));
+const ready = Promise.all([coresRead, ...[...firstSnapshot.values()].map((x) => x.promise)]);
 const lanes = new Map(); // terminal key -> its last queued work
 function later(session, address, label, fn) {
   const k = key(session, address);
@@ -427,12 +446,19 @@ async function endGone() {
   for (const session of cfg.sessions) {
     for (const m of await machines(session).catch(() => [])) if (m.state === 'connected') connected.add(m.name);
   }
+  // every live terminal, by what it is (lib/views.mjs) and by address when that is unknown
+  const alive = new Set();
+  for (const session of cfg.sessions) {
+    for (const record of views.get(session)?.terminals.values() || []) {
+      if (record.state === 'live') alive.add(topology.identity(session, record.address) || record.address);
+    }
+  }
   for (const [k, c] of Object.entries(readState().chats)) {
     const address = addressOfKey(k);
     const machine = machineOf(address);
     if (c.ended && !c.avatar) later(c.session, address, 'avatar', () => avatarChat(k, c.chat, c.name.split(' / ')[0]));
     if (c.ended || !cfg.sessions.includes(c.session) || (machine && !connected.has(machine))) continue;
-    if (cfg.sessions.some((s) => views.get(s)?.terminals.get(address)?.state === 'live')) continue;
+    if (alive.has(topology.identity(c.session, address) || address)) continue;
     later(c.session, address, 'end', () => endChat(k));
   }
 }
@@ -1256,5 +1282,5 @@ ready.then(() => setTimeout(async () => {
   }
 }, 0));
 setInterval(() => asYou().catch((err) => logError(`as you: ${err.message}`)), YOU_CHECK_MS);
-setInterval(() => cfg.sessions.forEach(sweep), SWEEP_MS);
+setInterval(() => readCores().then(() => cfg.sessions.forEach(sweep)), SWEEP_MS);
 setInterval(() => cfg.sessions.forEach(live), LIVE_MS);
