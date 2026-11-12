@@ -1,0 +1,37 @@
+{
+  "name": "herdrchat",
+  "version": "0.1.0",
+  "description": "Chat front-ends for hc: every terminal hc runs, in the chat app you use",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zhangxiangliang/herdrchat.git"
+  },
+  "homepage": "https://github.com/zhangxiangliang/herdrchat#readme",
+  "bugs": "https://github.com/zhangxiangliang/herdrchat/issues",
+  "scripts": {
+    "start": "node bin/cli.mjs run",
+    "test": "node --test test/*.test.mjs"
+  },
+  "author": "zhangxiangliang",
+  "license": "MIT",
+  "dependencies": {
+    "@larksuiteoapi/node-sdk": "^1.76.0"
+  },
+  "type": "module",
+  "bin": {
+    "herdrchat": "bin/cli.mjs"
+  },
+  "files": [
+    "bin/",
+    "lib/",
+    "skills/",
+    "docs/",
+    "config.env.example",
+    "README.md",
+    "README.zh.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20"
+  }
+}
