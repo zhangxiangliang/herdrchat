@@ -17,11 +17,24 @@ Below, `S` is the first session in `HERDR_SESSIONS`.
 HC_SESSION=S hc get herdrchat --json      # state "live"
 HC_SESSION=S hc read herdrchat --lines 40 # its terminal: start lines, "[feishu] connected"
 herdrchat status                              # running, folders, /auth, errors today
-herdrchat start                               # restart (stops the old one first)
+herdrchat start                               # restart: stops it in every session, waits until it reaches Feishu
 ```
 
 A restart is needed after any code or `config.env` change. It is safe: what was posted
 is in `D/state.json`, so it picks up where it stopped.
+
+While the bot is down the user hears nothing, so:
+
+- Never end with the bot down: `herdrchat start` exits 1 with its errors when the bot
+  does not reach Feishu within 30 s; fix that before anything else.
+- Never stop or restart the hc core (`hc server stop|restart`) of the session the bot
+  runs in without saying so first, and run `herdrchat start` right after.
+- Never start an hc core from an agent's shell: the core passes that shell's variables
+  (`CLAUDECODE`, `CLAUDE_CODE_*`) to every terminal, and an agent started there treats
+  itself as a sub-agent (Claude Code then saves no transcript). Start it with those
+  variables removed (`env -u CLAUDECODE -u CLAUDE_CODE_CHILD_SESSION … hc server start`).
+- A crash posts "🔴 herdrchat is down" in the direct chat (at most every 10 minutes) and
+  the next connection posts "✅ herdrchat is back" with how long it was gone.
 
 ## Logs
 

@@ -29,3 +29,24 @@ test('the log writes one file a day with levels, and drops files past 14 days', 
     fs.rmSync(dir, { recursive: true, force: true });
   }
 });
+
+test('a crash is written and onCrash runs before the process exits', async () => {
+  const { execFile } = await import('node:child_process');
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'herdrchat-crash-test-'));
+  const said = path.join(dir, 'said');
+  const script = `
+    import fs from 'node:fs';
+    import { createLog } from ${JSON.stringify(path.resolve('lib/log.mjs'))};
+    const log = createLog(${JSON.stringify(dir)});
+    log.capture({ onCrash: async (err) => { await new Promise((r) => setTimeout(r, 100)); fs.writeFileSync(${JSON.stringify(said)}, err.message); } });
+    setTimeout(() => { throw new Error('boom'); }, 0);
+  `;
+  const code = await new Promise((resolve) => {
+    execFile(process.execPath, ['--input-type=module', '-e', script], (err) => resolve(err ? err.code : 0));
+  });
+  assert.equal(code, 1);
+  assert.equal(fs.readFileSync(said, 'utf8'), 'boom');
+  const text = fs.readFileSync(path.join(dir, `${new Date().toISOString().slice(0, 10)}.log`), 'utf8');
+  assert.match(text, / ERROR uncaught: Error: boom/);
+  fs.rmSync(dir, { recursive: true, force: true });
+});

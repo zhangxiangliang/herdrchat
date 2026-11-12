@@ -46,6 +46,45 @@ const places = placesOf();
 
 const shellQuote = (s) => `'${String(s).replace(/'/g, `'\\''`)}'`;
 const firstSession = () => loadConfig().sessions[0];
+const CONNECT_WAIT_MS = 30000;
+
+// hc's full path, from HERDRCHAT_HC or PATH
+function findHc() {
+  const dirs = (process.env.PATH || '').split(path.delimiter).filter(Boolean);
+  for (const file of [process.env.HERDRCHAT_HC, ...dirs.map((d) => path.join(d, 'hc'))].filter(Boolean)) {
+    try {
+      fs.accessSync(file, fs.constants.X_OK);
+      return file;
+    } catch {
+      // not there
+    }
+  }
+  return null;
+}
+
+// The bot runs in the first session listed; after that list changes, an older one may
+// still run in another, and two bots answer every message: it is stopped everywhere.
+async function stopEverywhere() {
+  for (const session of loadConfig().sessions) {
+    await hc(session, ['kill', places.terminal]).catch(() => {});
+    await hc(session, ['rm', places.terminal]).catch(() => {});
+  }
+}
+
+// Started is not running: wait until today's log says the bot reached Feishu after
+// `since`, and hand back the errors it wrote meanwhile when it does not.
+async function waitConnected(since) {
+  const log = path.join(STATE_DIR, 'logs', `${new Date().toISOString().slice(0, 10)}.log`);
+  const until = Date.now() + CONNECT_WAIT_MS;
+  let errors = [];
+  while (Date.now() < until) {
+    await new Promise((r) => setTimeout(r, 500));
+    const lines = fs.existsSync(log) ? fs.readFileSync(log, 'utf8').split('\n').filter((l) => l.slice(0, 24) >= since) : [];
+    if (lines.some((l) => l.includes('[feishu] connected'))) return { ok: true };
+    errors = lines.filter((l) => / ERROR /.test(l));
+  }
+  return { ok: false, errors: [...new Set(errors.map((l) => l.slice(25)))].slice(-5) };
+}
 
 async function terminalState(session) {
   try {
@@ -69,24 +108,34 @@ const commands = {
 
   async start() {
     const session = firstSession();
-    // hc starts a program with its own environment: the profile and folders go along
-    const env = ['HERDRCHAT_PROFILE', 'HERDRCHAT_HOME', 'XDG_CONFIG_HOME', 'XDG_STATE_HOME']
-      .filter((k) => process.env[k])
-      .map((k) => `${k}=${shellQuote(process.env[k])}`)
+    const hcPath = findHc();
+    if (!hcPath) throw new Error('hc is not on PATH: install herdr-core first (https://herdr.app)');
+    // hc starts a program with the core's environment, not ours, and a core started by a
+    // service may not have hc on its PATH: hc's full path, our PATH, the profile and the
+    // folders go along
+    const env = [['HERDRCHAT_HC', hcPath], ...['PATH', 'HERDRCHAT_PROFILE', 'HERDRCHAT_HOME', 'XDG_CONFIG_HOME', 'XDG_STATE_HOME'].map((k) => [k, process.env[k]])]
+      .filter(([, v]) => v)
+      .map(([k, v]) => `${k}=${shellQuote(v)}`)
       .join(' ');
     const run = `env ${env} ${shellQuote(process.execPath)} ${shellQuote(path.join(ROOT, 'bin', 'herdrchat.mjs'))}`;
     const loop = `while true; do ${run}; echo 'herdrchat exited, restarting in 3 s'; sleep 3; done`;
-    await hc(session, ['kill', places.terminal]).catch(() => {});
-    await hc(session, ['rm', places.terminal]).catch(() => {});
+    await stopEverywhere();
+    const since = new Date().toISOString();
     await hc(session, ['run', '--bg', '--no-parent', '--name', places.terminal, '--cwd', ROOT, '--', 'sh', '-c', loop]);
-    console.log(`Started ${places.terminal} (profile ${places.profile}) in hc session ${session}.`);
+    const result = await waitConnected(since);
+    if (!result.ok) {
+      console.error(`${places.terminal} started in hc session ${session} but did not reach Feishu within ${CONNECT_WAIT_MS / 1000} s.`);
+      if (result.errors.length) console.error(`Its errors:\n  ${result.errors.join('\n  ')}`);
+      console.error('It keeps retrying; `herdrchat logs --errors` shows more.');
+      process.exitCode = 1;
+      return;
+    }
+    console.log(`Started ${places.terminal} (profile ${places.profile}) in hc session ${session}; connected to Feishu.`);
   },
 
   async stop() {
-    const session = firstSession();
-    await hc(session, ['kill', places.terminal]).catch(() => {});
-    await hc(session, ['rm', places.terminal]).catch(() => {});
-    console.log(`Stopped ${places.terminal}.`);
+    await stopEverywhere();
+    console.log(`Stopped ${places.terminal}. Until it starts again, nothing reaches Feishu.`);
   },
 
   async status() {

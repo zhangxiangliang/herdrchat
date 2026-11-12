@@ -46,11 +46,40 @@ const cfg = loadConfig();
 const client = createClient(cfg);
 const userAuth = createUserAuth(cfg, STATE_DIR);
 const logger = createLog(path.join(STATE_DIR, 'logs'));
-logger.capture();
+logger.capture({ onCrash: sayCrash });
 const log = logger.info;
 const logWarn = logger.warn;
 const logError = logger.error;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+// A bot that is down is a phone that hears nothing, so down time is said in the direct
+// chat: a crash says why (at most once per CRASH_NOTICE_MS, as a restart loop repeats
+// it), and the next connection says how long it was gone.
+const CRASH_NOTICE_MS = 10 * 60 * 1000;
+async function sayCrash(err) {
+  if (!cfg.ownerOpenId) return;
+  const now = Date.now();
+  const state = readState();
+  const down = { since: now, said: 0, ...state.down, why: String(err?.message || err).slice(0, 300) };
+  const say = now - down.said >= CRASH_NOTICE_MS;
+  if (say) down.said = now;
+  state.down = down;
+  writeState(state);
+  if (!say) return;
+  const text = `herdrchat stopped: ${down.why}\n\nIt is being started again. Until it is back, nothing you send here reaches your terminals.`;
+  await sendCard(client, cfg.ownerOpenId, textCard(text, '🔴 herdrchat is down', 'red'), 'open_id');
+}
+async function sayBack() {
+  const state = readState();
+  const { down } = state;
+  if (!down) return;
+  delete state.down;
+  writeState(state);
+  if (!cfg.ownerOpenId) return;
+  const minutes = Math.max(1, Math.round((Date.now() - down.since) / 60000));
+  const text = `herdrchat is back after about ${minutes} min. What stopped it: ${down.why}`;
+  await sendCard(client, cfg.ownerOpenId, textCard(text, '✅ herdrchat is back', 'green'), 'open_id');
+}
 
 const views = new Map(); // session -> followEvents handle (its live terminal records)
 
@@ -1269,7 +1298,7 @@ async function onMessage(data) {
 
 log(`herdrchat: sessions ${cfg.sessions.join(', ')}`);
 if (!cfg.ownerOpenId) log('owner not set: no groups are made until it is. Send the bot any direct message.');
-startEvents(cfg, onMessage, onCardAction);
+startEvents(cfg, onMessage, onCardAction, () => sayBack().catch((err) => logError(`back notice: ${err.message}`)));
 for (const session of cfg.sessions) watch(session);
 ready.then(() => setTimeout(async () => {
   await endGone().catch((err) => logError(`end gone groups: ${err.message}`));
