@@ -7,6 +7,7 @@ Every terminal hc runs, in the chat app you already use. Feishu first.
 [English](README.md) · [简体中文](README.zh.md)
 
 [![npm](https://img.shields.io/npm/v/herdrchat.svg)](https://www.npmjs.com/package/herdrchat)
+[![CI](https://github.com/zhangxiangliang/herdrchat/actions/workflows/ci.yml/badge.svg)](https://github.com/zhangxiangliang/herdrchat/actions/workflows/ci.yml)
 [![license](https://img.shields.io/npm/l/herdrchat.svg)](https://github.com/zhangxiangliang/herdrchat/blob/main/LICENSE)
 
 </div>
