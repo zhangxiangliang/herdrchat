@@ -2,7 +2,7 @@
 
 herdrchat has two kinds of plug-ins that grow over time: **chat apps** (Feishu and
 Telegram now, Slack and Discord later) and **agents**, each read by its reader (Claude
-Code now, then codex and pi). The core between them knows neither. This page says where everything is and
+Code and Codex now, then pi). The core between them knows neither. This page says where everything is and
 how to add one of each.
 
 ## The parts

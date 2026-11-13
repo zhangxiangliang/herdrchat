@@ -345,8 +345,12 @@ before it is started again. Tokens and secrets are never logged. The skill's
 ## Limits
 
 - Narration blocks are a condensed version of the text Claude showed, not the exact words.
-- Only Claude Code has a reader so far. codex, pi and the rest post nothing by themselves
+- Claude Code and Codex have readers so far. pi and the rest post nothing by themselves
   until each has a reader; what you type to them gets their screen in reply.
+- Codex: its log is found as the one written in its folder since it started (Codex names
+  no pid outside its database), so two Codex sessions started in the same folder at the
+  same moment could be told apart wrongly. Its questions with choices come as text: answer
+  by typing. A group is named after Codex's thread name once it has one.
 - Only text, images and rich text are passed on; files, stickers and the rest are not.
 - An image that fails to upload three times is not sent; the group says so and why.
 - Feishu only, not Lark (the international version) yet: the bot talks to open.feishu.cn.

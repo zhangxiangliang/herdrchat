@@ -28,8 +28,9 @@ questions, send and receive images, and see all terminals in one overview. A new
 topic starts with the conversation so far, and your phone rings only when an agent needs
 you or is done (on Feishu once you have sent `/auth` to the bot; on Telegram right away).
 
-Claude Code is mirrored fully. Other agents show their screen when you type to them,
-until herdrchat learns to read their conversations too.
+Claude Code and Codex are mirrored fully, their dialogs answered with buttons. Other
+agents show their screen when you type to them, until herdrchat learns to read their
+conversations too.
 
 ## You need
 
