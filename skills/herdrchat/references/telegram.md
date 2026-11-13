@@ -64,7 +64,8 @@ without muting each topic by hand.
 | an ended group gets the "ended" tag | an ended topic's name starts with 🔚 (closing a topic is documented for supergroups only) |
 | an image inside a card | each image as its own photo after the text |
 | a text box on a dialog card | type the answer in the topic |
-| tags, labels, pins, `/auth` | none (a topic cannot be pinned; a bot cannot act as the user) |
+| pins the group that needs you | pins the dialog card in its topic until it is answered |
+| tags, labels, `/auth` | none (a bot cannot act as the user) |
 | the overview card | one message in the main thread, edited in place |
 | `/` commands: typed | `/` shows a menu: ls, new, kill, screen, answer, esc, history |
 

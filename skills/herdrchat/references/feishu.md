@@ -107,6 +107,27 @@ Deactivate it first in the tenant admin console,
 `https://<tenant>.feishu.cn/admin/appCenter/manage/<APP_ID>` (needs a tenant admin),
 then delete it in the developer console. Ask before each of the two steps.
 
+### The bot menu (optional)
+
+A menu at the bottom of the direct chat with the bot, so the commands are a tap away as
+Telegram's "/" list is. Feishu sets it only in the developer console (no API), shows it
+in the direct chat only (not in groups), and needs a published version (then about five
+minutes, and a client of 5.27 or later).
+
+1. 应用能力 -> 机器人 -> 机器人自定义菜单: edit, turn it on (开启), pick a style.
+2. Add items whose action is 推送事件 (push an event), with these keys; the bot treats a
+   click as that command in the direct chat:
+   | Item | Event key |
+   |---|---|
+   | Overview | `ls` |
+   | Help | `help` |
+   | Act as me | `auth` |
+3. 事件与回调 -> 事件配置 (long connection mode, as for messages) -> 添加事件:
+   机器人自定义菜单事件 (`application.bot.menu_v6`).
+4. Publish a version. Ask before publishing.
+
+Commands that take words (`/new`, `/kill`) stay typed.
+
 ## Scopes this bot uses
 
 Bot identity (the bot itself) and user identity (only for `/auth`, acting as the user):

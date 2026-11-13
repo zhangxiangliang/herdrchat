@@ -421,3 +421,24 @@ test('a message in a room no terminal has says so', async () => {
   assert.match(chat.of('reply').at(-1).args[1], /^Not delivered: this room is not a terminal's/);
   done();
 });
+
+test('Telegram pins the waiting dialog card and unpins it once answered', async () => {
+  const telegram = await import('../lib/chats/telegram/index.mjs');
+  const store = fakeStore();
+  const calls = [];
+  const realFetch = globalThis.fetch;
+  globalThis.fetch = async (url, opts) => {
+    calls.push({ method: url.split('/').pop(), body: JSON.parse(opts.body) });
+    return { ok: true, json: async () => ({ ok: true, result: true }) };
+  };
+  try {
+    const chat = telegram.create({ cfg: { env: { TELEGRAM_BOT_TOKEN: '1:test', TELEGRAM_OWNER_ID: '42' }, sessions: ['a'] }, store, log: quiet, logWarn: quiet, logError: quiet, stateDir: os.tmpdir(), lane: () => {}, scopeOf: () => 'a' });
+    await chat.pin('a|t1', '11', '77');
+    assert.deepEqual(chat.pinned(), ['a|t1']);
+    await chat.unpin('a|t1');
+    assert.deepEqual(chat.pinned(), []);
+    assert.deepEqual(calls.map((c) => [c.method, c.body.message_id]), [['pinChatMessage', 77], ['unpinChatMessage', 77]]);
+  } finally {
+    globalThis.fetch = realFetch;
+  }
+});
