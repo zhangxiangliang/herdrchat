@@ -17,7 +17,9 @@ Below, `S` is the first session in `HERDR_SESSIONS`.
 HC_SESSION=S hc get herdrchat --json      # state "live"
 HC_SESSION=S hc read herdrchat --lines 40 # its terminal: start lines, "[feishu] connected"
 herdrchat status                              # running, folders, /auth, errors today
-herdrchat start                               # restart: stops it in every session, waits until it reaches Feishu
+herdrchat start                               # restart: stops it in every session, waits until it reaches its chat app
+herdrchat install                             # run it as a service (launchd/systemd): starts at login, back after a crash
+launchctl print gui/$(id -u)/app.herdrchat.<profile>   # the service on macOS: state, pid, last exit
 ```
 
 A restart is needed after any code or `config.env` change. It is safe: what was posted
@@ -38,7 +40,7 @@ While the bot is down the user hears nothing, so:
 
 ## Logs
 
-`D/logs/<YYYY-MM-DD>.log`, one file a day, 14 kept, lines `<time> <LEVEL> <text>`:
+`D/logs/<YYYY-MM-DD>.log`, one file a day, 14 kept, lines `<time> <LEVEL> <text>`. Run as a service, what the process printed before its log was open (a crash at start) is in `D/logs/service.out.log`:
 
 ```sh
 grep -h ERROR D/logs/*.log | tail -20   # what went wrong
