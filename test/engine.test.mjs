@@ -285,3 +285,43 @@ test('in a multi-select, boxes are ticked on the card only and Next sends them a
     done();
   }
 });
+
+test('Telegram posts silently only in muted spaces, and rings only there and never in silent ones', async () => {
+  const telegram = await import('../lib/chats/telegram/index.mjs');
+  const store = fakeStore();
+  const state = store.read();
+  state.chats = { 'a|t1': { chat: '11', name: 'work / master' }, 'a|t2': { chat: '12', name: 'tw-worker / job' }, 'a|t3': { chat: '13', name: 'play / x' } };
+  store.write(state);
+  const cfg = { env: { TELEGRAM_BOT_TOKEN: '1:test', TELEGRAM_OWNER_ID: '42' }, sessions: ['a'], muted: { all: false, spaces: ['work', 'tw-worker'] }, silent: { all: false, spaces: ['tw-worker'] } };
+  const sent = [];
+  const realFetch = globalThis.fetch;
+  globalThis.fetch = async (url, opts) => {
+    sent.push({ method: url.split('/').pop(), body: JSON.parse(opts.body) });
+    return { ok: true, json: async () => ({ ok: true, result: { message_id: sent.length } }) };
+  };
+  try {
+    const chat = telegram.create({ cfg, store, log: quiet, logWarn: quiet, logError: quiet, stateDir: os.tmpdir(), lane: () => {}, scopeOf: () => 'a' });
+    await chat.post('11', 'in a muted space');
+    await chat.post('13', 'in a loud space');
+    await chat.ring('a|t1', '1', 'needs you');
+    await chat.ring('a|t2', '1', 'needs you');
+    await chat.ring('a|t3', '1', 'done');
+    const messages = sent.filter((x) => x.method === 'sendMessage').map((x) => [x.body.message_thread_id, x.body.disable_notification, x.body.text]);
+    assert.deepEqual(messages, [[11, true, 'in a muted space'], [13, false, 'in a loud space'], [11, false, 'needs you']]);
+  } finally {
+    globalThis.fetch = realFetch;
+  }
+});
+
+test('a dialog answered while its screen was read gets no card', async () => {
+  const t = terminal('t1', { program: 'fake', agent: true });
+  const { chat, hc, engine, done } = await setup([t]);
+  hc.screens.set('s|t1', '* Working… (12s)\n\n────────────\n❯ \n────────────');
+  t.status = { app: 'fake-agent', state: 'blocked', kind: 'permission' };
+  hc.turn('s', 't1', 'blocked');
+  setTimeout(() => { t.status = { app: 'fake-agent', state: 'working' }; }, 2); // answered in the terminal
+  await settle(engine);
+  assert.equal(chat.of('postDialog').length, 0);
+  assert.ok(!chat.of('post').some((c) => /Needs you/.test(c.args[1])), 'no "needs you" with a screen that waits on nothing');
+  done();
+});

@@ -80,3 +80,21 @@ test('a multi-question dialog keeps its key as its question tabs get their marks
   assert.equal(after.options[0].checked, true);
   assert.notEqual(before.key, menuOf(draw('☐ Colors  ☐ Sizes  ✔ Submit', ' ').replace('Which sizes?', 'Which colors?')).key, 'another question is another dialog');
 });
+
+test('a question with previews: the box beside the options is neither label nor key', async () => {
+  const { menuOf } = await import('../lib/core/menu.mjs');
+  const draw = (cursor, preview) => [
+    '──────────────────────────────────────────────',
+    ' ☐ Release',
+    '│ The tests passed. Post the updates?',
+    `${cursor === 1 ? '❯' : ' '} 1. Post them    ┌──────────────────────────────┐`,
+    `    (Recommended)                 │ ${preview}`,
+    `${cursor === 2 ? '❯' : ' '} 2. Not yet                       └──────────────────────────────`,
+    '                                  Notes: press n to add notes',
+  ].join('\n');
+  const a = menuOf(draw(1, 'Staging test done: all six cases'));
+  const b = menuOf(draw(2, 'No preview available'));
+  assert.deepEqual(a.options.map((o) => o.label), ['Post them', 'Not yet']);
+  assert.equal(a.key, b.key, 'moving the cursor changes the preview, not the dialog');
+  assert.match(a.text, /^☐ Release\nThe tests passed\. Post the updates\?$/);
+});

@@ -90,7 +90,7 @@ Say which checks were run and which were not; "the code is there" is not "it wor
 | nothing posts | bot down, or `FEISHU_OWNER_OPEN_ID` unset | check it runs; the log says "owner not set" |
 | a button gives error 200340 | the card callback is not set up | `references/feishu.md`: events and card callbacks |
 | a dialog had no card | answered in the terminal before the card; or no numbered menu on screen | log: `blocked`; the card says `/answer` when it saw no menu |
-| the phone rings too much | not `/auth`ed, or settings | `/auth`; `HERDR_MUTED_SPACES`, `HERDR_SILENT_SPACES` |
+| the phone rings too much | Feishu: not `/auth`ed; either app: settings | Feishu `/auth`; `HERDR_MUTED_SPACES` (quiet but for needs you and done), `HERDR_SILENT_SPACES` (nothing rings), per profile |
 | a ⚠️ warning in the direct chat about acting as you | the token could not be refreshed | send `/auth` again |
 | a group keeps an old name | its terminal is not live | it renames when the terminal is back |
 | a Feishu call fails with 400 in a burst | a rate limit (tags: 5 a second) | space the calls; the bot queues tag calls |
