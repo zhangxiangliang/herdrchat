@@ -1,3 +1,10 @@
+## [1.1.1](https://github.com/zhangxiangliang/herdrchat/compare/v1.1.0...v1.1.1) (2026-11-13)
+
+
+### Bug Fixes
+
+* tick multi-select boxes on the card and send them on Next ([8ac9282](https://github.com/zhangxiangliang/herdrchat/commit/8ac9282a4d0cdf71308468244858aa1b6a5b35af))
+
 # [1.1.0](https://github.com/zhangxiangliang/herdrchat/compare/v1.0.0...v1.1.0) (2026-11-13)
 
 
