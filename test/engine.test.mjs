@@ -179,3 +179,12 @@ test('every listed harness reader keeps the reader contract', async () => {
   for (const reader of LISTED) assert.doesNotThrow(() => checkReader(reader));
   assert.throws(() => checkReader({ app: 'half' }), /does not give: processes, after, rest/);
 });
+
+test('the Telegram app keeps the chat contract', async () => {
+  const telegram = await import('../lib/chats/telegram/index.mjs');
+  const cfg = { env: { TELEGRAM_BOT_TOKEN: '1:test', TELEGRAM_OWNER_ID: '42' }, sessions: ['s'], silent: { all: false, spaces: [] } };
+  const chat = telegram.create({ cfg, store: fakeStore(), log: quiet, logWarn: quiet, logError: quiet, stateDir: os.tmpdir(), lane: () => {}, scopeOf: () => 's' });
+  assert.doesNotThrow(() => checkChat(chat));
+  assert.equal(chat.ready(), true);
+  assert.deepEqual(telegram.requires, ['TELEGRAM_BOT_TOKEN']);
+});

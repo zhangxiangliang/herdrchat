@@ -80,7 +80,7 @@ async function waitConnected(since) {
   while (Date.now() < until) {
     await new Promise((r) => setTimeout(r, 500));
     const lines = fs.existsSync(log) ? fs.readFileSync(log, 'utf8').split('\n').filter((l) => l.slice(0, 24) >= since) : [];
-    if (lines.some((l) => l.includes('[feishu] connected'))) return { ok: true };
+    if (lines.some((l) => /\[\w+\] connected\b/.test(l))) return { ok: true }; // the chat app says it is in
     errors = lines.filter((l) => / ERROR /.test(l));
   }
   return { ok: false, errors: [...new Set(errors.map((l) => l.slice(25)))].slice(-5) };
@@ -124,13 +124,13 @@ const commands = {
     await hc(session, ['run', '--bg', '--no-parent', '--name', places.terminal, '--cwd', ROOT, '--', 'sh', '-c', loop]);
     const result = await waitConnected(since);
     if (!result.ok) {
-      console.error(`${places.terminal} started in hc session ${session} but did not reach Feishu within ${CONNECT_WAIT_MS / 1000} s.`);
+      console.error(`${places.terminal} started in hc session ${session} but did not reach its chat app within ${CONNECT_WAIT_MS / 1000} s.`);
       if (result.errors.length) console.error(`Its errors:\n  ${result.errors.join('\n  ')}`);
       console.error('It keeps retrying; `herdrchat logs --errors` shows more.');
       process.exitCode = 1;
       return;
     }
-    console.log(`Started ${places.terminal} (profile ${places.profile}) in hc session ${session}; connected to Feishu.`);
+    console.log(`Started ${places.terminal} (profile ${places.profile}) in hc session ${session}; connected to its chat app.`);
   },
 
   async stop() {
