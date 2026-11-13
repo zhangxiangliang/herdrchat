@@ -489,7 +489,7 @@ async function ensureChat(session, record) {
       if (known.name !== name) log(`renamed group ${known.chat} -> ${name}`);
     }
     await placeChat(k, known.chat, where.space);
-    if (!known.avatar) await avatarChat(k, known.chat, where.space);
+    await avatarChat(k, known.chat, where.space); // the space's; set again when the space changes (a no-op when it has it)
     return known.chat;
   }
   const chat = await createChat(client, cfg.ownerOpenId, name, `hc terminal ${record.address} (hc session "${session}"). Type here to talk to it.`);
