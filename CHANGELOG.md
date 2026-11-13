@@ -1,3 +1,10 @@
+## [1.1.2](https://github.com/zhangxiangliang/herdrchat/compare/v1.1.1...v1.1.2) (2026-11-13)
+
+
+### Bug Fixes
+
+* card the dialog that waits, as drawn, and quiet Telegram by the settings ([66abb59](https://github.com/zhangxiangliang/herdrchat/commit/66abb59df3ffcadbf79502382648b81a328dc247))
+
 ## [1.1.1](https://github.com/zhangxiangliang/herdrchat/compare/v1.1.0...v1.1.1) (2026-11-13)
 
 
