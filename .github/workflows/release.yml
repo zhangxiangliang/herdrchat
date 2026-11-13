@@ -36,6 +36,9 @@ jobs:
       - name: Test
         run: npm test
 
+      - name: Install the way a user does (nothing is released if this fails)
+        run: sh scripts/smoke.sh local
+
       - name: Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

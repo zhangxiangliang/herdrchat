@@ -1,0 +1,31 @@
+name: Published
+
+# What users get today, checked every day: herdrchat@latest from npm and the skill from
+# GitHub, installed and tried as the README says. A failure here means users are blocked
+# now; GitHub mails the repository owner when a scheduled run fails.
+on:
+  schedule:
+    - cron: '17 1 * * *'
+  workflow_dispatch:
+  workflow_run:
+    workflows: [Release]
+    types: [completed]
+
+jobs:
+  install:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+
+      - name: Wait for a release just made to reach npm
+        if: github.event_name == 'workflow_run'
+        run: sleep 120
+
+      - name: Install what is published, the way a user does
+        run: sh scripts/smoke.sh published

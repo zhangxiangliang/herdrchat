@@ -28,3 +28,23 @@ jobs:
 
       - name: Test
         run: npm test
+
+  # the user's way in, for real: the packed package installed, the skill installed by the
+  # skills tool, the command's first steps (scripts/smoke.sh)
+  install:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Install the way a user does
+        run: sh scripts/smoke.sh local

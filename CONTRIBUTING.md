@@ -19,6 +19,13 @@ node bin/cli.mjs status  # the command line from the clone
 Try a change in its own folder, never next to your real bot: with `HERDRCHAT_HOME` set to
 a new folder, a setup gets its own hc terminal and service name.
 
+`sh scripts/smoke.sh local` walks the user's way in for real, in a throwaway home: the
+packed package installed, the skill installed by the `skills` tool, `init`, `status` and
+`start` saying what is missing. CI runs it on every push and before every release, and
+every day on what is published (`.github/workflows/published.yml`), so a broken install
+is found by us, not by a user. `test/docs.test.mjs` checks that every link and command
+in the docs exists.
+
 A change to what the core does gets a test in `test/engine.test.mjs` (`test/fakes.mjs`
 has the fake chat app, hc and reader). A chat app gets a test that `checkChat` passes.
 
