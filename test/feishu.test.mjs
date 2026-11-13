@@ -62,3 +62,10 @@ test('a multi-select card puts its boxes in a form as checkers that make no call
   assert.equal(ticksOf({ answer: 'x' }), null);
   assert.equal(ticksOf(undefined), null);
 });
+
+test('messageParts passes on text and images, and gives null for what it cannot read', () => {
+  assert.deepEqual(messageParts('text', JSON.stringify({ text: 'hi' })), { text: 'hi', images: [] });
+  assert.equal(messageParts('merge_forward', 'Merged and Forwarded Message'), null, 'not JSON: not passed on, never a throw');
+  assert.equal(messageParts('text', 'null'), null);
+  assert.equal(messageParts('file', JSON.stringify({ file_key: 'f' })), null);
+});
