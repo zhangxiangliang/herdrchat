@@ -33,7 +33,7 @@ export function fakeChat() {
     reply: async (where, markdown) => { record('reply', where, markdown); return id('m'); },
     postCard: async (room, look) => { record('postCard', room, look); return id('m'); },
     editCard: async (...a) => record('editCard', ...a),
-    postDialog: async (room, dialog, value) => { record('postDialog', room, dialog, value); return id('m'); },
+    postDialog: async (room, dialog, value) => { const m = id('m'); record('postDialog', room, dialog, value, m); return m; },
     closeDialog: async (...a) => record('closeDialog', ...a),
     pin: async (k, room) => { pins.add(k); record('pin', k, room); },
     unpin: async (k) => { pins.delete(k); record('unpin', k); },

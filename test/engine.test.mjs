@@ -246,3 +246,42 @@ test('HERDR_HISTORY leaves out what it does not name', async () => {
   assert.doesNotMatch(chat.of('postFolded')[0].args[1].title, /file/);
   engine.stop();
 });
+
+test('a numbered list on the screen before the dialog is drawn does not become the card', async () => {
+  const t = terminal('t1', { program: 'fake', agent: true });
+  const { chat, hc, engine, done } = await setup([t]);
+  // what the agent wrote, then a moment later its dialog
+  hc.screens.set('s|t1', 'Two things to know:\n1. one thing\n2. another thing');
+  t.status = { app: 'fake-agent', state: 'blocked', kind: 'question' };
+  hc.turn('s', 't1', 'blocked');
+  setTimeout(() => hc.screens.set('s|t1', '──────────────────────\nWhich one?\n❯ 1. Red\n  2. Green\n  3. Blue\n\nEnter to select'), 3);
+  await settle(engine);
+  const cards = chat.of('postDialog');
+  assert.equal(cards.length, 1);
+  assert.deepEqual(cards[0].args[1].menu.options.map((o) => o.label), ['Red', 'Green', 'Blue']);
+  done();
+});
+
+test('in a multi-select, boxes are ticked on the card only and Next sends them all at once', async () => {
+  const t = terminal('t1', { program: 'fake', agent: true });
+  const { chat, hc, engine, done } = await setup([t]);
+  hc.screens.set('s|t1', '──────────────────────\n ← ☐ Sizes  ✔ Submit →\nWhich sizes?\n❯ 1. [ ] Small\n  2. [✔] Medium\n  3. [ ] Large\n  4. Type something.');
+  t.status = { app: 'fake-agent', state: 'blocked', kind: 'question' };
+  hc.turn('s', 't1', 'blocked');
+  await settle(engine);
+  const [, , value, message] = chat.of('postDialog')[0].args; // the card, by the id the chat app gave it
+  const click = (pick, label) => engine.onAction({ value: { ...value, pick, label }, message });
+  try {
+  const first = await click(1, 'Small');
+  assert.equal(first.card?.kind, 'dialog');
+  assert.equal(first.card.dialog.menu.options[0].checked, true);
+  const second = await click(2, 'Medium'); // untick
+  assert.equal(second.card.dialog.menu.options[1].checked, false);
+  await click(3, 'Large');
+  assert.equal(hc.pressed.length, 0, 'ticking presses nothing');
+  await click('tab');
+  assert.deepEqual(hc.pressed.map((p) => p.names[0]), ['1', '2', '3', 'tab']);
+  } finally {
+    done();
+  }
+});

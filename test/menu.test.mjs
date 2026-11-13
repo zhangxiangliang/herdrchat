@@ -70,3 +70,13 @@ test('menuOf: no numbered menu, no dialog', () => {
   assert.equal(menuOf('Login required. Open the link below.\n> '), null);
   assert.equal(menuOf('2. a\n3. b'), null);
 });
+
+test('a multi-question dialog keeps its key as its question tabs get their marks', async () => {
+  const { menuOf } = await import('../lib/core/menu.mjs');
+  const draw = (tabs, mark) => ['──────────────────────', ` ← ${tabs} →`, '', 'Which sizes?', '', `❯ 1. [${mark}] Small`, '  2. [ ] Large', '  3. Type something.'].join('\n');
+  const before = menuOf(draw('☐ Colors  ☐ Sizes  ✔ Submit', ' '));
+  const after = menuOf(draw('☒ Colors  ☐ Sizes  ✔ Submit', '✔'));
+  assert.equal(before.key, after.key);
+  assert.equal(after.options[0].checked, true);
+  assert.notEqual(before.key, menuOf(draw('☐ Colors  ☐ Sizes  ✔ Submit', ' ').replace('Which sizes?', 'Which colors?')).key, 'another question is another dialog');
+});
