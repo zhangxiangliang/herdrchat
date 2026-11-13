@@ -14,13 +14,13 @@ const running = new Set();
 after(() => running.forEach((engine) => engine.stop()));
 
 // A core on the fakes, one session "s", started and given `list` as its first snapshot.
-async function setup(list = []) {
+async function setup(list = [], { logError = (...a) => { throw new Error(a.join(' ')); } } = {}) {
   const chat = fakeChat();
   const hc = fakeHc();
   const store = fakeStore();
   const r = fakeReaders();
   const inbox = fs.mkdtempSync(path.join(os.tmpdir(), 'herdrchat-engine-test-'));
-  const engine = createEngine({ cfg: { sessions: ['s'] }, chat, hc, readers: r.readers, store, log: quiet, logWarn: quiet, logError: (...a) => { throw new Error(a.join(' ')); }, startedAt: '2026-01-01T00:00:00.000Z', inbox, quick: true });
+  const engine = createEngine({ cfg: { sessions: ['s'] }, chat, hc, readers: r.readers, store, log: quiet, logWarn: quiet, logError, startedAt: '2026-01-01T00:00:00.000Z', inbox, quick: true });
   running.add(engine);
   running.add(engine);
   const started = engine.start();
@@ -166,6 +166,56 @@ test('an agent\'s dialog gets one card, and a click presses the option it shows'
   const out = await engine.onAction({ value: { ...value, pick: 1, label: 'Yes' }, message });
   assert.deepEqual(hc.pressed.at(-1).names, ['1']);
   assert.match(out.toast.text, /1\. Yes/);
+  done();
+});
+
+test('a click on a card the screen no longer matches turns that card into what it asks now', async () => {
+  const t = terminal('t1', { program: 'fake', agent: true });
+  const { chat, hc, engine, done } = await setup([t]);
+  hc.screens.set('s|t1', 'Do you want to proceed?\n❯ 1. Yes\n  2. No\n\nEsc to cancel');
+  t.status = { app: 'fake-agent', state: 'blocked', kind: 'permission' };
+  hc.change('s', 'status', t);
+  hc.turn('s', 't1', 'blocked');
+  await settle(engine);
+  const [, , value] = chat.of('postDialog')[0].args;
+  const message = `m${chat.calls.indexOf(chat.of('postDialog')[0])}`;
+  // the screen moves on to another question before the tap, and that one was seen already
+  hc.screens.set('s|t1', 'Ready to submit your answers?\n❯ 1. Submit answers\n  2. Cancel\n\nEsc to cancel');
+  hc.turn('s', 't1', 'blocked');
+  await settle(engine);
+  const cards = chat.of('postDialog').length;
+  const pressed = hc.pressed.length;
+  const out = await engine.onAction({ value: { ...value, pick: 1, label: 'Yes' }, message });
+  assert.equal(hc.pressed.length, pressed, 'nothing pressed on a dialog the card did not show');
+  assert.equal(out.card?.kind, 'dialog', 'the card is not closed: it shows the dialog now');
+  assert.equal(out.card.dialog.menu.options[0].label, 'Submit answers');
+  await settle(engine);
+  assert.equal(chat.of('postDialog').length, cards, 'and no extra card');
+  const again = await engine.onAction({ value: { ...out.card.value, pick: 1, label: 'Submit answers' }, message });
+  assert.deepEqual(hc.pressed.at(-1).names, ['1'], 'the second tap presses it');
+  assert.match(again.toast.text, /Submit answers/);
+  done();
+});
+
+test('a message held on a dialog with no open card posts the card again', async () => {
+  const t = terminal('t1', { program: 'fake', agent: true });
+  const errors = [];
+  const { chat, hc, store, engine, done } = await setup([t], { logError: (...a) => errors.push(a.join(' ')) });
+  const room = rooms(store)['s|t1'].chat;
+  hc.screens.set('s|t1', 'Do you want to proceed?\n❯ 1. Yes\n  2. No\n\nEsc to cancel');
+  t.status = { app: 'fake-agent', state: 'blocked', kind: 'permission' };
+  // the first card fails to post: the dialog must not count as posted
+  const real = chat.postDialog;
+  chat.postDialog = async () => { throw new Error('feishu down'); };
+  hc.change('s', 'status', t);
+  await settle(engine).catch(() => {});
+  chat.postDialog = real;
+  const before = chat.of('postDialog').length;
+  await engine.onMessage({ room, where: room, message: 'm-in', text: 'are you there?', images: [] });
+  await settle(engine);
+  assert.equal(chat.of('postDialog').length, before + 1, 'the card is posted when the message is held');
+  assert.match(chat.of('reply').at(-1).args[1], /the card above/);
+  assert.ok(errors.some((e) => /feishu down/.test(e)), 'the failed post was logged');
   done();
 });
 
