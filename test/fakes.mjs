@@ -124,6 +124,7 @@ export function fakeReaders() {
     rest: async () => [],
   };
   return {
+    reader, // a test may give it `dialog` and `answer`, as an agent with its own API
     queue: (address, items) => logs.set(address, [...(logs.get(address) || []), ...items]),
     readers: {
       readerFor: (app) => (app === reader.app ? reader : null),

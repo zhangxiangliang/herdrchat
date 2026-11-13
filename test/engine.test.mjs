@@ -237,6 +237,53 @@ test('a message held on a dialog with no open card posts the card again', async 
   done();
 });
 
+test('an agent with its own API: its dialog comes from the API, and a tap answers through it, not the screen', async () => {
+  const t = terminal('t1', { program: 'fake', agent: true });
+  const { chat, hc, engine, r, done } = await setup([t]);
+  const answers = [];
+  let waiting = [
+    { key: 'f1#q0', kind: 'question', text: 'Which color?', options: [{ n: 1, label: 'Red', value: 'Red' }, { n: 2, label: 'Green', value: 'Green' }, { n: 3, label: 'Type your own answer' }], multi: false, free: { n: 3, label: 'Type your own answer' } },
+    { key: 'f1#q1', kind: 'question', text: 'Which size?', options: [{ n: 1, label: 'Small', value: 'S' }, { n: 2, label: 'Large', value: 'L' }], multi: false, free: null },
+  ];
+  r.reader.dialog = async () => waiting[0] || null;
+  r.reader.answer = async (s, a, shown, reply) => { answers.push([shown.key, reply]); waiting = waiting.slice(1); return true; };
+  hc.screens.set('s|t1', 'nothing here looks like a menu');
+  t.status = { app: 'fake-agent', state: 'blocked', kind: 'question' };
+  hc.change('s', 'status', t);
+  hc.turn('s', 't1', 'blocked');
+  await settle(engine);
+  assert.equal(chat.of('postDialog').length, 1, 'a card, though the screen shows no menu');
+  const [, shown, value, message] = chat.of('postDialog')[0].args;
+  assert.deepEqual(shown.menu.options.map((o) => o.label), ['Red', 'Green', 'Type your own answer']);
+  assert.equal(shown.menu.free.label, 'Type your own answer');
+  const pressed = hc.pressed.length;
+  const out = await engine.onAction({ value: { ...value, pick: 2, label: 'Green' }, message });
+  assert.deepEqual(answers[0], ['f1#q0', { pick: 2 }]);
+  assert.equal(hc.pressed.length, pressed, 'no key pressed');
+  assert.equal(out.card?.kind, 'dialog', 'the card turns into the next question');
+  assert.equal(out.card.dialog.menu.options[0].label, 'Small');
+  const esc = await engine.onAction({ value: { ...out.card.value, pick: 'esc' }, message });
+  assert.deepEqual(answers[1], ['f1#q1', { esc: true }]);
+  assert.match(esc.toast.text, /Cancelled/);
+  done();
+});
+
+test('an agent with its own API: words typed while it asks go in as your own answer, through the API', async () => {
+  const t = terminal('t1', { program: 'fake', agent: true });
+  const { hc, store, engine, r, done } = await setup([t]);
+  const room = store.read().chats['s|t1'].chat;
+  const answers = [];
+  r.reader.dialog = async () => (answers.length ? null : { key: 'f2#q0', kind: 'question', text: 'Name it?', options: [{ n: 1, label: 'Type your own answer' }], multi: false, free: { n: 1, label: 'Type your own answer' } });
+  r.reader.answer = async (s, a, shown, reply) => { answers.push(reply); return true; };
+  t.status = { app: 'fake-agent', state: 'blocked', kind: 'question' };
+  hc.change('s', 'status', t);
+  await settle(engine);
+  await engine.onMessage({ room, where: room, message: 'm-in', text: 'call it Bob', images: [] });
+  assert.deepEqual(answers, [{ pick: 1, text: 'call it Bob' }]);
+  assert.equal(hc.sent.length, 0, 'nothing typed into the terminal');
+  done();
+});
+
 test('the Feishu app keeps the chat contract', async () => {
   const feishu = await import('../lib/chats/feishu/index.mjs');
   const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), 'herdrchat-feishu-contract-'));
