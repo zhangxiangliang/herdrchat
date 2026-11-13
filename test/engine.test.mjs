@@ -363,3 +363,30 @@ test('a click in a question with previews moves with the arrows and presses Ente
   assert.deepEqual(hc.pressed.at(-1).names, ['down', 'enter']);
   done();
 });
+
+test('a message sent while it waits on a dialog is held and goes in once the dialog is answered', async () => {
+  const t = terminal('t1', { program: 'fake', agent: true });
+  const { chat, hc, store, engine, done } = await setup([t]);
+  const room = rooms(store)['s|t1'].chat;
+  hc.screens.set('s|t1', '──────────\nRun it?\n❯ 1. Yes\n  2. No');
+  t.status = { app: 'fake-agent', state: 'blocked', kind: 'permission' };
+  await engine.onMessage({ room, where: room, message: 'm-in', text: 'and check the mcp too', images: [] });
+  assert.equal(hc.sent.length, 0, 'not typed into the dialog');
+  assert.match(chat.of('reply').at(-1).args[1], /goes in once that is answered/);
+  t.status = { app: 'fake-agent', state: 'working' };
+  hc.change('s', 'status', t);
+  await settle(engine);
+  assert.equal(hc.sent.at(-1)?.text, 'and check the mcp too');
+  done();
+});
+
+test('a message that comes while the status still looks blocked but hc says it works goes in at once', async () => {
+  const t = terminal('t1', { program: 'fake', agent: true, state: 'blocked' });
+  const { hc, store, engine, done } = await setup([t]);
+  const room = rooms(store)['s|t1'].chat;
+  const view = { ...t, status: { app: 'fake-agent', state: 'blocked' } };
+  hc.getTerminal = async () => ({ ...view, status: { app: 'fake-agent', state: 'working' } }); // hc is ahead of the events
+  await engine.onMessage({ room, where: room, message: 'm-in', text: 'hello', images: [] });
+  assert.equal(hc.sent.at(-1)?.text, 'hello');
+  done();
+});
