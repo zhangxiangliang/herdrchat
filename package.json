@@ -1,6 +1,6 @@
 {
   "name": "herdrchat",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Chat front-ends for hc: every terminal hc runs, in the chat app you use",
   "repository": {
     "type": "git",
