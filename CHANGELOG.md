@@ -1,3 +1,10 @@
+## [1.4.1](https://github.com/zhangxiangliang/herdrchat/compare/v1.4.0...v1.4.1) (2026-11-13)
+
+
+### Bug Fixes
+
+* tell you when a message cannot be passed on, instead of dropping it ([baed7f5](https://github.com/zhangxiangliang/herdrchat/commit/baed7f57cd71da2352cec6c6072f7048e49a3cd9))
+
 # [1.4.0](https://github.com/zhangxiangliang/herdrchat/compare/v1.3.3...v1.4.0) (2026-11-13)
 
 
