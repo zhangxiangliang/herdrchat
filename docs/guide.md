@@ -56,7 +56,9 @@ agent, write `lib/readers/<agent>.mjs` (the contract is at the top of
   - Images too: ones it looked at (a screenshot, an image file it read) and ones you
     pasted in the terminal, shown in the card.
   - What you sent from the group is not repeated.
-- A program without one: the last 150 lines of its screen when a turn ends.
+- Anything else (a shell, a tool, an agent that has quit): nothing by itself. A terminal
+  counts as an agent only while its foreground process is that agent, so a status left
+  over after it quits posts nothing.
 - A turn that ends on `blocked` (permission, question, auth): what it said first, then
   a red "⚠️ Needs you" card. When the screen shows a numbered menu (as Claude Code's
   permission and question dialogs do), the card shows only the dialog, as text, with a
@@ -103,7 +105,12 @@ from one dialog straight to the next. One dialog gets one card.
   the text shown on screen, the only version on disk.
 
 On the first start the bot posts only what happens from then on, never older history.
-A shell reports no turns, so after you type a command into one, the bot posts its screen.
+In a terminal that runs no agent, what you type gets one reply: its screen a moment
+later, without blank lines.
+
+A group belongs to its herdr-app tab (by the tab's id): when the tab's terminal is
+replaced, the new terminal carries on in the same group. A message that cannot be
+delivered (the terminal has ended) says so plainly.
 
 ## Commands
 

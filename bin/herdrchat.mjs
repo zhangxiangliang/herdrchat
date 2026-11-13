@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 // herdr-app, moved to Feishu. One bot for every hc session in HERDR_SESSIONS (config.env):
-//   every terminal herdr-app shows (it has a `where` label) -> one group,
-//     named "<space> / <tab>", tagged with its session; what you type there goes to that terminal
+//   every tab herdr-app shows (a `where` label; `herdr.tab` is its id) -> one group,
+//     named "<space> / <tab>", tagged with its session; what you type there goes to its terminal
 //   the direct chat with the bot -> herdr itself: /ls, /new, /kill
 // hc is the backbone: its events say which terminals exist, their status and when a
 // turn ends (a program left `working`). What the program said comes from its reader
 // (lib/readers/: the agent's own records, so your prompts and its answers, posted live
-// while it works); a program with no reader gets its screen at each turn's end.
+// while it works); anything but a running agent posts nothing by itself.
 // Only what happens after the bot starts is posted, never older history.
 //
 // Usage: node bin/herdrchat.mjs
@@ -20,14 +20,13 @@ import { CONFIG_FILE, STATE_DIR, loadConfig, makeDirs, readState, writeState } f
 import { advance, startCursor } from '../lib/cursor.mjs';
 import { followEvents } from '../lib/events.mjs';
 import { bindTag, chunk, createChat, createClient, createTag, recallMessage, replyMention, setChatAvatar, tagName, unbindTag, doneCard, downloadImage, menuCard, messageParts, renameChat, sendCard, sendMarkdown, startEvents, textCard, updateCard, uploadImage } from '../lib/feishu.mjs';
-import { cores, getTerminal, hc, keys, machineOf, machines, put, run, screenTail, send, splitWhere } from '../lib/hc.mjs';
+import { cores, getTerminal, hc, keys, machineOf, machines, put, run, screenTail, send, plainError, splitWhere, tidyScreen } from '../lib/hc.mjs';
 import { menuOf } from '../lib/menu.mjs';
 import { createLog } from '../lib/log.mjs';
-import { readerFor } from '../lib/readers/index.mjs';
+import { agentOf, readerFor } from '../lib/readers/index.mjs';
 import { createUserAuth } from '../lib/userauth.mjs';
 import { coreViews } from '../lib/views.mjs';
 
-const SHELLS = new Set(['zsh', 'bash', 'sh', 'fish', 'nu', 'dash']);
 const SHELL_ECHO_MS = 1500;
 const SCREEN_LINES = 40;
 const TURN_SCREEN_LINES = 150;
@@ -414,21 +413,54 @@ function terminalOfChat(chatId) {
   return null;
 }
 
+// A group belongs to a herdr-app tab, by the tab's id (`herdr.tab`), not to the terminal
+// that happens to run in it: when the terminal is replaced (Claude quit and the tab got a
+// new shell, a program was started again), the new one takes over the tab's group once
+// the old one is gone. A tab that was deleted and made again has a new id, so a new group.
+// Returns the group, null (none: make one), or WAIT (the old terminal still runs: its end
+// hands the group over, see postEnd). The old terminal's last words are posted first.
+const WAIT = Symbol('wait');
+async function adoptTabChat(k, tab) {
+  const before = Object.entries(readState().chats).find(([ok, c]) => ok !== k && c.tab === tab && scopeOfKey(ok) === scopeOfKey(k));
+  if (!before) return null;
+  const [ok, was] = before;
+  if (views.get(was.session)?.terminals.get(addressOfKey(ok))?.state === 'live') return WAIT;
+  await lanes.get(ok)?.catch(() => {}); // its end (postEnd) runs to the last item
+  const state = readState();
+  const old = state.chats[ok];
+  if (!old) return null;
+  delete state.chats[ok];
+  state.chats[k] = old;
+  for (const map of [state.pinned, state.reacts]) {
+    if (map?.[ok]) {
+      map[k] = map[ok];
+      delete map[ok];
+    }
+  }
+  if (state.cursors) delete state.cursors[ok];
+  writeState(state);
+  log(`group ${old.name} (${old.chat}) now follows ${addressOfKey(k)}, the new terminal of its tab`);
+  await sendMarkdown(client, old.chat, `↪ This tab runs a new terminal now (${addressOfKey(k)}); it carries on here.`).catch((err) => logError(`adopt notice: ${err.message}`));
+  return old;
+}
+
 async function ensureChat(session, record) {
   const where = shownWhere(record);
   if (!where || !cfg.ownerOpenId || !handles(session, record.address)) return null;
   const k = key(session, record.address);
   const name = groupName(where, record);
+  const tab = record.labels?.['herdr.tab'] || null;
   // state.json is read again after each await: other terminals' lanes write it meanwhile
-  const known = readState().chats[k];
+  const known = readState().chats[k] || (tab ? await adoptTabChat(k, tab) : null);
+  if (known === WAIT) return null;
   if (known) {
     if (known.ended) await reviveChat(k, known);
-    if (known.name !== name || known.session !== session) {
+    if (known.name !== name || known.session !== session || (tab && known.tab !== tab)) {
       if (known.name !== name) await renameChat(client, known.chat, name);
       const state = readState();
-      state.chats[k] = { ...state.chats[k], name, session };
+      state.chats[k] = { ...state.chats[k], name, session, ...(tab ? { tab } : {}) };
       writeState(state);
-      log(`renamed group ${known.chat} -> ${name}`);
+      if (known.name !== name) log(`renamed group ${known.chat} -> ${name}`);
     }
     await placeChat(k, known.chat, where.space);
     if (!known.avatar) await avatarChat(k, known.chat, where.space);
@@ -436,7 +468,7 @@ async function ensureChat(session, record) {
   }
   const chat = await createChat(client, cfg.ownerOpenId, name, `hc terminal ${record.address} (hc session "${session}"). Type here to talk to it.`);
   const state = readState();
-  state.chats[k] = { chat, name, session };
+  state.chats[k] = { chat, name, session, ...(tab ? { tab } : {}) };
   writeState(state);
   log(`created group ${name} (${chat})`);
   await placeChat(k, chat, where.space);
@@ -512,7 +544,7 @@ async function deliver(session, record, send) {
 }
 
 async function screen(session, address, lines = SCREEN_LINES) {
-  return `\`\`\`\n${await screenTail(session, address, lines)}\n\`\`\``;
+  return `\`\`\`\n${tidyScreen(await screenTail(session, address, lines)) || '(blank)'}\n\`\`\``;
 }
 
 // Per terminal, in state.json: the cursor of what its reader posted, which reader and
@@ -707,6 +739,10 @@ async function postEnd(session, address, record, reason) {
   await postTo(session, record, `🔚 **Terminal ended**${reason ? ` (${reason})` : ''}`);
   await markDone(k);
   await endChat(k);
+  // a new terminal that came up in the same tab while this one still ran takes the group now
+  const tab = readState().chats[k]?.tab;
+  const next = tab && [...(views.get(session)?.terminals.values() || [])].find((t) => t.state === 'live' && t.address !== address && t.labels?.['herdr.tab'] === tab);
+  if (next) later(session, next.address, 'group', () => ensureChat(session, next));
 }
 
 // ---------- dialogs: it waits for you ----------
@@ -727,12 +763,14 @@ const escapeMarkdown = (text) => text.replace(/[\\`*_[\]#>~|]/g, '\\$&');
 // A card that needs you says so first thing, so the chat list shows it at a glance; once
 // it no longer waits, it says that instead (the card's last line says why).
 const NEEDS_TITLE = '⚠️ Needs you';
+const DIALOG_LINES = 15;
 const DONE_TITLE = '✅ Done';
 
 function dialogOf(status, screenText) {
   const menu = menuOf(screenText);
   const title = `${NEEDS_TITLE}${status?.kind ? ` (${status.kind})` : ''}`;
-  const markdown = menu ? escapeMarkdown(menu.text) : `\`\`\`\n${screenText}\n\`\`\``;
+  // no options to read: the dialog is at the bottom, so its last lines, without blank ones
+  const markdown = menu ? escapeMarkdown(menu.text) : `\`\`\`\n${tidyScreen(screenText, DIALOG_LINES)}\n\`\`\``;
   return { menu, title, markdown };
 }
 
@@ -893,7 +931,7 @@ async function onCardAction(data) {
 function readable(session) {
   return [...(views.get(session)?.terminals.values() || [])]
     .filter((record) => shownWhere(record) && handles(session, record.address))
-    .map((record) => ({ record, reader: readerFor(record.status?.app) }))
+    .map((record) => ({ record, reader: agentOf(record) }))
     .filter((x) => x.reader);
 }
 
@@ -942,7 +980,7 @@ function onStatus(session, address, record) {
     if (openCard.has(k)) later(session, address, 'dialog', () => closeCard(k, '✔ Answered.'));
     return;
   }
-  if (was === 'working' || !shownWhere(record) || !handles(session, address)) return;
+  if (was === 'working' || !shownWhere(record) || !handles(session, address) || !agentOf(record)) return;
   // the screen and the status as they are now: by the time the lane gets to it, the
   // dialog may be answered and the status moved on
   const screen = screenTail(session, address, SCREEN_LINES).catch(() => null);
@@ -971,13 +1009,14 @@ function watch(session) {
     onTurn: ({ address, state, record }) => {
       scheduleOverview();
       log(`turn ${session}/${address}: ${state}${shownWhere(record) ? '' : ' (not shown in herdr-app)'}`);
-      if (!shownWhere(record) || !handles(session, address)) return;
+      // a group mirrors agents: a shell or another program posts nothing by itself
+      if (!shownWhere(record) || !handles(session, address) || !agentOf(record)) return;
       const screen = state === 'blocked' ? screenTail(session, address, SCREEN_LINES).catch(() => null) : null;
       const status = { ...record.status };
       later(session, address, 'turn', async () => {
         if (state === 'blocked') {
           // what it said before stopping to ask comes first
-          const reader = readerFor(record.status?.app);
+          const reader = agentOf(record);
           if (reader) await postRead(session, address, record, reader, { waitForEnd: false }).catch(() => {});
           await postBlocked(session, address, { ...record, status }, { screen });
           return;
@@ -993,6 +1032,9 @@ function watch(session) {
 // ---------- Feishu in ----------
 
 const seen = new Set();
+
+// What you sent did not reach the terminal: said plainly, never a raw hc error.
+const ENDED_REPLY = 'Not delivered: this terminal has ended. Nothing you send here reaches it.';
 
 async function reply(chatId, text) {
   await sendMarkdown(client, chatId, text);
@@ -1046,16 +1088,17 @@ async function markDone(k, { olderThan = 0 } = {}) {
 async function typeInto(chatId, messageId, session, address, text) {
   const record = views.get(session)?.terminals.get(address);
   if (!record || record.state !== 'live') {
-    await reply(chatId, 'This terminal has ended.');
+    await reply(chatId, ENDED_REPLY);
     return;
   }
+  const agent = agentOf(record);
   if (text === '/screen' || text === '/esc') {
     if (text === '/esc') await keys(session, address, ['esc']);
     await reply(chatId, `${text === '/esc' ? 'Esc pressed.\n\n' : ''}${await screen(session, address)}`);
     return;
   }
   const answer = text.match(/^\/answer\s+([\s\S]+)$/);
-  if (!answer && record.status?.state === 'blocked') {
+  if (!answer && agent && record.status?.state === 'blocked') {
     // It waits on a dialog: words go into its "Type something" box when it has one;
     // otherwise the dialog card comes again, to pick there.
     const menu = menuOf(await screenTail(session, address, SCREEN_LINES));
@@ -1077,12 +1120,12 @@ async function typeInto(chatId, messageId, session, address, text) {
     await markWorking(key(session, address), messageId);
   } catch (err) {
     const hint = /blocked/i.test(err.message) ? '\n\nIt waits on a dialog. Reply `/answer <text>` to answer it, or `/esc` to cancel it.' : '';
-    await reply(chatId, `Not sent: ${err.message}\n\n${await screen(session, address)}${hint}`);
+    await reply(chatId, `Not delivered: ${plainError(err)}\n\n${await screen(session, address)}${hint}`);
     return;
   }
-  // A shell reports no turns, so show what the command did.
-  const foreground = (await getTerminal(session, address)).foreground?.name;
-  if (!record.status && SHELLS.has(foreground)) {
+  // Anything but an agent posts nothing by itself: what you typed gets one look at its
+  // screen in reply.
+  if (!agent) {
     await sleep(SHELL_ECHO_MS);
     await reply(chatId, await screen(session, address));
     await markDone(key(session, address));
@@ -1287,10 +1330,15 @@ async function onMessage(data) {
       log(`message in a group this bot did not make: ${msg.chat_id}${msg.thread_id ? ` (thread ${msg.thread_id})` : ''}`);
       return;
     }
+    if (views.get(target.session)?.terminals.get(target.address)?.state !== 'live') {
+      await reply(msg.chat_id, ENDED_REPLY);
+      return;
+    }
     const files = await imagesInto(msg.message_id, target.session, target.address, parts.images);
     await typeInto(msg.chat_id, msg.message_id, target.session, target.address, [text, ...files].filter(Boolean).join(' '));
   } catch (err) {
-    await reply(msg.chat_id, err.message);
+    logError(`message to ${msg.chat_id}:`, err);
+    await reply(msg.chat_id, `Not delivered: ${plainError(err)}`);
   }
 }
 
