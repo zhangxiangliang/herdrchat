@@ -22,7 +22,7 @@ in `~/.config/herdrchat/<profile>/config.env` and its state in
 | `/herdrchat start`, `/herdrchat stop` | Read `config.env` (its `HERDR_SESSIONS`) in one step, then `herdrchat start` / `stop` in the next; never both at once. |
 | `/herdrchat logs` | `herdrchat logs --errors` (or `-n 100`); explain them with `references/ops.md` "Logs". |
 | `/herdrchat auth` | The user sends `/auth` to the bot and allows it on Feishu's page; the app needs the user scopes in `references/feishu.md`. Then groups are muted, labels and pins follow. |
-| `/herdrchat config` | Change a setting in `config.env` with the user (sessions, `HERDR_MUTED_SPACES`, `HERDR_SILENT_SPACES`, `HERDR_BOT_TAGS`, `HERDR_USER_TAGS`; each is explained in `config.env.example`), read the file back, then restart. |
+| `/herdrchat config` | Change a setting in `config.env` with the user (sessions, `HERDR_MUTED_SPACES`, `HERDR_SILENT_SPACES`, `HERDR_BOT_TAGS`, `HERDR_USER_TAGS`, `HERDR_HISTORY`, `HERDRCHAT_CHAT`; each is explained in `config.env.example`), read the file back, then restart. |
 | `/herdrchat fix` | Find the cause from `herdrchat status`, the logs and the live result, then fix it: `references/ops.md`. |
 | `/herdrchat feishu <task>` | Anything in the Feishu developer console: scopes, callbacks, publishing, the icon, deleting an app: `references/feishu.md`. |
 

@@ -188,3 +188,61 @@ test('the Telegram app keeps the chat contract', async () => {
   assert.equal(chat.ready(), true);
   assert.deepEqual(telegram.requires, ['TELEGRAM_BOT_TOKEN']);
 });
+
+test('a new room gets the conversation before it: all of it as a file, the newest in a folded post, nothing twice', async () => {
+  const chat = fakeChat();
+  const hc = fakeHc();
+  const store = fakeStore();
+  const r = fakeReaders();
+  const before = Array.from({ length: 40 }, (_, i) => ({ role: i % 2 ? 'ai' : 'you', text: `old ${i} ${'x'.repeat(200)}`, at: `2025-12-31T10:${String(i).padStart(2, '0')}:00.000Z`, id: `o${i}` }));
+  r.queue('t1', before);
+  r.queue('t1', [{ role: 'ai', text: 'after the start', at: '2026-01-02T00:00:00.000Z', id: 'n1', end: true }]);
+  const engine = createEngine({ cfg: { sessions: ['s'] }, chat, hc, readers: r.readers, store, log: quiet, logWarn: quiet, logError: (...a) => { throw new Error(a.join(' ')); }, startedAt: '2026-01-01T00:00:00.000Z', inbox: os.tmpdir(), quick: true });
+  const started = engine.start();
+  hc.snapshot('s', [terminal('t1', { program: 'fake', agent: true })]);
+  await started;
+  await settle(engine);
+  const [file] = chat.of('postFile').map((c) => c.args[1]);
+  assert.match(file.name, /^proj-master-2025-12-31\.md$/);
+  const text = file.data.toString();
+  assert.match(text, /old 0 /);
+  assert.match(text, /old 39 /);
+  assert.doesNotMatch(text, /after the start/, 'what came after the start is posted the usual way');
+  const [folded] = chat.of('postFolded').map((c) => c.args[1]);
+  assert.match(folded.title, /the last \d+ of 40/);
+  assert.ok(Buffer.byteLength(folded.markdown) <= chat.foldedBytes);
+  assert.match(folded.markdown, /old 39 /);
+  engine.tick.sweep();
+  await settle(engine);
+  assert.ok(chat.of('post').some((c) => c.args[1] === 'after the start'));
+  assert.ok(!chat.of('post').some((c) => /old \d+ /.test(c.args[1])), 'nothing from before posted twice');
+  engine.tick.sweep();
+  await settle(engine);
+  assert.equal(chat.of('postFile').length, 1, 'only when the room is made');
+  engine.stop();
+});
+
+test('/history in a room posts the conversation so far again', async () => {
+  const { chat, store, engine, r, done } = await setup([terminal('t1', { program: 'fake', agent: true })]);
+  r.queue('t1', [{ role: 'you', text: 'an old question', at: '2025-12-31T10:00:00.000Z', id: 'o1' }]);
+  const room = rooms(store)['s|t1'].chat;
+  await engine.onMessage({ room, where: room, message: 'm-in', text: '/history', images: [] });
+  assert.match(chat.of('postFile').at(-1).args[1].data.toString(), /an old question/);
+  done();
+});
+
+test('HERDR_HISTORY leaves out what it does not name', async () => {
+  const chat = fakeChat();
+  const hc = fakeHc();
+  const r = fakeReaders();
+  r.queue('t1', [{ role: 'you', text: 'old', at: '2025-12-31T10:00:00.000Z', id: 'o1' }]);
+  const engine = createEngine({ cfg: { sessions: ['s'], history: { file: false, folded: true } }, chat, hc, readers: r.readers, store: fakeStore(), log: quiet, logWarn: quiet, logError: quiet, startedAt: '2026-01-01T00:00:00.000Z', inbox: os.tmpdir(), quick: true });
+  const started = engine.start();
+  hc.snapshot('s', [terminal('t1', { program: 'fake', agent: true })]);
+  await started;
+  await settle(engine);
+  assert.equal(chat.of('postFile').length, 0);
+  assert.equal(chat.of('postFolded').length, 1);
+  assert.doesNotMatch(chat.of('postFolded')[0].args[1].title, /file/);
+  engine.stop();
+});

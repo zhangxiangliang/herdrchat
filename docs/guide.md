@@ -105,6 +105,11 @@ from one dialog straight to the next. One dialog gets one card.
   the text shown on screen, the only version on disk.
 
 On the first start the bot posts only what happens from then on, never older history.
+A new room is not empty: it gets the conversation before it, all of it as a `.md` file
+and its newest part in one folded post, silent and never repeated (`HERDR_HISTORY` says
+which: `file,folded` by default, `file`, `folded`, or empty for neither). `/history` in a
+room posts both again.
+
 In a terminal that runs no agent, what you type gets one reply: its screen a moment
 later, without blank lines.
 

@@ -42,6 +42,9 @@ export function fakeChat() {
     markWorking: async (message) => { record('markWorking', message); return `r-${message}`; },
     markDone: async (...a) => record('markDone', ...a),
     image: async () => '![image](img)',
+    postFile: async (room, file) => { record('postFile', room, file); return id('m'); },
+    postFolded: async (room, look) => { record('postFolded', room, look); return id('m'); },
+    foldedBytes: 3500,
     download: async (...a) => record('download', ...a),
     tellOwner: async (...a) => record('tellOwner', ...a),
     showOverview: async (rows) => record('showOverview', rows),
@@ -107,17 +110,18 @@ export function terminal(address, { space = 'proj', tab = 'master', tabId = 'tb1
   };
 }
 
-// An agent reader whose items a test queues per terminal.
+// An agent reader over a log a test writes per terminal; like a real one, it returns
+// what is after the cursor and not seen.
 export function fakeReaders() {
-  const queued = new Map();
+  const logs = new Map();
   const reader = {
     app: 'fake-agent',
     processes: ['fake'],
-    after: async (session, address, cursor) => ({ items: (queued.get(address) || []).splice(0), file: 'log', cursor }),
+    after: async (session, address, cursor) => ({ items: (logs.get(address) || []).filter((it) => it.at > cursor.at && !cursor.seen.some(([id]) => id === it.id)), file: 'log' }),
     rest: async () => [],
   };
   return {
-    queue: (address, items) => queued.set(address, [...(queued.get(address) || []), ...items]),
+    queue: (address, items) => logs.set(address, [...(logs.get(address) || []), ...items]),
     readers: {
       readerFor: (app) => (app === reader.app ? reader : null),
       agentOf: (record) => (record?.status?.app === reader.app && reader.processes.includes(record.foreground?.name) ? reader : null),

@@ -28,3 +28,13 @@ test('places: one folder pair per profile under XDG, or one folder of your choic
   assert.deepEqual(placesOf({ HERDRCHAT_HOME: '', XDG_CONFIG_HOME: '' }, '/h').configDir, '/h/.config/herdrchat/default');
   assert.throws(() => placesOf({ HERDRCHAT_PROFILE: '../x' }, '/h'), /letters, digits/);
 });
+
+test('HERDR_HISTORY names the parts a new room gets; an unknown one is refused', async () => {
+  const { partsOf } = await import('../lib/core/config.mjs');
+  const known = ['file', 'folded'];
+  assert.deepEqual(partsOf(undefined, 'file,folded', known), { file: true, folded: true });
+  assert.deepEqual(partsOf('folded', 'file,folded', known), { file: false, folded: true });
+  assert.deepEqual(partsOf('', 'file,folded', known), { file: false, folded: false });
+  assert.deepEqual(partsOf('none', 'file,folded', known), { file: false, folded: false });
+  assert.throws(() => partsOf('files', 'file,folded', known, 'HERDR_HISTORY'), /HERDR_HISTORY: files is not one of file, folded/);
+});
