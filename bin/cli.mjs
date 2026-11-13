@@ -21,7 +21,10 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const GUIDE = 'https://github.com/zhangxiangliang/herdrchat/blob/main/docs/guide.md';
-const USAGE = `herdrchat <command> [--profile <name>]
+const HERDR = 'herdrchat is built on herdr: it mirrors the terminals that hc (herdr-core) runs.\nIt needs hc on this machine: install herdr first, from https://herdr.dev';
+const USAGE = `herdrchat: herdr's terminals in Feishu or Telegram. Needs herdr (https://herdr.dev).
+
+herdrchat <command> [--profile <name>]
 
   init       make the profile's config.env (--chat feishu|telegram picks the app)
   start      start (or restart) it: the service, or else its own hc terminal
@@ -155,7 +158,7 @@ async function waitConnected(since) {
 // Nothing else, so no agent's variables come along.
 function botEnv() {
   const hcPath = findHc();
-  if (!hcPath) throw new Error('hc is not on PATH: install herdr-core first (https://herdr.dev)');
+  if (!hcPath) throw new Error(`hc is not on PATH. ${HERDR}`);
   const env = { HERDRCHAT_HC: hcPath, HERDRCHAT_PROFILE: places.profile };
   for (const k of ['PATH', 'HERDRCHAT_HOME', 'XDG_CONFIG_HOME', 'XDG_STATE_HOME']) if (process.env[k]) env[k] = process.env[k];
   return env;
@@ -182,6 +185,8 @@ const commands = {
   init() {
     const chatName = chatFlag || 'feishu';
     if (!chatNames().includes(chatName)) fail(`--chat ${chatName}: the chat apps are ${chatNames().join(', ')}`);
+    // the settings can be made first, but nothing works without herdr: said before anything
+    if (!findHc()) console.log(`⚠️  hc is not on PATH. ${HERDR}\n`);
     makeDirs();
     if (fs.existsSync(CONFIG_FILE)) {
       console.log(`${CONFIG_FILE} is there already; open it and edit it, then run \`herdrchat start${again}\`.`);
@@ -269,7 +274,7 @@ const commands = {
     // how it runs: the service, an hc terminal, or not at all
     const svc = hcThere ? service() : null;
     if (!hcThere) {
-      console.log('running   unknown: hc is not on PATH (install herdr-core: https://herdr.dev)');
+      console.log('running   unknown: hc is not on PATH; herdrchat is built on herdr: install it from https://herdr.dev');
     } else {
       const inTerminal = cfg.sessions.length ? (await terminalState(cfg.sessions[0])) === 'live' : false;
       if (svc?.installed()) {

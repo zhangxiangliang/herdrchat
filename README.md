@@ -2,7 +2,7 @@
 
 # herdrchat
 
-Every terminal hc runs, in the chat app you already use: Feishu or Telegram.
+A chat front-end for [herdr](https://herdr.dev): every terminal it runs, in Feishu or Telegram.
 
 [English](README.md) · [简体中文](README.zh.md)
 
@@ -31,7 +31,9 @@ until herdrchat learns to read their conversations too.
 
 ## You need
 
-- **hc** running on this machine, with at least one session ([herdr.dev](https://herdr.dev)).
+- **herdr**: herdrchat is built on it and does nothing without it. Install it from
+  [herdr.dev](https://herdr.dev) first; its **hc** must run on this machine, with at least
+  one session.
 - **Node.js 20** or newer, on **macOS or Linux**.
 - **Feishu**: a Feishu team (not Lark) where you may create a custom app and publish it.
   **Telegram**: a Telegram account. Use one app, or both at once.

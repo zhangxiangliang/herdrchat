@@ -52,6 +52,8 @@ expect "no settings" 'herdrchat init' "$out"
 step "herdrchat init --chat telegram"
 out="$(herdrchat init --chat telegram)"
 expect "init" 'Made .*config.env' "$out"
+# no hc here, as for a user without herdr: init says what herdrchat is built on
+command -v hc >/dev/null || expect "herdr reminder" 'built on herdr.*herdr\.dev|herdr\.dev' "$(printf '%s' "$out" | tr '\n' ' ')"
 grep -q '^HERDRCHAT_CHAT=telegram$' "$HERDRCHAT_HOME/config.env" || fail "init did not set HERDRCHAT_CHAT=telegram"
 
 step "status names what is missing"

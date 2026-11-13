@@ -2,7 +2,7 @@
 
 # herdrchat
 
-hc 跑的每个终端，都能在你常用的聊天软件里看到和回复：飞书或 Telegram。
+[herdr](https://herdr.dev) 的聊天前端：它跑的每个终端，都能在飞书或 Telegram 里看到和回复。
 
 [English](README.md) · [简体中文](README.zh.md)
 
@@ -27,7 +27,8 @@ agent 干活时说的话实时可见，它问你的问题点按钮就能回答�
 
 ## 需要什么
 
-- 这台机器上在跑 **hc**，至少有一个 session（[herdr.dev](https://herdr.dev)）。
+- **herdr**：herdrchat 是基于它做的，没有它什么都做不了。请先从 [herdr.dev](https://herdr.dev) 安装；
+  它的 **hc** 要在这台机器上跑着，至少有一个 session。
 - **Node.js 20** 或更新版本，系统是 **macOS 或 Linux**。
 - **飞书**：一个能创建并发布企业自建应用的飞书团队（暂不支持 Lark 国际版）。
   **Telegram**：一个 Telegram 账号。可以只用一个，也可以两个同时用。
