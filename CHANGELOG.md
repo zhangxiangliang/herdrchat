@@ -1,3 +1,10 @@
+## [1.3.3](https://github.com/zhangxiangliang/herdrchat/compare/v1.3.2...v1.3.3) (2026-11-13)
+
+
+### Bug Fixes
+
+* say up front that herdrchat is built on herdr and needs it ([30760a8](https://github.com/zhangxiangliang/herdrchat/commit/30760a871a53bdb1dbe2d6169adbb869c1ce4f74))
+
 ## [1.3.2](https://github.com/zhangxiangliang/herdrchat/compare/v1.3.1...v1.3.2) (2026-11-13)
 
 
