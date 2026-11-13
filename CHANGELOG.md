@@ -1,3 +1,10 @@
+## [1.3.1](https://github.com/zhangxiangliang/herdrchat/compare/v1.3.0...v1.3.1) (2026-11-13)
+
+
+### Bug Fixes
+
+* make herdrchat safe and plain for a first-time user ([7c0c946](https://github.com/zhangxiangliang/herdrchat/commit/7c0c946f53a82175ac10edcec18b7900936d461b))
+
 # [1.3.0](https://github.com/zhangxiangliang/herdrchat/compare/v1.2.1...v1.3.0) (2026-11-13)
 
 
