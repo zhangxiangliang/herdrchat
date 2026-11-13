@@ -1,11 +1,11 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { overviewCard, overviewText } from '../lib/overview.mjs';
+import { overviewCard, overviewText } from '../lib/chats/feishu/overview.mjs';
 
 test('the overview puts what waits for you first and links every group', () => {
   const rows = [
-    { name: 'alpha / docs', address: 't1', state: 'done', chat: 'oc_a' },
-    { name: 'beta / 1', address: 'box/t2', state: 'blocked', kind: 'permission', chat: 'oc_b' },
+    { name: 'alpha / docs', address: 't1', state: 'done', room: 'oc_a' },
+    { name: 'beta / 1', address: 'box/t2', state: 'blocked', kind: 'permission', room: 'oc_b' },
     { name: 'alpha / build', address: 't3', state: 'working' },
     { name: 'alpha / shell', address: 't4', program: 'zsh' },
   ];

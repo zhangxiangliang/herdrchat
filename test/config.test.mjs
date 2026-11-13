@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { onOff, placesOf, spacesOf } from '../lib/config.mjs';
+import { onOff, placesOf, spacesOf } from '../lib/core/config.mjs';
 
 test('HERDR_MUTED_SPACES and HERDR_SILENT_SPACES: all, none or some spaces, with a default', () => {
   assert.deepEqual(spacesOf(undefined, 'all'), { all: true, spaces: [] });

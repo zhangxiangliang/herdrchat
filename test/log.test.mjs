@@ -3,7 +3,7 @@ import test from 'node:test';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { createLog } from '../lib/log.mjs';
+import { createLog } from '../lib/core/log.mjs';
 
 test('the log writes one file a day with levels, and drops files past 14 days', () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'herdrchat-log-test-'));
@@ -36,7 +36,7 @@ test('a crash is written and onCrash runs before the process exits', async () =>
   const said = path.join(dir, 'said');
   const script = `
     import fs from 'node:fs';
-    import { createLog } from ${JSON.stringify(path.resolve('lib/log.mjs'))};
+    import { createLog } from ${JSON.stringify(path.resolve('lib/core/log.mjs'))};
     const log = createLog(${JSON.stringify(dir)});
     log.capture({ onCrash: async (err) => { await new Promise((r) => setTimeout(r, 100)); fs.writeFileSync(${JSON.stringify(said)}, err.message); } });
     setTimeout(() => { throw new Error('boom'); }, 0);

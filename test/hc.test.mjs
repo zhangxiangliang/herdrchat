@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { machineOf, splitWhere } from '../lib/hc.mjs';
+import { machineOf, splitWhere } from '../lib/core/hc.mjs';
 
 test('splitWhere', () => {
   assert.deepEqual(splitWhere('alpha / 2'), { space: 'alpha', tab: '2' });

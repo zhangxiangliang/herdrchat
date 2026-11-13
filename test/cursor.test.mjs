@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { LAG_MS, advance, itemsAfter, startCursor } from '../lib/cursor.mjs';
+import { LAG_MS, advance, itemsAfter, startCursor } from '../lib/core/cursor.mjs';
 
 // A log of the simplest kind: one item per entry, with its text.
 const at = (s) => new Date(Date.UTC(2026, 10, 12, 0, 0, s)).toISOString();

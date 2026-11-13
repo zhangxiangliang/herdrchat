@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { plainError, tidyScreen } from '../lib/hc.mjs';
-import { agentOf } from '../lib/readers/index.mjs';
+import { plainError, tidyScreen } from '../lib/core/hc.mjs';
+import { agentOf } from '../lib/core/readers/index.mjs';
 
 test('a screen loses blank ends and runs of blank lines', () => {
   const raw = '\n\n  switch to which account?   \n\n\n  2  someone\n\n\n\n\n\n  ⏎ Switch  esc Back\n\n\n';
@@ -32,7 +32,7 @@ test('only a running agent is mirrored, whatever its status still says', () => {
 });
 
 test('an unreachable machine is told apart from other hc errors', async () => {
-  const { isUnavailable } = await import('../lib/hc.mjs');
+  const { isUnavailable } = await import('../lib/core/hc.mjs');
   assert.equal(isUnavailable(new Error('hc get srv/t5 --json: {"error":{"kind":"unavailable","message":"srv is unreachable"}}')), true);
   assert.equal(isUnavailable(new Error('hc get t5 --json: {"error":{"kind":"not_found","message":"no terminal"}}')), false);
 });

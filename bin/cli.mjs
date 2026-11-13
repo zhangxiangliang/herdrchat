@@ -10,7 +10,7 @@
 //     run      run in the foreground (what start keeps running)
 //
 // The profile is --profile or HERDRCHAT_PROFILE (default "default"); where its files are
-// is in lib/config.mjs.
+// is in lib/core/config.mjs.
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -39,9 +39,9 @@ const lines = Number(flag('-n') || 40);
 const errorsOnly = argv.includes('--errors');
 const command = argv.find((a) => !a.startsWith('-'));
 
-// after the profile is set: lib/config.mjs reads it when it loads
-const { CONFIG_FILE, STATE_DIR, loadConfig, makeDirs, placesOf } = await import('../lib/config.mjs');
-const { hc } = await import('../lib/hc.mjs');
+// after the profile is set: lib/core/config.mjs reads it when it loads
+const { CONFIG_FILE, STATE_DIR, loadConfig, makeDirs, placesOf } = await import('../lib/core/config.mjs');
+const { hc } = await import('../lib/core/hc.mjs');
 const places = placesOf();
 
 const shellQuote = (s) => `'${String(s).replace(/'/g, `'\\''`)}'`;

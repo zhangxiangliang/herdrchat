@@ -3,7 +3,7 @@ import test from 'node:test';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { createUserAuth } from '../lib/userauth.mjs';
+import { createUserAuth } from '../lib/chats/feishu/userauth.mjs';
 
 test('without /auth the bot does nothing as you: no token, no calls', async () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'herdrchat-auth-test-'));

@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { conversationAfter } from '../lib/readers/claude.mjs';
-import { startCursor } from '../lib/cursor.mjs';
-import { readerFor } from '../lib/readers/index.mjs';
+import { conversationAfter } from '../lib/core/readers/claude.mjs';
+import { startCursor } from '../lib/core/cursor.mjs';
+import { readerFor } from '../lib/core/readers/index.mjs';
 
 test('a reader is picked by the app name hc reports; anything else has none', () => {
   assert.equal(readerFor('claude-code').app, 'claude-code');

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { coreViews } from '../lib/views.mjs';
+import { coreViews } from '../lib/core/views.mjs';
 
 const link = (name, id, state = 'connected') => ({ name, id, state });
 

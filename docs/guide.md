@@ -31,16 +31,16 @@ herdr-app shows them, their status, and when a turn ends (`turn` event: the stat
 **A reader gives the conversation.** hc can show only the screen, and the screen is a
 picture: long output is folded, and you cannot tell your words from the agent's. So for
 each agent a reader reads the agent's own records. The status hc reports names the agent
-(`status.app`), and that name picks the reader (`lib/readers/`):
+(`status.app`), and that name picks the reader (`lib/core/readers/`):
 
 | `status.app` | reader | reads |
 |---|---|---|
-| `claude-code` | `lib/readers/claude.mjs` | its transcript: the terminal's foreground pid names the session in `~/.claude/sessions/<pid>.json` |
+| `claude-code` | `lib/core/readers/claude.mjs` | its transcript: the terminal's foreground pid names the session in `~/.claude/sessions/<pid>.json` |
 | anything else | none (default) | the screen, through `hc read` |
 
 On another machine, a reader reads the same files through `hc exec --on`. To add an
-agent, write `lib/readers/<agent>.mjs` (the contract is at the top of
-`lib/readers/index.mjs`) and list it there.
+agent, write `lib/core/readers/<agent>.mjs` (the contract is at the top of
+`lib/core/readers/index.mjs`) and list it there.
 
 ## What a group shows
 

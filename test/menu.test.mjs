@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { menuOf } from '../lib/menu.mjs';
+import { menuOf } from '../lib/core/menu.mjs';
 
 const RULE = '─'.repeat(60);
 

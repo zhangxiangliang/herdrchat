@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { chunk, messageParts, tagName } from '../lib/feishu.mjs';
+import { chunk, messageParts, tagName } from '../lib/chats/feishu/client.mjs';
 
 test('chunk keeps short text whole', () => {
   assert.deepEqual(chunk('hello\nworld'), ['hello\nworld']);

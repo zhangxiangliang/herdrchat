@@ -74,7 +74,7 @@ your token after `/auth`: never print it.
 ## Did the change take effect
 
 Check the live result, not only the code: count what actually happened in Feishu with
-the bot's own client (`lib/feishu.mjs` `createClient` with `loadConfig()`), for example:
+the bot's own client (`lib/chats/feishu/client.mjs` `createClient` with `loadConfig()`), for example:
 
 - mentions in a group since a time: `im.v1.message.list` on the chat, then each item's
   `mentions` (a mention inside a card is not counted by Feishu, so it does not ring);
