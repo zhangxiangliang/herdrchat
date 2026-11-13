@@ -19,18 +19,20 @@ Do these in order; the user does the Telegram steps, you check each one.
 2. **The config.** `herdrchat init --chat telegram P` makes the profile's `config.env`
    (private) and prints where it is. Ask the user to paste the token after
    `TELEGRAM_BOT_TOKEN=` themselves (`open -e <file>` opens it), no quotes, no spaces, and
-   fill `HERDR_SESSIONS` with them (`ls ~/.local/state/herdr-core` lists the sessions).
+   leave `HERDR_SESSIONS` empty for hc's default session, or name others
+   (`ls ~/.local/state/herdr-core` lists the sessions).
 3. **Topic mode, checked before the first start.** It is not in BotFather's `/mybots` →
    Bot Settings list; it is in BotFather's mini app (the **Open** button at the bottom
    left of the BotFather chat): pick the bot, turn on Threaded Mode. Check it without
    printing the token: a short `node -e` reads the token from the config, calls
    `https://api.telegram.org/bot<token>/getMe` and prints only `username` and
    `has_topics_enabled`, which must be `true`.
-4. **First start, to learn the owner.** `herdrchat start P`; the user messages the bot
-   anything; it answers with the line to add, `TELEGRAM_OWNER_ID=<digits>`, and where the
-   file is. The user adds it. Until then the bot makes no topic.
-5. **Start again.** Read the config (secrets hidden) in one step, then
-   `herdrchat start P` in the next. One topic per tab appears; Telegram takes about one
+4. **Start, then pair the owner.** Read the config (secrets hidden) in one step, then
+   `herdrchat start P` in the next. Then run `herdrchat pair P` in the background: it
+   prints a 6-digit code and waits. Tell the user the code; they open the bot (tap
+   Start), send it, and the bot writes `TELEGRAM_OWNER_ID` itself and starts again as
+   theirs. Until then the bot makes no topic. No id to copy.
+5. **The topics.** One topic per tab appears; Telegram takes about one
    message a second in a chat, so twenty tabs take twenty seconds. A new topic gets the
    conversation before it (`HERDR_HISTORY`); `/history` in a topic posts it again.
 6. **Make it a service.** Once it works: `herdrchat install P`. It then starts at login
@@ -68,7 +70,7 @@ without muting each topic by hand.
 | Seen | Cause | Do |
 |---|---|---|
 | log: `topic mode is off for @<bot>` | step 3 not done | turn it on in BotFather's mini app, check `has_topics_enabled`, start again |
-| the bot answers "To make you this bot's owner…" | `TELEGRAM_OWNER_ID` empty | step 4 |
+| the bot answers "This bot has no owner yet" | `TELEGRAM_OWNER_ID` empty | step 4: `herdrchat pair P` |
 | `herdrchat start` says it did not reach its chat app | wrong token, or no network | check with getMe (step 3) |
 | log: `telegram poll: ... 409` | another copy polls the same token | `herdrchat stop P`, find the other one (another machine?), start once |
 | log: `too fast, waiting N s` | Telegram's flood limit; the bot waits as told | nothing; it catches up |

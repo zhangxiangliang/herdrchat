@@ -6,13 +6,20 @@ that with ego-browser, in the user's own logged-in browser.
 
 ## Before anything
 
-1. **ego-browser.** Run `command -v ego-browser`. When it is there, run
+1. **ego-browser, or the guide.** Only Feishu needs this (Telegram's bot is made in a
+   chat, with no browser). Run `command -v ego-browser`. When it is there, run
    `ego-browser skill` and follow its usage guide. When it is missing, do not fall back
    to another browser; ask the user which they want:
-   - install Ego Lite (https://lite.ego.app/), sign in to Feishu in it, and ask again,
-     so the agent does the clicking; or
-   - a guided walk-through instead (see "Guide mode" below): the user clicks, the agent
-     says what to click.
+   - **Install Ego Lite**, so the agent does the clicking. Use Ego's own instructions,
+     read now at https://lite.ego.app/ (not from memory): say what it installs, and
+     install only on a yes. Then check `command -v ego-browser` again (a new folder may
+     need a new shell), and have the user sign in to Feishu in Ego as an admin of the
+     tenant. If any of it fails or the user stops, take the guide below; do not retry
+     other ways.
+   - **The guide** ("Guide mode" below): the user clicks, the agent says what to click.
+   Either way is the same procedures. When Ego stops working in the middle (signed out,
+   a page that does not match), say so and go on in guide mode from that step: what is
+   done stays done.
 2. **Which profile.** Ask which Ego profile is signed in to Feishu as an admin of the
    tenant that owns the app (`await profiles()` lists them); never guess. Create one task
    space for the whole job with that `profileId`, and close it at the end with
@@ -20,7 +27,9 @@ that with ego-browser, in the user's own logged-in browser.
 3. **Which app.** The app id is `FEISHU_APP_ID` in the profile's `config.env`
    (`~/.config/herdrchat/<profile>/config.env`, or in `HERDRCHAT_HOME`). Read only that
    key; never print, screenshot or paste `FEISHU_APP_SECRET`, and never write a real app
-   id, open_id, chat id or tenant name into a file of this repo.
+   id, open_id, chat id or tenant name into a file of this repo. With Ego too, the agent
+   does not read or reveal the secret on the credentials page: the user copies it into
+   `config.env` themselves (the agent says the file and the line).
 4. **Ask first** before anything outward-facing: publishing a version, applying scopes,
    deleting or deactivating an app. One yes covers one action.
 

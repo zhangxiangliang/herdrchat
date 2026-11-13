@@ -5,7 +5,8 @@
 //
 // Usage: node bin/herdrchat.mjs (`herdrchat start` keeps it running)
 import path from 'node:path';
-import { STATE_DIR, chatOf, loadConfig, makeDirs, readState, writeState } from '../lib/core/config.mjs';
+import { STATE_DIR, chatOf, loadConfig, makeDirs, readState, setConfigValue, writeState } from '../lib/core/config.mjs';
+import { tryPairing } from '../lib/core/pairing.mjs';
 import { createEngine } from '../lib/core/engine.mjs';
 import { followEvents } from '../lib/core/events.mjs';
 import { cores, getTerminal, hc, keys, machines, nameTab, put, run, screenTail, send } from '../lib/core/hc.mjs';
@@ -34,6 +35,17 @@ const chat = createChat(cfg.chat, {
   stateDir: STATE_DIR,
   lane: (k, label, fn) => engine.laneOf(k, label, fn),
   scopeOf: (k) => engine.scopeOfKey(k),
+  // the pairing code from `herdrchat setup`: its sender becomes the owner, written to
+  // config.env; the bot then starts again (its service or terminal brings it back) as theirs
+  claimOwner: (text, key, id) => {
+    const result = tryPairing(store, text);
+    if (result === 'ok') {
+      setConfigValue(cfg.configFile, key, id);
+      log(`paired: ${key} set; starting again as the owner's`);
+      setTimeout(() => process.exit(0), 2000);
+    }
+    return result;
+  },
 });
 
 // A bot that is down is a phone that hears nothing, so down time is said in the direct

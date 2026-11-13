@@ -2,7 +2,7 @@
 
 # herdrchat
 
-A chat front-end for [herdr](https://herdr.dev): every terminal it runs, in Feishu or Telegram.
+The chat client for hc ([herdr](https://herdr.dev)): see and answer every hc terminal from Feishu or Telegram.
 
 [English](README.md) · [简体中文](README.zh.md)
 
@@ -12,13 +12,15 @@ A chat front-end for [herdr](https://herdr.dev): every terminal it runs, in Feis
 
 </div>
 
+**herdr-app is hc's desktop and phone client; herdrchat is hc's chat client.**
+
 [herdr](https://herdr.dev) runs your coding agents (Claude Code, codex, pi, …) in
-terminals that stay alive: **hc** (herdr-core) keeps them running, **herdr-app** shows
-them in spaces and tabs. herdr-app has phone and desktop apps, but your phone has to
+terminals that stay alive: **hc** (herdr-core) keeps them running, and herdr-app shows
+them in spaces and tabs. But to use herdr-app away from your desk, your phone has to
 reach the machine that runs hc, so you first need a VPN or a private network, and working
 with an agent on a small phone screen is clumsy.
 
-herdrchat puts them in a chat app instead. It connects out to Feishu or Telegram by
+herdrchat shows the same terminals in a chat app you already have on your phone. It connects out to Feishu or Telegram by
 itself, so there is nothing to set up on your network: no public IP, no VPN. Each
 herdr-app tab gets its own Feishu group, or a topic in your private chat with the
 Telegram bot. You read what the agent says while it works, tap buttons to answer its
@@ -32,8 +34,9 @@ until herdrchat learns to read their conversations too.
 ## You need
 
 - **herdr**: herdrchat is built on it and does nothing without it. Install it from
-  [herdr.dev](https://herdr.dev) first; its **hc** must run on this machine, with at least
-  one session.
+  [herdr.dev](https://herdr.dev) first (or let your coding agent do it with you:
+  `/herdrchat setup` offers to); its **hc** must run on this machine, with at least one
+  session.
 - **Node.js 20** or newer, on **macOS or Linux**.
 - **Feishu**: a Feishu team (not Lark) where you may create a custom app and publish it.
   **Telegram**: a Telegram account. Use one app, or both at once.
@@ -58,17 +61,21 @@ reach the agent.
 **With your agent:** ask it `/herdrchat setup`. It asks which chat app, then walks you
 through everything, clicking in the Feishu console for you when it can.
 
-**By hand:**
+**In the terminal** (the same steps, asked one by one; the agent can also click through
+the Feishu console for you, with the [Ego Lite](https://lite.ego.app/) browser, which the
+terminal cannot; without Ego it tells you what to click):
 
 ```bash
-herdrchat init --chat telegram   # or --chat feishu; it prints where the settings file is
-# fill in that file (each line says where its value comes from), then:
-herdrchat start                  # starts it and waits until it is connected
-herdrchat install                # once it works: start at login, come back after a crash
+herdrchat setup
 ```
 
-The steps for each app (making the Feishu app, or the Telegram bot) are in the
-[guide](docs/guide.md#set-up-telegram).
+It asks which chat app, takes the bot's token (or the Feishu app's keys) and checks them
+at once, picks your hc sessions (`default` unless you say otherwise), starts the bot, and
+shows a 6-digit code: send it to the bot and it knows you are its owner. Last, it offers
+to keep it running as a service. No file to edit, no id to copy.
+
+Making the Telegram bot or the Feishu app, and doing it all by editing the settings file
+instead: the [guide](docs/guide.md#set-up-telegram).
 
 ## Use
 
@@ -86,7 +93,7 @@ start a terminal, `/kill` to end one.
 | `/herdrchat feishu <task>` | Does a task in the Feishu developer console (with the [Ego Lite](https://lite.ego.app/) browser, or step by step). |
 | `/herdrchat telegram <task>` | The Telegram bot, from @BotFather to the first topic. |
 
-On the command line: `herdrchat init`, `start`, `stop`, `status`, `logs`, `install`,
+On the command line: `herdrchat setup`, `pair`, `init`, `start`, `stop`, `status`, `logs`, `install`,
 `uninstall`, `version`; `herdrchat` alone lists them. Add `--profile <name>` to run a
 second chat app beside the first.
 

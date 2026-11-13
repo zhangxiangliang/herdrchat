@@ -47,3 +47,32 @@ test('HERDR_HISTORY names the parts a new room gets; an unknown one is refused',
   assert.deepEqual(partsOf('none', 'file,folded', known), { file: false, folded: false });
   assert.throws(() => partsOf('files', 'file,folded', known, 'HERDR_HISTORY'), /HERDR_HISTORY: files is not one of file, folded/);
 });
+
+test('setConfigValue sets one key and keeps every other line, comments too', async () => {
+  const fs = await import('node:fs');
+  const os = await import('node:os');
+  const path = await import('node:path');
+  const { setConfigValue } = await import('../lib/core/config.mjs');
+  const file = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'herdrchat-setvalue-')), 'config.env');
+  fs.writeFileSync(file, '# a comment\nTELEGRAM_BOT_TOKEN=\nHERDR_SESSIONS=\n');
+  setConfigValue(file, 'TELEGRAM_BOT_TOKEN', '1:abc');
+  setConfigValue(file, 'TELEGRAM_OWNER_ID', '42');
+  assert.equal(fs.readFileSync(file, 'utf8'), '# a comment\nTELEGRAM_BOT_TOKEN=1:abc\nHERDR_SESSIONS=\nTELEGRAM_OWNER_ID=42\n');
+  assert.equal(fs.statSync(file).mode & 0o777, 0o600);
+});
+
+test('a pairing code makes one owner, expires, and stops after five wrong guesses', async () => {
+  const { startPairing, tryPairing } = await import('../lib/core/pairing.mjs');
+  let state = {};
+  const store = { read: () => JSON.parse(JSON.stringify(state)), write: (s) => { state = s; } };
+  const code = startPairing(store, 1000);
+  assert.match(code, /^\d{6}$/);
+  assert.equal(tryPairing(store, '000000' === code ? '111111' : '000000', 2000), 'wrong');
+  assert.equal(tryPairing(store, ` ${code} `, 2000), 'ok');
+  assert.equal(tryPairing(store, code, 2000), 'none', 'used up');
+  const later = startPairing(store, 1000);
+  assert.equal(tryPairing(store, later, 1000 + 16 * 60 * 1000), 'none', 'expired');
+  const guessed = startPairing(store, 1000);
+  for (let i = 0; i < 5; i += 1) assert.equal(tryPairing(store, guessed === '999999' ? '000000' : '999999', 2000), 'wrong');
+  assert.equal(tryPairing(store, guessed, 2000), 'none', 'locked after five wrong guesses');
+});

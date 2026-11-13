@@ -1,7 +1,7 @@
 {
   "name": "herdrchat",
   "version": "1.3.3",
-  "description": "A chat front-end for herdr: every terminal hc runs, in Feishu or Telegram",
+  "description": "The chat client for hc (herdr): see and answer every hc terminal from Feishu or Telegram",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/zhangxiangliang/herdrchat.git"

@@ -2,6 +2,7 @@
 // herdrchat's command line: set up, start, stop and look at one profile.
 //
 //   herdrchat <command> [--profile <name>]
+//     setup      a few questions, and it is set up, started, paired with you and kept running
 //     init       make the profile's config.env from the example when it is missing
 //     install    run it as a service of the system (launchd, systemd): it starts at
 //                login and comes back after a crash; start, stop, status go through it
@@ -21,11 +22,13 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const GUIDE = 'https://github.com/zhangxiangliang/herdrchat/blob/main/docs/guide.md';
-const HERDR = 'herdrchat is built on herdr: it mirrors the terminals that hc (herdr-core) runs.\nIt needs hc on this machine: install herdr first, from https://herdr.dev';
-const USAGE = `herdrchat: herdr's terminals in Feishu or Telegram. Needs herdr (https://herdr.dev).
+const HERDR = 'herdrchat is built on herdr: it mirrors the terminals that hc (herdr-core) runs.\nIt needs hc on this machine: install herdr first, from https://herdr.dev\n(or ask your coding agent `/herdrchat setup`: it can install herdr with you).';
+const USAGE = `herdrchat: the chat client for hc (herdr), in Feishu or Telegram. Needs hc (https://herdr.dev).
 
 herdrchat <command> [--profile <name>]
 
+  setup      set it up by answering a few questions (the easy way in)
+  pair       make you the bot's owner: it shows a code to send to the bot
   init       make the profile's config.env (--chat feishu|telegram picks the app)
   start      start (or restart) it: the service, or else its own hc terminal
   stop       stop it
@@ -36,7 +39,7 @@ herdrchat <command> [--profile <name>]
   run        run in the foreground (what start keeps running)
   version    which herdrchat this is
 
-First time: herdrchat init, fill in the file it names, then herdrchat start.
+First time: herdrchat setup. (Or by hand: herdrchat init, fill in the file, herdrchat start.)
 A second chat app: add --profile <name> to every command.
 Environment: HERDRCHAT_PROFILE (same as --profile), HERDRCHAT_HOME (one folder for a
 profile's settings and state).
@@ -85,7 +88,8 @@ if (helpAsked || !command) {
 if (process.env.HERDRCHAT_PROFILE && !/^[A-Za-z0-9][A-Za-z0-9_-]*$/.test(process.env.HERDRCHAT_PROFILE)) fail(`HERDRCHAT_PROFILE "${process.env.HERDRCHAT_PROFILE}": use letters, digits, - and _ only.`);
 
 // after the profile is set: lib/core/config.mjs reads it when it loads
-const { CONFIG_FILE, STATE_DIR, chatOf, loadConfig, makeDirs, placesOf } = await import('../lib/core/config.mjs');
+const { CONFIG_FILE, STATE_DIR, chatOf, loadConfig, makeDirs, placesOf, readState, setConfigValue, writeState } = await import('../lib/core/config.mjs');
+const { startPairing, PAIR_MINUTES } = await import('../lib/core/pairing.mjs');
 const { chatModule, chatNames } = await import('../lib/chats/index.mjs');
 const { coreUp, hc, sessionsHere } = await import('../lib/core/hc.mjs');
 const { serviceOf } = await import('../lib/core/service.mjs');
@@ -107,7 +111,10 @@ function readyConfig() {
   // a session not on this machine would be made by hc as the bot asks for it: a typo
   const here = sessionsHere();
   const unknown = cfg.sessions.filter((s) => !here.includes(s));
-  if (unknown.length) fail(`HERDR_SESSIONS in ${CONFIG_FILE} names ${unknown.join(', ')}, which ${unknown.length > 1 ? 'are' : 'is'} not an hc session on this machine.\nThe sessions here: ${here.join(', ') || 'none (start hc first)'}.`, 1);
+  if (unknown.length) {
+    const what = cfg.sessionsSet ? `HERDR_SESSIONS in ${CONFIG_FILE} names ${unknown.join(', ')}, which ${unknown.length > 1 ? 'are' : 'is'} not an hc session on this machine` : `HERDR_SESSIONS is empty, so herdrchat follows hc's default session, which is not on this machine`;
+    fail(`${what}.\nThe sessions here: ${here.join(', ') || 'none: install and start herdr first (https://herdr.dev)'}.${here.length ? ` Put the ones to mirror in HERDR_SESSIONS in ${CONFIG_FILE}.` : ''}`, 1);
+  }
   return cfg;
 }
 // a day's log file: the local date, as the log names its files
@@ -181,7 +188,235 @@ async function terminalState(session) {
   }
 }
 
+// ---------- setup: questions instead of a file to fill ----------
+
+async function prompter() {
+  const readline = await import('node:readline/promises');
+  let rl = null;
+  const open = () => { rl ||= readline.createInterface({ input: process.stdin, output: process.stdout, terminal: true }); return rl; };
+  const shut = () => { rl?.close(); rl = null; };
+  const ask = async (q, fallback = '') => (await open().question(fallback ? `${q} [${fallback}] ` : `${q} `)).trim() || fallback;
+  // A token or a secret is typed with nothing shown, not even dots: the terminal is put in
+  // raw mode and each key is read here, so neither the terminal nor readline echoes it.
+  const askSecret = (q) => new Promise((resolve) => {
+    shut();
+    process.stdout.write(`${q} `);
+    const stdin = process.stdin;
+    stdin.setRawMode(true);
+    stdin.resume();
+    let value = '';
+    const onData = (buf) => {
+      for (const ch of buf.toString('utf8')) {
+        if (ch === '\u0003') { // Ctrl+C
+          stdin.setRawMode(false);
+          process.stdout.write('\n');
+          process.exit(130);
+        }
+        if (ch === '\r' || ch === '\n' || ch === '\u0004') {
+          stdin.setRawMode(false);
+          stdin.pause();
+          stdin.off('data', onData);
+          process.stdout.write('\n');
+          resolve(value.trim());
+          return;
+        }
+        if (ch === '\u007f' || ch === '\b') value = value.slice(0, -1);
+        else if (ch >= ' ') value += ch;
+      }
+    };
+    stdin.on('data', onData);
+  });
+  return { ask, askSecret, close: shut };
+}
+
+const ok = (text) => console.log(`✔ ${text}`);
+const bad = (text) => console.log(`✘ ${text}`);
+const tell = (text) => console.log(`  ${text}`);
+
+async function telegramMe(token) {
+  try {
+    const res = await fetch(`https://api.telegram.org/bot${token}/getMe`, { signal: AbortSignal.timeout(15000) });
+    const body = await res.json();
+    return body.ok ? body.result : { error: body.description || `HTTP ${res.status}` };
+  } catch (err) {
+    return { error: err.message };
+  }
+}
+
+async function feishuCheck(appId, appSecret) {
+  try {
+    const res = await fetch('https://open.feishu.cn/open-apis/auth/v3/tenant_access_token/internal', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ app_id: appId, app_secret: appSecret }), signal: AbortSignal.timeout(15000) });
+    const body = await res.json();
+    return body.code === 0 ? { ok: true } : { error: body.msg || `code ${body.code}` };
+  } catch (err) {
+    return { error: err.message };
+  }
+}
+
 const commands = {
+  async setup() {
+    if (!process.stdin.isTTY) fail(`herdrchat setup asks questions, so run it in a terminal. Without one: herdrchat init${again}, fill in the file, herdrchat start${again}.`);
+    console.log(`herdrchat setup${again}: a few questions, then it runs.\n`);
+    // 1. herdr
+    const hcPath = findHc();
+    if (!hcPath) {
+      bad(`hc is not on PATH. ${HERDR}`);
+      process.exitCode = 1;
+      return;
+    }
+    const { execFileSync } = await import('node:child_process');
+    ok(`herdr is here (${execFileSync(hcPath, ['--version'], { encoding: 'utf8' }).trim()})`);
+    const p = await prompter();
+    try {
+      // 2. the chat app
+      makeDirs();
+      const had = fs.existsSync(CONFIG_FILE) ? loadConfig() : null;
+      let chatName = chatFlag || had?.chat;
+      if (!chatName || (!had && !chatFlag)) {
+        const pick = await p.ask('Which chat app? 1) Feishu  2) Telegram', had?.chat === 'telegram' ? '2' : '1');
+        chatName = pick === '2' || /^t/i.test(pick) ? 'telegram' : 'feishu';
+      }
+      if (!had) {
+        const example = fs.readFileSync(path.join(ROOT, 'config.env.example'), 'utf8').replace(/^HERDRCHAT_CHAT=.*$/m, `HERDRCHAT_CHAT=${chatName}`);
+        fs.writeFileSync(CONFIG_FILE, example, { mode: 0o600 });
+      } else {
+        setConfigValue(CONFIG_FILE, 'HERDRCHAT_CHAT', chatName);
+      }
+      ok(`${chatName}, settings in ${CONFIG_FILE}`);
+      const env = loadConfig().env;
+      // 3. its keys, checked now
+      if (chatName === 'telegram') {
+        let token = env.TELEGRAM_BOT_TOKEN || '';
+        if (!token) tell('Make a bot first: in Telegram, message @BotFather, send /newbot, pick a name; it gives you a token.');
+        for (;;) {
+          if (!token) token = await p.askSecret('Paste the token (it is not shown):');
+          const me = await telegramMe(token);
+          if (me.error) {
+            bad(`Telegram says: ${me.error}. Check the token and paste it again.`);
+            token = '';
+            continue;
+          }
+          setConfigValue(CONFIG_FILE, 'TELEGRAM_BOT_TOKEN', token);
+          ok(`the token works: @${me.username}`);
+          if (!me.has_topics_enabled) {
+            bad('topic mode is off, and herdrchat makes one topic per terminal.');
+            tell('In the @BotFather chat tap Open (its mini app), pick your bot, turn on Threaded Mode.');
+            await p.ask('Press Enter when it is on.');
+            continue;
+          }
+          ok('topic mode is on');
+          break;
+        }
+      } else {
+        let appId = env.FEISHU_APP_ID || '';
+        let appSecret = env.FEISHU_APP_SECRET || '';
+        if (!appId || !appSecret) {
+          tell('Make the Feishu app first, in https://open.feishu.cn/app: a custom app (企业自建应用) with the bot ability');
+          tell('and the scopes in the guide, "Set up: Feishu": ' + GUIDE + '#set-up-feishu');
+          tell('(your coding agent can click through it for you: /herdrchat feishu create the app)');
+        }
+        for (;;) {
+          if (!appId) appId = await p.ask('App ID (cli_…, on the app\'s 凭证与基础信息 page):');
+          if (!appSecret) appSecret = await p.askSecret('App Secret (it is not shown):');
+          const check = await feishuCheck(appId, appSecret);
+          if (check.error) {
+            bad(`Feishu says: ${check.error}. Check the App ID and Secret and give them again.`);
+            appId = '';
+            appSecret = '';
+            continue;
+          }
+          setConfigValue(CONFIG_FILE, 'FEISHU_APP_ID', appId);
+          setConfigValue(CONFIG_FILE, 'FEISHU_APP_SECRET', appSecret);
+          ok('the App ID and Secret work');
+          break;
+        }
+      }
+      // 4. which sessions
+      const here = sessionsHere();
+      if (!here.length) {
+        bad('herdr is installed but no hc session runs on this machine, so there is nothing to mirror yet.');
+        tell('Open herdr-app, or start hc as herdr\'s docs say (https://herdr.dev), then run herdrchat setup' + again + ' again: what is done so far is kept.');
+        process.exitCode = 1;
+        return;
+      }
+      const named = loadConfig().sessionsSet ? loadConfig().sessions.join(',') : '';
+      const fallback = named || (here.includes('default') ? 'default' : here[0] || 'default');
+      tell(`hc sessions on this machine: ${here.join(', ') || 'none yet'}. "default" with herdr-app reaches all it shows.`);
+      for (;;) {
+        const pick = (await p.ask('Which sessions to mirror (comma-separated)?', fallback)).split(',').map((x) => x.trim()).filter(Boolean);
+        const unknown = pick.filter((x) => !here.includes(x));
+        if (unknown.length) {
+          bad(`not on this machine: ${unknown.join(', ')}`);
+          continue;
+        }
+        setConfigValue(CONFIG_FILE, 'HERDR_SESSIONS', pick.join(',') === 'default' ? '' : pick.join(','));
+        ok(`following ${pick.join(', ')}`);
+        break;
+      }
+      // 5. start
+      console.log('');
+      await commands.start();
+      if (process.exitCode) return;
+      if (chatName === 'feishu') {
+        tell('Now, with the bot running, in the Feishu developer console: 事件与回调 -> long connection (长连接),');
+        tell('add the event im.message.receive_v1 and the callback card.action.trigger, then publish a version.');
+        await p.ask('Press Enter when the version is published.');
+      }
+      // 6. pair: the owner is whoever sends the code (the same step the agent runs)
+      await commands.pair();
+      if (process.exitCode) return;
+      // 7. keep it running
+      const svc = service();
+      if (svc && !svc.installed()) {
+        const yes = await p.ask('Keep it running as a service (starts at login, comes back after a crash)? [Y/n]', 'Y');
+        if (/^y/i.test(yes)) await commands.install();
+      }
+      console.log(`\nDone. herdrchat status${again} shows how it is; herdrchat logs${again} what it did.`);
+      if (chatName === 'feishu') console.log('Send /auth to the bot once to let it mute its groups, so your phone rings only when it should.');
+    } finally {
+      p.close();
+    }
+  },
+
+  // The owner, without copying an id: a 6-digit code sent to the bot. It needs no terminal,
+  // so `herdrchat setup` and the agent's `/herdrchat setup` both use it. Sending the code
+  // also proves the whole path works: the bot runs, the chat app delivers, events are on.
+  async pair() {
+    const cfg = loadConfig();
+    const ownerKey = cfg.chat === 'telegram' ? 'TELEGRAM_OWNER_ID' : 'FEISHU_OWNER_OPEN_ID';
+    if (cfg.env[ownerKey]) {
+      ok(`the owner is set already (${ownerKey} in ${CONFIG_FILE}); to change it, empty that line and pair again`);
+      return;
+    }
+    const svc = service();
+    const running = svc?.installed() ? svc.state().running : (await terminalState(cfg.sessions[0])) === 'live';
+    if (!running) fail(`The bot is not running, and it is the bot that reads the code. Run herdrchat start${again} first.`);
+    let where = 'your chat with the bot';
+    if (cfg.chat === 'telegram') {
+      const me = await telegramMe(cfg.env.TELEGRAM_BOT_TOKEN || '');
+      if (me.username) where = `your chat with @${me.username} (https://t.me/${me.username}), tap Start if Telegram shows it,`;
+    } else {
+      where = 'your chat with the bot (in Feishu, search the app\'s name, open it, and message it)';
+    }
+    const code = startPairing({ read: readState, write: writeState });
+    console.log(`\nOpen ${where} and send it this code:\n\n      ${code}\n`);
+    tell(`It works for ${PAIR_MINUTES} minutes. Waiting…`);
+    const since = new Date().toISOString();
+    const until = Date.now() + PAIR_MINUTES * 60 * 1000;
+    while (Date.now() < until && !loadConfig().env[ownerKey]) await new Promise((r) => setTimeout(r, 2000));
+    if (!loadConfig().env[ownerKey]) {
+      bad(`no code came in ${PAIR_MINUTES} minutes. Run herdrchat pair${again} for a new one.`);
+      if (cfg.chat === 'feishu') tell('When the bot never answered at all: in the developer console, check the event im.message.receive_v1 is added on the long connection, and that a version with it is published.');
+      else tell('When the bot never answered at all: herdrchat logs' + again + ' says why.');
+      process.exitCode = 1;
+      return;
+    }
+    ok('paired: you are the owner. It starts again as yours…');
+    const back = await waitConnected(since);
+    if (!back.ok) return failedToConnect('It paired', back);
+    ok(`connected; your terminals' ${cfg.chat === 'telegram' ? 'topics' : 'groups'} appear in a moment`);
+  },
+
   init() {
     const chatName = chatFlag || 'feishu';
     if (!chatNames().includes(chatName)) fail(`--chat ${chatName}: the chat apps are ${chatNames().join(', ')}`);
@@ -195,7 +430,7 @@ const commands = {
     const example = fs.readFileSync(path.join(ROOT, 'config.env.example'), 'utf8').replace(/^HERDRCHAT_CHAT=.*$/m, `HERDRCHAT_CHAT=${chatName}`);
     fs.writeFileSync(CONFIG_FILE, example, { mode: 0o600 });
     const keys = (chatModule(chatName).requires || []).join(', ');
-    console.log(`Made ${CONFIG_FILE} (only you can read it) for ${chatName}.\nOpen it and fill in ${keys} and HERDR_SESSIONS (the hc sessions to mirror), then run \`herdrchat start${again}\`.\nThe guide walks through it: ${GUIDE}`);
+    console.log(`Made ${CONFIG_FILE} (only you can read it) for ${chatName}.\nOpen it and fill in ${keys} (HERDR_SESSIONS is hc's default session unless you name others), then run \`herdrchat start${again}\`.\nThe guide walks through it: ${GUIDE}`);
   },
 
   // The service file is written again each time (a moved node or hc is picked up), and
@@ -270,7 +505,7 @@ const commands = {
       if (!here.includes(session)) sessionWords.push(`${session} (no such session here; this machine has: ${here.join(', ') || 'none'})`);
       else sessionWords.push(`${session} (${(await coreUp(session)) ? 'core up' : 'core not running'})`);
     }
-    console.log(`sessions  ${sessionWords.join(', ') || 'none yet: set HERDR_SESSIONS (`ls ~/.local/state/herdr-core` lists them)'}`);
+    console.log(`sessions  ${sessionWords.join(', ')}${cfg.sessionsSet ? '' : ' (hc\'s default session: HERDR_SESSIONS is empty)'}`);
     // how it runs: the service, an hc terminal, or not at all
     const svc = hcThere ? service() : null;
     if (!hcThere) {

@@ -2,7 +2,7 @@
 
 # herdrchat
 
-[herdr](https://herdr.dev) 的聊天前端：它跑的每个终端，都能在飞书或 Telegram 里看到和回复。
+hc（[herdr](https://herdr.dev)）的聊天客户端：在飞书或 Telegram 里查看和回复 hc 的每一个终端。
 
 [English](README.md) · [简体中文](README.zh.md)
 
@@ -12,11 +12,13 @@
 
 </div>
 
-[herdr](https://herdr.dev) 让你的编程 agent（Claude Code、codex、pi……）跑在不会断的终端里：
-**hc**（herdr-core）让它们一直跑着，**herdr-app** 按空间和标签页把它们展示出来。herdr-app 有手机端和电脑端，
-但手机得能连到跑 hc 的机器，所以要先折腾 VPN 或内网；而且在手机的小屏幕上和 agent 交互，体验并不好。
+**herdr-app 是 hc 的电脑和手机客户端；herdrchat 是 hc 的聊天客户端。**
 
-herdrchat 把它们搬进聊天软件。它自己主动连到飞书或 Telegram，网络上什么都不用配：不要公网 IP，也不要 VPN。
+[herdr](https://herdr.dev) 让你的编程 agent（Claude Code、codex、pi……）跑在不会断的终端里：
+**hc**（herdr-core）让它们一直跑着，herdr-app 按空间和标签页把它们展示出来。
+但想在外面用 herdr-app，手机得能连到跑 hc 的机器，所以要先折腾 VPN 或内网；而且在手机的小屏幕上和 agent 交互，体验并不好。
+
+herdrchat 把同样这些终端，放进你手机上本来就有的聊天软件里。它自己主动连到飞书或 Telegram，网络上什么都不用配：不要公网 IP，也不要 VPN。
 herdr-app 的每个标签页，在飞书里是一个群，在 Telegram 里是和 bot 私聊中的一个话题：
 agent 干活时说的话实时可见，它问你的问题点按钮就能回答，图片双向都能传，所有终端汇总在一张总览里。
 新开的群或话题会先补上之前的对话；只有 agent 需要你、或者做完的时候手机才会响
@@ -27,8 +29,8 @@ agent 干活时说的话实时可见，它问你的问题点按钮就能回答�
 
 ## 需要什么
 
-- **herdr**：herdrchat 是基于它做的，没有它什么都做不了。请先从 [herdr.dev](https://herdr.dev) 安装；
-  它的 **hc** 要在这台机器上跑着，至少有一个 session。
+- **herdr**：herdrchat 是基于它做的，没有它什么都做不了。请先从 [herdr.dev](https://herdr.dev) 安装
+  （也可以让编程 agent 帮你装：`/herdrchat setup` 会主动问你）；它的 **hc** 要在这台机器上跑着，至少有一个 session。
 - **Node.js 20** 或更新版本，系统是 **macOS 或 Linux**。
 - **飞书**：一个能创建并发布企业自建应用的飞书团队（暂不支持 Lark 国际版）。
   **Telegram**：一个 Telegram 账号。可以只用一个，也可以两个同时用。
@@ -49,18 +51,19 @@ skill 会教你的编程 agent（Claude Code、Codex……）替你配置和照�
 ## 配置
 
 **让 agent 帮你：** 对它说 `/herdrchat setup`。它会先问你用哪个聊天软件，然后一步步带你配好，
-能自动点的飞书后台操作它会替你点。
+飞书后台的操作，装了 [Ego Lite](https://lite.ego.app/) 浏览器它会替你点；没装的话，它会问你要不要装，不装就一步步告诉你点哪里。
 
-**自己动手：**
+**在终端里**（步骤和 agent 一样，一个个问你；区别是 agent 还能替你在飞书后台点，终端做不到）：
 
 ```bash
-herdrchat init --chat telegram   # 或者 --chat feishu；它会告诉你配置文件在哪
-# 填好那个文件（每一行上面都写了值从哪来），然后：
-herdrchat start                  # 启动，并等到真的连上
-herdrchat install                # 跑通以后：装成系统服务，开机自动启动，崩溃自动重启
+herdrchat setup
 ```
 
-每个聊天软件的具体步骤（建飞书应用，或者建 Telegram bot）在[详细说明](docs/guide.md#set-up-telegram)里（英文）。
+它会问你用哪个聊天软件，让你粘贴 bot 的 token（或飞书应用的 App ID 和 Secret）并当场检查，
+帮你选好要同步的 hc session（不改就是 `default`），然后启动 bot，并给你一个 6 位数字：
+把它发给 bot，bot 就认出你是主人。最后问你要不要装成系统服务。不用改文件，也不用复制任何 id。
+
+怎么建 Telegram bot 或飞书应用，以及想自己改配置文件的做法，见[详细说明](docs/guide.md#set-up-telegram)（英文）。
 
 ## 使用
 
@@ -77,7 +80,7 @@ herdrchat install                # 跑通以后：装成系统服务，开机自
 | `/herdrchat feishu <任务>` | 替你在飞书开发者后台完成操作（用 [Ego Lite](https://lite.ego.app/) 浏览器，或者一步步带你点）。 |
 | `/herdrchat telegram <任务>` | Telegram bot：从 @BotFather 一直到第一个话题。 |
 
-命令行：`herdrchat init`、`start`、`stop`、`status`、`logs`、`install`、`uninstall`、`version`；
+命令行：`herdrchat setup`、`pair`、`init`、`start`、`stop`、`status`、`logs`、`install`、`uninstall`、`version`；
 只输入 `herdrchat` 会列出全部。加上 `--profile <名字>`，可以再开一个聊天软件。
 
 ## 更新

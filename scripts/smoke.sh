@@ -45,6 +45,10 @@ step "an unknown command says so"
 if out="$(herdrchat nosuchcommand 2>&1)"; then fail "an unknown command exited 0"; fi
 expect "unknown command" 'Unknown command: nosuchcommand' "$out"
 
+step "setup without a terminal says how else to set it up"
+if out="$(herdrchat setup </dev/null 2>&1)"; then fail "setup without a terminal exited 0"; fi
+expect "setup needs a terminal" 'run it in a terminal.*herdrchat init' "$(printf '%s' "$out" | tr '\n' ' ')"
+
 step "start with no settings says to run init"
 if out="$(herdrchat start 2>&1)"; then fail "start with no settings exited 0"; fi
 expect "no settings" 'herdrchat init' "$out"
@@ -58,12 +62,16 @@ grep -q '^HERDRCHAT_CHAT=telegram$' "$HERDRCHAT_HOME/config.env" || fail "init d
 
 step "status names what is missing"
 out="$(herdrchat status)"
-expect "status sessions" 'sessions +none yet' "$out"
+expect "status sessions" "sessions +default.*hc's default session" "$out"
 expect "status token" 'token +missing' "$out"
 
-step "start names the empty setting"
+step "pair before the bot runs says to start it"
+if out="$(herdrchat pair 2>&1)"; then fail "pair with no bot running exited 0"; fi
+expect "pair needs the bot" 'not running.*herdrchat start' "$out"
+
+step "start names what is missing"
 if out="$(herdrchat start 2>&1)"; then fail "start with empty settings exited 0"; fi
-expect "empty sessions" 'HERDR_SESSIONS is empty' "$out"
+expect "empty token" 'TELEGRAM_BOT_TOKEN is empty' "$out"
 
 if [ "${SMOKE_SKILL:-1}" = 0 ]; then printf '\nSMOKE OK (%s, skill not tried)\n' "$MODE"; exit 0; fi
 step "the skill installs ($SKILL_SOURCE)"

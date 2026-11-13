@@ -79,7 +79,7 @@ your token after `/auth`: never print it.
 
 | You see | Likely cause | Do |
 |---|---|---|
-| nothing posts | bot down, or the owner not set (`FEISHU_OWNER_OPEN_ID`, `TELEGRAM_OWNER_ID`) | `herdrchat status`; the log says "owner not set" |
+| nothing posts | bot down, or the owner not set (`FEISHU_OWNER_OPEN_ID`, `TELEGRAM_OWNER_ID`) | `herdrchat status`; the log says "owner not set": `herdrchat pair` |
 | Telegram: no topic appears | topic mode off | log: "topic mode is off"; BotFather's mini app, the bot, Threaded Mode, then start again |
 | Telegram: `telegram poll: ... 409` | another copy polls the same token | stop it (another machine?), then start once |
 | a button gives error 200340 | the card callback is not set up | `references/feishu.md`: events and card callbacks |

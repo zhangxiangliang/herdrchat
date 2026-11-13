@@ -2,8 +2,8 @@
 
 How herdrchat works and every setting, for when the README is not enough.
 
-herdrchat is a chat front-end for hc: every herdr-app tab, followed and answered in a chat
-app, Feishu or Telegram. Both sit on the same core (hc events, a reader per agent,
+herdrchat is hc's chat client, as herdr-app is its desktop and phone client: every
+herdr-app tab, followed and answered in a chat app, Feishu or Telegram. Both sit on the same core (hc events, a reader per agent,
 dialogs, the overview), each behind one contract (`docs/architecture.md`); Slack and
 Discord may follow the same way. A profile is one chat app (`HERDRCHAT_CHAT`); to use
 both, run a profile each.
@@ -85,7 +85,7 @@ In the profile's `config.env` (`herdrchat status` prints where it is):
 | Key | For | Default | What it does |
 |---|---|---|---|
 | `HERDRCHAT_CHAT` | both | `feishu` | the chat app this profile mirrors into: `feishu` or `telegram` |
-| `HERDR_SESSIONS` | both | (required) | the hc sessions to mirror, comma-separated; machines they reach come along |
+| `HERDR_SESSIONS` | both | `default` | the hc sessions to mirror, comma-separated; machines they reach come along. `default` is hc's own session, which with herdr-app reaches every session it shows |
 | `HERDR_MUTED_SPACES` | both | `all` | spaces whose rooms are quiet: only "needs you" and "done" ring; empty for none |
 | `HERDR_SILENT_SPACES` | both | (none) | spaces where nothing rings, not even "needs you" |
 | `HERDR_HISTORY` | both | `file,folded` | what a new room gets of the conversation before it: `file`, `folded`, both, or empty |
@@ -228,6 +228,11 @@ delivered (the terminal has ended) says so plainly.
   dialog it waits on, as is), `/esc`, `/history` (the conversation so far, as a file and
   a folded post). Dialog cards have buttons.
 
+`herdrchat setup` does the steps below by asking: it checks the token or the Feishu keys
+at once, picks the sessions, starts the bot and pairs you as its owner with a 6-digit
+code you send to the bot, then offers the service. The steps say what happens, and how
+to do it by hand. When the owner is missing later, `herdrchat pair` shows a new code.
+
 ## Set up: Telegram
 
 1. In Telegram, message **@BotFather**: `/newbot`, give it a name and a username ending
@@ -235,10 +240,10 @@ delivered (the terminal has ended) says so plainly.
 2. Turn on topics for the bot: in the BotFather chat tap **Open** (its mini app), pick the
    bot, turn on **Threaded Mode**. Without it the bot cannot make topics.
 3. `herdrchat init --chat telegram` (with `--profile <name>` too if you also run Feishu)
-   prints where its `config.env` is. Fill in `TELEGRAM_BOT_TOKEN` and `HERDR_SESSIONS`
-   (`ls ~/.local/state/herdr-core` lists your hc sessions).
-4. `herdrchat start`, then message the bot anything. It answers with the line to add,
-   `TELEGRAM_OWNER_ID=<your id>`; add it and run `herdrchat start` again. One topic per
+   prints where its `config.env` is. Fill in `TELEGRAM_BOT_TOKEN`. `HERDR_SESSIONS`
+   can stay empty for hc's default session (`ls ~/.local/state/herdr-core` lists yours).
+4. `herdrchat start`, then `herdrchat pair`: it shows a 6-digit code. Open the bot (tap
+   Start) and send it the code; the bot makes you its owner and starts again. One topic per
    tab appears in your private chat with the bot (Telegram takes about one message a
    second, so many tabs take a moment).
 5. Once it works: `herdrchat install` (see "Running as a service").
@@ -249,8 +254,9 @@ If Telegram is your only app, use the default profile with `--chat telegram`. Us
 ## Set up: Feishu
 
 Feishu only: Lark (the international version) is not supported yet. Steps 1, 2, 5 and 6
-are in the Feishu developer console (`https://open.feishu.cn/app`); the herdrchat skill
-(`/herdrchat setup`) can do them with you.
+are in the Feishu developer console (`https://open.feishu.cn/app`). The herdrchat skill
+(`/herdrchat setup`) clicks them for you with the [Ego Lite](https://lite.ego.app/)
+browser, or tells you what to click without it; or follow the steps here yourself.
 
 1. Create a custom app (企业自建应用) and add the bot ability (机器人).
 2. Permissions: import the scopes listed in `skills/herdrchat/references/feishu.md`,
@@ -258,8 +264,8 @@ are in the Feishu developer console (`https://open.feishu.cn/app`); the herdrcha
    reading the messages sent to it, making and renaming groups, reactions, images both
    ways, and group tags.
 3. `herdrchat init` prints where its `config.env` is. Fill in the app's App ID and App
-   Secret (the app's 凭证与基础信息 page) and `HERDR_SESSIONS` (`ls
-   ~/.local/state/herdr-core` lists your hc sessions).
+   Secret (the app's 凭证与基础信息 page). `HERDR_SESSIONS` can stay empty for hc's
+   default session (`ls ~/.local/state/herdr-core` lists yours).
 4. `herdrchat start`. The bot must be running for the next step: the console checks for
    a live connection.
 5. Events and callbacks (事件与回调): for events, choose the long connection mode (长连接)
@@ -267,9 +273,9 @@ are in the Feishu developer console (`https://open.feishu.cn/app`); the herdrcha
    mode too and add `card.action.trigger` (the dialog buttons).
 6. Publish a version. If the page does not say 本次发布免审核, your team's admin must
    approve it first.
-7. Open `https://applink.feishu.cn/client/bot/open?appId=<app id>` and send anything.
-   The bot answers with the line to add, `FEISHU_OWNER_OPEN_ID=<your open_id>`; add it
-   and run `herdrchat start` again. One group per tab appears.
+7. `herdrchat pair`: it shows a 6-digit code. In Feishu, search the app's name, open the
+   bot and send it the code; the bot makes you its owner and starts again. One group per
+   tab appears. When the code gets no answer, step 5 or 6 is not done.
 8. Optional: send `/auth` to the bot so it can mute its groups for you ("Optional: let
    the bot act as you"), and add the bot menu (`skills/herdrchat/references/feishu.md`,
    "The bot menu").
