@@ -50,3 +50,20 @@ test('a crash is written and onCrash runs before the process exits', async () =>
   assert.match(text, / ERROR uncaught: Error: boom/);
   fs.rmSync(dir, { recursive: true, force: true });
 });
+
+test('a library error printed as a plain log line is logged as WARN', async () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'herdrchat-log-level-'));
+  const realLog = console.log;
+  try {
+    const log = createLog(dir);
+    log.capture();
+    console.log('[error]:', ['[ws]', 'connect failed']);
+    console.log('[feishu] connected');
+  } finally {
+    console.log = realLog;
+  }
+  const text = fs.readFileSync(path.join(dir, `${new Date().toISOString().slice(0, 10)}.log`), 'utf8');
+  assert.match(text, / WARN \[error\]:/);
+  assert.match(text, / INFO \[feishu\] connected/);
+  fs.rmSync(dir, { recursive: true, force: true });
+});

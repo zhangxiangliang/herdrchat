@@ -52,7 +52,7 @@ const places = placesOf();
 
 const shellQuote = (s) => `'${String(s).replace(/'/g, `'\\''`)}'`;
 const firstSession = () => loadConfig().sessions[0];
-const CONNECT_WAIT_MS = 30000;
+const CONNECT_WAIT_MS = 60000; // a first attempt that times out (15 s) is tried again
 
 // hc's full path, from HERDRCHAT_HC or PATH
 function findHc() {
