@@ -35,11 +35,55 @@ A Telegram bot cannot make groups, so it uses topics in your private chat with t
 | a terminal that is gone | its topic stays, its name starting with 🔚 (taken off if it comes back) |
 | herdr itself | the chat's main thread: the overview message, edited in place; `/ls`, `/new`, `/kill`; `/` shows the commands |
 
-What differs: an image goes as its own photo after the text (a message cannot hold one);
-a dialog's free answer is typed in the topic (a message has no text box); there are no
-tags, labels, pins or `/auth` (a bot cannot act as you). Telegram takes about one message
-a second in a chat, so the bot queues and waits as Telegram asks. Setting it up:
+What differs is in "Feishu and Telegram side by side" below. Telegram takes about one
+message a second in a chat, so the bot queues and waits as Telegram asks. Setting it up:
 `skills/herdrchat/references/telegram.md`.
+
+## Feishu and Telegram side by side
+
+Both do the same things; where an app cannot, something stands in.
+
+| | Feishu | Telegram |
+|---|---|---|
+| a tab | a group | a topic in the bot's private chat |
+| a space | an avatar (its letter, its color) | a topic icon color |
+| an ended terminal | the `ended` tag | 🔚 before the topic's name |
+| the direct chat | the overview card, commands typed or from the bot menu (set in the console) | the main thread: the overview, commands with the `/` list |
+| what it says while working | one live card per turn, edited | one live message per turn, edited |
+| a dialog | a card with buttons, a text box for its own words | a message with buttons; its own words are typed in the topic |
+| needs you | the group pinned (after `/auth`), an @ that rings | the dialog card pinned in its topic, a reply that rings |
+| quiet spaces (`HERDR_MUTED_SPACES`) | groups muted (after `/auth`); only an @ rings | posts silent; only a short reply rings |
+| silent spaces (`HERDR_SILENT_SPACES`) | no @ | no ringing reply |
+| a new room (`HERDR_HISTORY`), `/history` | the conversation as a file, its newest part in a folded panel | the same, the newest part in an expandable quote |
+| images | in the card, both ways | as photos after the text, both ways |
+| your message marked | a reaction, then OK | 👀, then 👌 |
+| tags and labels (`HERDR_BOT_TAGS`, `HERDR_USER_TAGS`) | yes | none in Telegram |
+| messages while the bot is away | looked for and handled when it connects | kept by Telegram for 24 hours, handled when it connects |
+| acting as you (`/auth`) | mute, labels, pins | not needed: posts are silent by themselves |
+
+## Settings
+
+In the profile's `config.env` (`herdrchat status` prints where it is):
+
+| Key | For | Default | What it does |
+|---|---|---|---|
+| `HERDRCHAT_CHAT` | both | `feishu` | the chat app this profile mirrors into: `feishu` or `telegram` |
+| `HERDR_SESSIONS` | both | (required) | the hc sessions to mirror, comma-separated; machines they reach come along |
+| `HERDR_MUTED_SPACES` | both | `all` | spaces whose rooms are quiet: only "needs you" and "done" ring; empty for none |
+| `HERDR_SILENT_SPACES` | both | (none) | spaces where nothing rings, not even "needs you" |
+| `HERDR_HISTORY` | both | `file,folded` | what a new room gets of the conversation before it: `file`, `folded`, both, or empty |
+| `FEISHU_APP_ID`, `FEISHU_APP_SECRET` | Feishu | (required) | the Feishu app |
+| `FEISHU_OWNER_OPEN_ID` | Feishu | (empty) | you; the bot tells you yours when you message it |
+| `HERDR_BOT_TAGS` | Feishu | `on` | the session or machine tag and `ended` next to a group's name |
+| `HERDR_USER_TAGS` | Feishu | `on` | your sidebar labels, once `/auth` is done |
+| `TELEGRAM_BOT_TOKEN` | Telegram | (required) | the bot's token from @BotFather |
+| `TELEGRAM_OWNER_ID` | Telegram | (empty) | you; the bot tells you yours when you message it |
+
+In the environment (not `config.env`): `HERDRCHAT_PROFILE` (or `--profile`) picks the
+profile; `HERDRCHAT_HOME` puts a profile's `config.env` and state in one folder;
+`XDG_CONFIG_HOME` and `XDG_STATE_HOME` move the usual folders. `herdrchat start` and
+`herdrchat install` hand the bot hc's full path as `HERDRCHAT_HC`. A setting changed in
+`config.env` takes effect at the next `herdrchat start`.
 
 ## How it works: hc, plus a reader per agent
 
@@ -151,8 +195,10 @@ delivered (the terminal has ended) says so plainly.
 
 - Direct chat: `/ls` (the overview again at the bottom of the chat; the old one is
   recalled), `/new <session> <space>/<tab> [command]` (start one; default `claude`;
-  `--cwd <dir>` first to pick its folder), `/kill <session> <address>`, `/auth` (see
-  below).
+  `--cwd <dir>` first to pick its folder), `/kill <session> <address>`, `/auth` (Feishu;
+  see below). Telegram lists them when you type `/`; Feishu can have a bot menu for
+  `/ls`, help and `/auth` (set in the developer console:
+  `skills/herdrchat/references/feishu.md`, "The bot menu").
 - In a terminal's room: any text goes to it (marked once typed in, and again when the
   turn that took it is over); an image (alone or in a rich text message) is sent
   beside the terminal with `hc put`, on its machine, and its path is typed in with your
@@ -185,7 +231,9 @@ Steps 1, 2, 5 and 6 are in the Feishu developer console; the herdrchat skill
 7. Open `https://applink.feishu.cn/client/bot/open?appId=<app id>` and send anything.
    The bot answers with your `open_id`; put it in `FEISHU_OWNER_OPEN_ID` and run
    `herdrchat start` again.
-8. Once it works: `herdrchat install` (see "Running as a service").
+8. Optional: the bot menu in the direct chat (`skills/herdrchat/references/feishu.md`,
+   "The bot menu").
+9. Once it works: `herdrchat install` (see "Running as a service").
 
 ## Running as a service
 
