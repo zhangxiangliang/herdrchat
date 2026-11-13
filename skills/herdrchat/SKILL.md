@@ -1,6 +1,13 @@
 ---
 name: herdrchat
-description: Set up, run and look after herdrchat, which mirrors every herdr-app (hc) tab into Feishu (a group per tab) or Telegram (a topic per tab): first setup of either app, start, stop, status, logs, running it as a service, settings, fixing problems, the Feishu developer console and @BotFather. Use for anything about herdrchat or its Feishu or Telegram bot, even "set up the Telegram bot", "is it running", "it does not post" or "mute the workers". Trigger with "/herdrchat", "/herdrchat setup", "/herdrchat status", "/herdrchat fix".
+description: >-
+  Set up, run and look after herdrchat, which mirrors every herdr-app (hc) tab into
+  Feishu (a group per tab) or Telegram (a topic per tab): first setup of either app,
+  start, stop, status, logs, running it as a service, settings, fixing problems, the
+  Feishu developer console and @BotFather. Use for anything about herdrchat or its
+  Feishu or Telegram bot, even "set up the Telegram bot", "is it running", "it does not
+  post" or "mute the workers". Trigger with "/herdrchat", "/herdrchat setup",
+  "/herdrchat status", "/herdrchat fix".
 ---
 
 # herdrchat
