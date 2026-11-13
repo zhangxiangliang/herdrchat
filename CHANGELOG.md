@@ -1,3 +1,10 @@
+## [1.3.2](https://github.com/zhangxiangliang/herdrchat/compare/v1.3.1...v1.3.2) (2026-11-13)
+
+
+### Bug Fixes
+
+* quote the skill's description so its YAML header parses ([655710c](https://github.com/zhangxiangliang/herdrchat/commit/655710c878340526201d5da8a78451d7064fe6de))
+
 ## [1.3.1](https://github.com/zhangxiangliang/herdrchat/compare/v1.3.0...v1.3.1) (2026-11-13)
 
 
