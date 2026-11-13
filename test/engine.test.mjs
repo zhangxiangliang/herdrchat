@@ -284,6 +284,41 @@ test('an agent with its own API: words typed while it asks go in as your own ans
   done();
 });
 
+test('a terminal that already waits when the bot starts gets its card at the first sweep, once', async () => {
+  const t = terminal('t1', { program: 'fake', agent: true });
+  t.status = { app: 'fake-agent', state: 'blocked', kind: 'permission' };
+  const { chat, hc, engine, done } = await setup([t]);
+  hc.screens.set('s|t1', 'Do you want to proceed?\n❯ 1. Yes\n  2. No\n\nEsc to cancel');
+  engine.tick.sweep();
+  await settle(engine);
+  assert.equal(chat.of('postDialog').length, 1);
+  engine.tick.sweep();
+  await settle(engine);
+  assert.equal(chat.of('postDialog').length, 1, 'not twice');
+  done();
+});
+
+test('after a restart, the card already out for a dialog is known: not posted again', async () => {
+  const t = terminal('t1', { program: 'fake', agent: true });
+  t.status = { app: 'fake-agent', state: 'blocked', kind: 'permission' };
+  const { chat, hc, store, engine, r, done } = await setup([t]);
+  hc.screens.set('s|t1', 'Do you want to proceed?\n❯ 1. Yes\n  2. No\n\nEsc to cancel');
+  engine.tick.sweep();
+  await settle(engine);
+  assert.equal(chat.of('postDialog').length, 1);
+  done();
+  // the bot starts again on the same state.json
+  const again = createEngine({ cfg: { sessions: ['s'] }, chat, hc, readers: r.readers, store, log: quiet, logWarn: quiet, logError: (...a) => { throw new Error(a.join(' ')); }, startedAt: '2026-01-01T00:00:00.000Z', inbox: os.tmpdir(), quick: true });
+  running.add(again);
+  const started = again.start();
+  hc.snapshot('s', [t]);
+  await started;
+  again.tick.sweep();
+  await settle(again);
+  assert.equal(chat.of('postDialog').length, 1, 'the card from before the restart still stands for it');
+  again.stop();
+});
+
 test('the Feishu app keeps the chat contract', async () => {
   const feishu = await import('../lib/chats/feishu/index.mjs');
   const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), 'herdrchat-feishu-contract-'));
