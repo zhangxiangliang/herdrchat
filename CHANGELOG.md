@@ -1,3 +1,16 @@
+# [1.5.0](https://github.com/zhangxiangliang/herdrchat/compare/v1.4.1...v1.5.0) (2026-11-13)
+
+
+### Bug Fixes
+
+* take a moment offline for what it is, not for a revoked /auth ([9998825](https://github.com/zhangxiangliang/herdrchat/commit/9998825c6d1a9b4a4d1af0af9fc2dcf88c9f5450))
+
+
+### Features
+
+* give Feishu cards Feishu's own icons, buttons that fit their words, and state tags ([954e716](https://github.com/zhangxiangliang/herdrchat/commit/954e716088a0bfedfec15cd1b2d228008397f616))
+* read Codex as fully as Claude Code: its log, its approvals, its room name ([16b945e](https://github.com/zhangxiangliang/herdrchat/commit/16b945ef91c31b258209ef33be0fa04097ab411a))
+
 ## [1.4.1](https://github.com/zhangxiangliang/herdrchat/compare/v1.4.0...v1.4.1) (2026-11-13)
 
 
