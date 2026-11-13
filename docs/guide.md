@@ -2,9 +2,11 @@
 
 How herdrchat works and every setting, for when the README is not enough.
 
-herdrchat is a chat front-end for hc: every terminal hc runs, followed and answered in a
-chat app. Feishu is the first (one bot); Slack, Discord and Telegram may follow, on the
-same core (hc events, a reader per agent, dialogs, the overview) with an adapter each.
+herdrchat is a chat front-end for hc: every herdr-app tab, followed and answered in a chat
+app, Feishu or Telegram. Both sit on the same core (hc events, a reader per agent,
+dialogs, the overview), each behind one contract (`docs/architecture.md`); Slack and
+Discord may follow the same way. A profile is one chat app (`HERDRCHAT_CHAT`); to use
+both, run a profile each.
 
 ## Feishu
 
@@ -21,6 +23,24 @@ herdr-app, moved into one Feishu bot:
 Everything comes from hc, so it works the same for Claude Code, codex, pi or any program
 hc shows, on this machine or on a machine hc has added. Nothing is installed in the agents.
 
+## Telegram
+
+A Telegram bot cannot make groups, so it uses topics in your private chat with the bot
+(topic mode must be on in @BotFather):
+
+| herdr-app | Telegram |
+|---|---|
+| a tab | a topic named `<space> / <tab>` in the bot's private chat; type there to talk to it |
+| a space | one topic icon color for all of its topics (Telegram offers six) |
+| a terminal that is gone | its topic stays, its name starting with 🔚 (taken off if it comes back) |
+| herdr itself | the chat's main thread: the overview message, edited in place; `/ls`, `/new`, `/kill`; `/` shows the commands |
+
+What differs: an image goes as its own photo after the text (a message cannot hold one);
+a dialog's free answer is typed in the topic (a message has no text box); there are no
+tags, labels, pins or `/auth` (a bot cannot act as you). Telegram takes about one message
+a second in a chat, so the bot queues and waits as Telegram asks. Setting it up:
+`skills/herdrchat/references/telegram.md`.
+
 ## How it works: hc, plus a reader per agent
 
 **hc is the backbone.** The bot follows `hc events --json` for each session (format:
@@ -36,13 +56,14 @@ each agent a reader reads the agent's own records. The status hc reports names t
 | `status.app` | reader | reads |
 |---|---|---|
 | `claude-code` | `lib/core/readers/claude.mjs` | its transcript: the terminal's foreground pid names the session in `~/.claude/sessions/<pid>.json` |
-| anything else | none (default) | the screen, through `hc read` |
+| anything else | none | nothing by itself; what you type gets its screen in reply |
 
 On another machine, a reader reads the same files through `hc exec --on`. To add an
-agent, write `lib/core/readers/<agent>.mjs` (the contract is at the top of
-`lib/core/readers/index.mjs`) and list it there.
+agent: `docs/architecture.md`, "Adding a harness".
 
-## What a group shows
+## What a room shows
+
+A room is a Feishu group or a Telegram topic.
 
 - A program with a reader:
   - while it works: one "⌛️ Working…" card per turn (then "✅ Worked"), edited every 5
@@ -50,9 +71,12 @@ agent, write `lib/core/readers/<agent>.mjs` (the contract is at the top of
     mid-turn) as **You:**, and each tool it calls as one line (`▸ Bash: Run the tests`).
     It shows the program is alive, as herdr-app does, and since an edit is not a new
     message, the phone does not ring every few seconds;
-  - when the turn ends: its last answer, as a new message. Without `/auth` you are
-    notified when a turn starts and when it is done; with it, groups are muted and only
-    an @ under the answer rings (see "Optional: let the bot act as you").
+  - when the turn ends: its last answer, as a new message. In a space of
+    `HERDR_MUTED_SPACES` (all, by default) only "needs you" and "done" ring: in Feishu
+    the groups are muted (after `/auth`) and an @ under the answer rings; in Telegram
+    the posts go silently and a short reply rings. `HERDR_SILENT_SPACES` rings nothing.
+  - A message another terminal sent with `hc send` shows as **From t7 review**, not as
+    yours (hc wraps it in `<hc from="…">`, for any agent).
   - Images too: ones it looked at (a screenshot, an image file it read) and ones you
     pasted in the terminal, shown in the card.
   - What you sent from the group is not repeated.
@@ -63,15 +87,21 @@ agent, write `lib/core/readers/<agent>.mjs` (the contract is at the top of
   a red "⚠️ Needs you" card. When the screen shows a numbered menu (as Claude Code's
   permission and question dialogs do), the card shows only the dialog, as text, with a
   button per option; a multi-select also has "Next ⇥", a "Type something" option a box to
-  type in, and every card "Esc". Without a menu the card shows the screen and how to
-  answer by typing. Once the dialog is gone the card turns to "✅ Done".
+  type in (Feishu; in Telegram you type the answer in the topic), and every card "Esc".
+  Without a menu the card shows the last lines of the screen and how to answer by typing.
+  Once the dialog is gone the card turns to "✅ Done". A card is posted only for a dialog
+  that still waits: one answered while its screen was read gets none.
 
-## Answering a dialog from Feishu
+## Answering a dialog from the chat
 
-A button presses that option's number key in the terminal (Next presses tab, Esc esc).
+A button presses that option's number key in the terminal (Esc presses esc). A question
+with previews (a box beside its options) takes no number, so there the button moves with
+the arrows from the cursor to that option and presses Enter. In a multi-select, a box is
+ticked on the card only, at once; Next sends them all: each box that differs from the
+screen is pressed, then tab.
 Before it presses anything, the bot reads the screen again and checks that it still
-shows the same dialog (a hash of it, from its top border to its last option) and the
-same option, so an old card can never answer a newer dialog that looks alike. After the
+shows the same dialog (a hash of it, from its top border to its last option, without the
+cursor, the check marks and the preview box) and the same option, so an old card can never answer a newer dialog that looks alike. After the
 key, the card turns into the dialog's next step (a toggled box, the next question, the
 review) or says what was picked. Text you type in the group while it waits goes into its
 "Type something" box when it has one.
@@ -123,13 +153,16 @@ delivered (the terminal has ended) says so plainly.
   recalled), `/new <session> <space>/<tab> [command]` (start one; default `claude`;
   `--cwd <dir>` first to pick its folder), `/kill <session> <address>`, `/auth` (see
   below).
-- In a terminal's group: any text goes to it (marked THINKING once typed in, then OK when
-  the turn that took it is over); an image (alone or in a rich text message) is sent
+- In a terminal's room: any text goes to it (marked once typed in, and again when the
+  turn that took it is over); an image (alone or in a rich text message) is sent
   beside the terminal with `hc put`, on its machine, and its path is typed in with your
   text, so an agent like Claude Code opens it; `/screen`, `/answer <text>` (type into the
-  dialog it waits on, as is), `/esc`. Dialog cards have buttons.
+  dialog it waits on, as is), `/esc`, `/history` (the conversation so far, as a file and
+  a folded post). Dialog cards have buttons.
 
 ## Set up
+
+Telegram: `skills/herdrchat/references/telegram.md`. Feishu:
 
 Steps 1, 2, 5 and 6 are in the Feishu developer console; the herdrchat skill
 (`/herdrchat setup`, see "Skills") does them with an agent, or guides you through them.
@@ -152,6 +185,24 @@ Steps 1, 2, 5 and 6 are in the Feishu developer console; the herdrchat skill
 7. Open `https://applink.feishu.cn/client/bot/open?appId=<app id>` and send anything.
    The bot answers with your `open_id`; put it in `FEISHU_OWNER_OPEN_ID` and run
    `herdrchat start` again.
+8. Once it works: `herdrchat install` (see "Running as a service").
+
+## Running as a service
+
+`herdrchat start` runs the bot in an hc terminal, which ends when that hc core stops,
+and nothing starts it after a reboot. `herdrchat install` makes it a service of the
+system instead: a launchd agent on macOS, a systemd user unit on Linux. It starts at
+login, comes back by itself after a crash, and does not depend on any hc core. It runs
+node and the bot by their full paths with only the variables it needs (hc's path, PATH,
+the profile, the folders), so no agent's variables come along. With it installed,
+`start`, `stop` and `status` go through the service; `herdrchat uninstall` removes it.
+Each profile is its own service (`herdrchat install --profile telegram`).
+
+- After a node upgrade that moves node, run `herdrchat install` again; `herdrchat status`
+  says when the service's node is gone.
+- On Linux, `loginctl enable-linger` keeps it running after you log out.
+- What the process prints before its log is open (a crash at start) goes to
+  `logs/service.out.log` in the state folder.
 
 ## Optional: let the bot act as you
 
@@ -181,9 +232,10 @@ refreshed, the bot says so once and falls back.
 ## Skills
 
 `skills/herdrchat/` is one skill for an agent (Claude Code or another that reads
-`SKILL.md`): `/herdrchat setup`, `status`, `start`, `stop`, `logs`, `auth`, `config`, `fix`
-and `feishu <task>` (the developer console, with Ego Lite from https://lite.ego.app/ or as
-a guided walk-through). Details per part are in `skills/herdrchat/references/`. To use it
+`SKILL.md`): `/herdrchat setup`, `status`, `start`, `stop`, `install`, `logs`, `auth`,
+`config`, `fix`, `feishu <task>` (the developer console, with Ego Lite from
+https://lite.ego.app/ or as a guided walk-through) and `telegram <task>` (the bot, from
+@BotFather to the first topic). Details per part are in `skills/herdrchat/references/`. To use it
 with Claude Code, link it where skills are read, for example
 `ln -s "$PWD/skills/herdrchat" ~/.claude/skills/herdrchat`.
 
@@ -191,7 +243,7 @@ with Claude Code, link it where skills are read, for example
 
 Everything the bot logs goes to `logs/<YYYY-MM-DD>.log` in the state folder (one file a
 day, the last 14 kept) as `<time> <LEVEL> <text>`, besides its terminal: `grep ERROR
-~/.local/state/herdrchat/default/logs/*.log` finds
+~/.local/state/herdrchat/<profile>/logs/*.log` finds
 what went wrong, a retry that recovered is a `WARN`, and a crash leaves its stack there
 before it is started again. Tokens and secrets are never logged. The
 skill's `references/ops.md` explains the lines.
@@ -199,12 +251,15 @@ skill's `references/ops.md` explains the lines.
 ## Limits
 
 - Narration blocks are a condensed version of the text Claude showed, not the exact words.
-- Only Claude Code has a reader so far. codex, pi and the rest get their screen, at turn
-  end only, until each has a reader.
+- Only Claude Code has a reader so far. codex, pi and the rest post nothing by themselves
+  until each has a reader; what you type to them gets their screen in reply.
 - Only text, images and rich text are passed on; files, stickers and the rest are not.
 - An image that fails to upload three times is not sent; the group says so and why.
 - Feishu takes tag names of at most 16 characters; a longer session or machine name is cut
   at its last `-`, `_` or `.` that fits (`build-agent-server` becomes `build-agent`).
 - Avatars are drawn with `sips`, so only on macOS; elsewhere groups keep Feishu's default.
+- Telegram: a bot cannot mute a topic for you; a topic you mute in Telegram stays fully
+  quiet, "needs you" included. Closing a topic is documented for supergroups only, so an
+  ended topic is marked by its name.
 - Dialog buttons come from the screen's numbered menu; a dialog drawn some other way gets
   the screen and `/answer`, `/esc`.

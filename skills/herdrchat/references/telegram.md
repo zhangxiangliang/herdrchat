@@ -39,6 +39,9 @@ Do these in order; the user does the Telegram steps, you check each one.
    takes about one message a second in a chat, so twenty tabs take twenty seconds. A new
    topic gets the conversation before it (`HERDR_HISTORY`); `/history` in a topic posts it
    again.
+7. **Make it a service.** Once it works: `herdrchat install --profile telegram`. It then
+   starts at login and comes back by itself after a crash, whatever happens to the hc
+   cores; `herdrchat status --profile telegram` says it runs as the service.
 
 ## What rings
 
