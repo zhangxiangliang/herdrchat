@@ -21,10 +21,19 @@ test('HERDR_BOT_TAGS and HERDR_USER_TAGS: on or off, with a default', () => {
 });
 
 test('places: one folder pair per profile under XDG, or one folder of your choice', () => {
-  assert.deepEqual(placesOf({}, '/h'), { profile: 'default', configDir: '/h/.config/herdrchat/default', stateDir: '/h/.local/state/herdrchat/default', terminal: 'herdrchat' });
-  assert.deepEqual(placesOf({ HERDRCHAT_PROFILE: 'work' }, '/h'), { profile: 'work', configDir: '/h/.config/herdrchat/work', stateDir: '/h/.local/state/herdrchat/work', terminal: 'herdrchat-work' });
-  assert.deepEqual(placesOf({ XDG_CONFIG_HOME: '/c', XDG_STATE_HOME: '/s' }, '/h'), { profile: 'default', configDir: '/c/herdrchat/default', stateDir: '/s/herdrchat/default', terminal: 'herdrchat' });
-  assert.deepEqual(placesOf({ HERDRCHAT_HOME: '/my/hc', HERDRCHAT_PROFILE: 'work' }, '/h'), { profile: 'work', configDir: '/my/hc', stateDir: '/my/hc/state', terminal: 'herdrchat-work' });
+  assert.deepEqual(placesOf({}, '/h'), { profile: 'default', id: 'default', configDir: '/h/.config/herdrchat/default', stateDir: '/h/.local/state/herdrchat/default', terminal: 'herdrchat' });
+  assert.deepEqual(placesOf({ HERDRCHAT_PROFILE: 'work' }, '/h'), { profile: 'work', id: 'work', configDir: '/h/.config/herdrchat/work', stateDir: '/h/.local/state/herdrchat/work', terminal: 'herdrchat-work' });
+  const xdg = placesOf({ XDG_CONFIG_HOME: '/c', XDG_STATE_HOME: '/s' }, '/h');
+  assert.equal(xdg.configDir, '/c/herdrchat/default');
+  assert.equal(xdg.stateDir, '/s/herdrchat/default');
+  const moved = placesOf({ HERDRCHAT_HOME: '/my/hc', HERDRCHAT_PROFILE: 'work' }, '/h');
+  assert.equal(moved.configDir, '/my/hc');
+  assert.equal(moved.stateDir, '/my/hc/state');
+  // a moved setup never shares a terminal or service name with the usual one
+  assert.match(moved.id, /^work-[0-9a-f]{6}$/);
+  assert.equal(moved.terminal, `herdrchat-${moved.id}`);
+  assert.match(xdg.terminal, /^herdrchat-default-[0-9a-f]{6}$/);
+  assert.notEqual(placesOf({ HERDRCHAT_HOME: '/other' }, '/h').id, placesOf({ HERDRCHAT_HOME: '/my/hc' }, '/h').id);
   assert.deepEqual(placesOf({ HERDRCHAT_HOME: '', XDG_CONFIG_HOME: '' }, '/h').configDir, '/h/.config/herdrchat/default');
   assert.throws(() => placesOf({ HERDRCHAT_PROFILE: '../x' }, '/h'), /letters, digits/);
 });

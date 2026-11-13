@@ -3,7 +3,7 @@ import test from 'node:test';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { createLog } from '../lib/core/log.mjs';
+import { createLog, localDay } from '../lib/core/log.mjs';
 
 test('the log writes one file a day with levels, and drops files past 14 days', () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'herdrchat-log-test-'));
@@ -17,7 +17,7 @@ test('the log writes one file a day with levels, and drops files past 14 days', 
     log.info('hello');
     log.info('two\nlines');
     log.error('broke', new Error('boom'));
-    const today = new Date().toISOString().slice(0, 10);
+    const today = localDay();
     const text = fs.readFileSync(path.join(dir, `${today}.log`), 'utf8');
     assert.match(text, / INFO hello\n/);
     assert.match(text, / INFO two ⏎ lines\n/);
@@ -46,7 +46,7 @@ test('a crash is written and onCrash runs before the process exits', async () =>
   });
   assert.equal(code, 1);
   assert.equal(fs.readFileSync(said, 'utf8'), 'boom');
-  const text = fs.readFileSync(path.join(dir, `${new Date().toISOString().slice(0, 10)}.log`), 'utf8');
+  const text = fs.readFileSync(path.join(dir, `${localDay()}.log`), 'utf8');
   assert.match(text, / ERROR uncaught: Error: boom/);
   fs.rmSync(dir, { recursive: true, force: true });
 });
@@ -62,7 +62,7 @@ test('a library error printed as a plain log line is logged as WARN', async () =
   } finally {
     console.log = realLog;
   }
-  const text = fs.readFileSync(path.join(dir, `${new Date().toISOString().slice(0, 10)}.log`), 'utf8');
+  const text = fs.readFileSync(path.join(dir, `${localDay()}.log`), 'utf8');
   assert.match(text, / WARN \[error\]:/);
   assert.match(text, / INFO \[feishu\] connected/);
   fs.rmSync(dir, { recursive: true, force: true });

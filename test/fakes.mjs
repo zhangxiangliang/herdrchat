@@ -20,6 +20,7 @@ export function fakeChat() {
     of: (name) => calls.filter((c) => c.name === name),
     ready: () => true,
     help: [],
+    roomWord: 'room',
     liveBytes: 20000,
     split: (text) => [text],
     start: (handlers) => { chat.handlers = handlers; record('start'); },
@@ -76,7 +77,9 @@ export function fakeHc() {
     send: async (session, address, text, opts) => { sent.push({ session, address, text, opts }); },
     keys: async (session, address, names) => { pressed.push({ session, address, names }); },
     put: async (session, address, file) => `/remote/${file.split('/').pop()}`,
-    run: async () => JSON.stringify({ address: 't99' }),
+    named: [],
+    run: async (session, opts) => { hc.ran = opts; return JSON.stringify({ address: 't99' }); },
+    nameTab: async (tabId, name) => { hc.named.push({ tabId, name }); return true; },
     kill: async () => {},
     // test side
     snapshot(session, list) {

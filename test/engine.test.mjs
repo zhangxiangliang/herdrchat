@@ -442,3 +442,13 @@ test('Telegram pins the waiting dialog card and unpins it once answered', async 
     globalThis.fetch = realFetch;
   }
 });
+
+test('/new names the new tab in herdr-app as asked, by the tab id it gave the terminal', async () => {
+  const { chat, hc, engine, done } = await setup([terminal('t1', { space: 'proj' })]);
+  await engine.onMessage({ room: null, where: 'dm', message: 'm-in', text: '/new s proj/daily', images: [] });
+  await settle(engine);
+  assert.equal(hc.ran.labels.where, 'proj / daily');
+  assert.deepEqual(hc.named, [{ tabId: hc.ran.labels['herdr.tab'], name: 'daily' }]);
+  assert.match(chat.of('reply').at(-1).args[1], /Started `claude` as `t99`.*Its room appears/);
+  done();
+});
