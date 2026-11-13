@@ -169,6 +169,24 @@ test('an agent\'s dialog gets one card, and a click presses the option it shows'
   done();
 });
 
+test('a multi-select sent from a form presses only the boxes that differ, then Next', async () => {
+  const t = terminal('t1', { program: 'fake', agent: true });
+  const { chat, hc, engine, done } = await setup([t]);
+  const screen = (a, b, c) => `${'─'.repeat(20)}\nWhich colors?\n❯ 1. [${a}] Red\n  2. [${b}] Green\n  3. [${c}] Blue\n`;
+  hc.screens.set('s|t1', screen(' ', ' ', '✔'));
+  t.status = { app: 'fake-agent', state: 'blocked', kind: 'question' };
+  hc.change('s', 'status', t);
+  hc.turn('s', 't1', 'blocked');
+  await settle(engine);
+  const [, , value, message] = chat.of('postDialog')[0].args; // the card, by the id the chat app gave it
+  const pressed = hc.pressed.length;
+  // on the card: Red ticked, Blue unticked, Green left as it was
+  const out = await engine.onAction({ value: { ...value, pick: 'tab' }, message, ticks: { 1: true, 2: false, 3: false } });
+  assert.deepEqual(hc.pressed.slice(pressed).map((p) => p.names.join()), ['1', '3', 'tab']);
+  assert.match(out.toast.text, /Red/);
+  done();
+});
+
 test('a click on a card the screen no longer matches turns that card into what it asks now', async () => {
   const t = terminal('t1', { program: 'fake', agent: true });
   const { chat, hc, engine, done } = await setup([t]);

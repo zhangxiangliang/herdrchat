@@ -110,3 +110,10 @@ test('a question with previews says it takes arrows, and where the cursor is', a
   assert.equal(plain.beside, false);
   assert.equal(plain.cursor, 1);
 });
+
+test('the same dialog keeps its key when the terminal is resized and it wraps elsewhere', () => {
+  const wide = `${'─'.repeat(40)}\nShall I run the long command that cleans the build folder now?\n❯ 1. Yes\n  2. No\n`;
+  const narrow = `${'─'.repeat(20)}\nShall I run the long command that\ncleans the build folder now?\n❯ 1. Yes\n  2. No\n`;
+  assert.equal(menuOf(wide.replace('─'.repeat(40), '─'.repeat(20))).key, menuOf(narrow).key);
+  assert.notEqual(menuOf(narrow).key, menuOf(narrow.replace('build', 'cache')).key, 'other words are another dialog');
+});

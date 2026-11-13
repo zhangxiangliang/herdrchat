@@ -43,3 +43,22 @@ test('tagName keeps short names and cuts long ones at a word', () => {
   assert.equal(tagName('build-agent-server'), 'build-agent');
   assert.equal(tagName('averyveryverylongname'), 'averyveryverylon');
 });
+
+test('a multi-select card puts its boxes in a form as checkers that make no call, and Next submits it', async () => {
+  const { menuCard, ticksOf } = await import('../lib/chats/feishu/client.mjs');
+  const menu = { multi: true, free: null, options: [{ n: 1, label: 'Red', checked: true }, { n: 2, label: 'Green', checked: false }, { n: 3, label: 'Submit', checked: null }] };
+  const card = menuCard({ title: 'T', markdown: 'Which?', menu, value: { s: 's', a: 't1', k: 'k' } });
+  const form = card.body.elements.find((e) => e.tag === 'form' && e.name === 'boxes');
+  const checkers = form.elements.filter((e) => e.tag === 'checker');
+  assert.deepEqual(checkers.map((c) => [c.name, c.checked]), [['box_1', true], ['box_2', false]]);
+  assert.ok(checkers.every((c) => !c.behaviors), 'a checker with no behaviors is ticked on the phone only');
+  const next = form.elements.find((e) => e.tag === 'button');
+  assert.equal(next.form_action_type, 'submit');
+  assert.equal(next.behaviors[0].value.pick, 'tab');
+  assert.ok(card.body.elements.some((e) => e.tag === 'button' && /Submit/.test(e.text.content)), 'an option with no box stays a button');
+  const names = JSON.stringify(card).match(/"name":"[^"]+"/g);
+  assert.equal(new Set(names).size, names.length, 'every name in the card is unique');
+  assert.deepEqual(ticksOf({ box_1: true, box_2: 'false', box_3: 'true' }), { 1: true, 2: false, 3: true });
+  assert.equal(ticksOf({ answer: 'x' }), null);
+  assert.equal(ticksOf(undefined), null);
+});
