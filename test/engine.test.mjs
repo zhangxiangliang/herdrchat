@@ -2,12 +2,16 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import test from 'node:test';
+import test, { after } from 'node:test';
 import { createEngine } from '../lib/core/engine.mjs';
 import { checkChat } from '../lib/chats/contract.mjs';
 import { fakeChat, fakeHc, fakeReaders, fakeStore, terminal } from './fakes.mjs';
 
 const quiet = () => {};
+
+// every core a test starts is stopped at the end, even when an assertion failed first
+const running = new Set();
+after(() => running.forEach((engine) => engine.stop()));
 
 // A core on the fakes, one session "s", started and given `list` as its first snapshot.
 async function setup(list = []) {
@@ -17,6 +21,8 @@ async function setup(list = []) {
   const r = fakeReaders();
   const inbox = fs.mkdtempSync(path.join(os.tmpdir(), 'herdrchat-engine-test-'));
   const engine = createEngine({ cfg: { sessions: ['s'] }, chat, hc, readers: r.readers, store, log: quiet, logWarn: quiet, logError: (...a) => { throw new Error(a.join(' ')); }, startedAt: '2026-01-01T00:00:00.000Z', inbox, quick: true });
+  running.add(engine);
+  running.add(engine);
   const started = engine.start();
   hc.snapshot('s', list);
   await started;
@@ -198,6 +204,7 @@ test('a new room gets the conversation before it: all of it as a file, the newes
   r.queue('t1', before);
   r.queue('t1', [{ role: 'ai', text: 'after the start', at: '2026-01-02T00:00:00.000Z', id: 'n1', end: true }]);
   const engine = createEngine({ cfg: { sessions: ['s'] }, chat, hc, readers: r.readers, store, log: quiet, logWarn: quiet, logError: (...a) => { throw new Error(a.join(' ')); }, startedAt: '2026-01-01T00:00:00.000Z', inbox: os.tmpdir(), quick: true });
+  running.add(engine);
   const started = engine.start();
   hc.snapshot('s', [terminal('t1', { program: 'fake', agent: true })]);
   await started;
@@ -237,6 +244,7 @@ test('HERDR_HISTORY leaves out what it does not name', async () => {
   const r = fakeReaders();
   r.queue('t1', [{ role: 'you', text: 'old', at: '2025-12-31T10:00:00.000Z', id: 'o1' }]);
   const engine = createEngine({ cfg: { sessions: ['s'], history: { file: false, folded: true } }, chat, hc, readers: r.readers, store: fakeStore(), log: quiet, logWarn: quiet, logError: quiet, startedAt: '2026-01-01T00:00:00.000Z', inbox: os.tmpdir(), quick: true });
+  running.add(engine);
   const started = engine.start();
   hc.snapshot('s', [terminal('t1', { program: 'fake', agent: true })]);
   await started;
@@ -323,5 +331,22 @@ test('a dialog answered while its screen was read gets no card', async () => {
   await settle(engine);
   assert.equal(chat.of('postDialog').length, 0);
   assert.ok(!chat.of('post').some((c) => /Needs you/.test(c.args[1])), 'no "needs you" with a screen that waits on nothing');
+  done();
+});
+
+test('a message another terminal sent with hc send shows who sent it, not "You"', async () => {
+  const { chat, hc, engine, r, done } = await setup([terminal('t1', { program: 'fake', agent: true })]);
+  r.queue('t1', [
+    { role: 'you', text: '<hc from="t2g master" reach="hc send t2g when done or stuck">Review x.rs</hc>', at: '2026-01-02T00:00:00.000Z', id: 'a' },
+    { role: 'you', text: 'and also this <hc from="t7 review">Two bugs</hc>', at: '2026-01-02T00:00:01.000Z', id: 'b' },
+    { role: 'ai', text: 'On it.', at: '2026-01-02T00:00:02.000Z', id: 'c', end: true },
+  ]);
+  hc.turn('s', 't1', 'done');
+  await settle(engine);
+  // what came before the answer is in the turn's live card, the answer a post
+  const text = [...chat.of('postCard').map((c) => c.args[1].markdown), ...chat.of('editCard').map((c) => c.args[1].markdown), ...chat.of('post').map((c) => c.args[1])].join('\n');
+  assert.match(text, /\*\*From t2g master\*\* _\(answer: hc send t2g when done or stuck\)_\n> Review x\.rs/);
+  assert.match(text, /\*\*You:\*\*\n> and also this\n\n\*\*From t7 review\*\*\n> Two bugs/);
+  assert.doesNotMatch(text, /<hc /);
   done();
 });
