@@ -74,4 +74,4 @@ without muting each topic by hand.
 | `herdrchat start` says it did not reach its chat app | wrong token, or no network | check with getMe (step 5) |
 | log: `telegram poll: ... 409` | another copy polls the same token | `herdrchat stop --profile telegram`, find the other one (another machine?), start once |
 | log: `too fast, waiting N s` | Telegram's flood limit; the bot waits as told | nothing; it catches up |
-| a click answers "This dialog is gone" | the bot restarted after the card was posted (button ids live in memory) | answer the newest card, or in the terminal |
+| a click answers "This dialog is gone" | the card is older than the last 300 dialog cards | answer the newest card, or in the terminal |
