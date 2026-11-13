@@ -30,3 +30,9 @@ test('only a running agent is mirrored, whatever its status still says', () => {
   assert.equal(agentOf({ status: { app: 'claude-code' } })?.app, 'claude-code');
   assert.equal(agentOf({ status: null, foreground: { name: 'zsh' } }), null);
 });
+
+test('an unreachable machine is told apart from other hc errors', async () => {
+  const { isUnavailable } = await import('../lib/hc.mjs');
+  assert.equal(isUnavailable(new Error('hc get srv/t5 --json: {"error":{"kind":"unavailable","message":"srv is unreachable"}}')), true);
+  assert.equal(isUnavailable(new Error('hc get t5 --json: {"error":{"kind":"not_found","message":"no terminal"}}')), false);
+});

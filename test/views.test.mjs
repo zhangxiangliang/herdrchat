@@ -66,3 +66,15 @@ test('what the cores cannot tell is left to the caller', () => {
   assert.equal(v.owns('main', 'server/inner/t1'), null); // a machine behind a machine
   assert.equal(v.identity('x', 't1'), null);
 });
+
+test('a terminal behind a link that is down is not reachable; one here always is', () => {
+  const down = new Map([
+    ['a', { self: 'core-a', links: [link('server', 'core-srv', 'unreachable')] }],
+    ['b', { self: 'core-b', links: [link('server', 'core-srv')] }],
+  ]);
+  const v = coreViews(['a', 'b'], down);
+  assert.equal(v.reachable('a', 'server/t5'), false);
+  assert.equal(v.reachable('b', 'server/t5'), true);
+  assert.equal(v.reachable('a', 't1'), true);
+  assert.equal(v.reachable('x', 'server/t5'), true); // nothing known: not held back
+});

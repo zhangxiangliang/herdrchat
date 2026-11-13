@@ -20,7 +20,7 @@ import { CONFIG_FILE, STATE_DIR, loadConfig, makeDirs, readState, writeState } f
 import { advance, startCursor } from '../lib/cursor.mjs';
 import { followEvents } from '../lib/events.mjs';
 import { bindTag, chunk, createChat, createClient, createTag, recallMessage, replyMention, setChatAvatar, tagName, unbindTag, doneCard, downloadImage, menuCard, messageParts, renameChat, sendCard, sendMarkdown, startEvents, textCard, updateCard, uploadImage } from '../lib/feishu.mjs';
-import { cores, getTerminal, hc, keys, machineOf, machines, put, run, screenTail, send, plainError, splitWhere, tidyScreen } from '../lib/hc.mjs';
+import { cores, getTerminal, hc, keys, machineOf, machines, put, run, screenTail, send, isUnavailable, plainError, splitWhere, tidyScreen } from '../lib/hc.mjs';
 import { menuOf } from '../lib/menu.mjs';
 import { createLog } from '../lib/log.mjs';
 import { agentOf, readerFor } from '../lib/readers/index.mjs';
@@ -86,6 +86,22 @@ const views = new Map(); // session -> followEvents handle (its live terminal re
 // which views are the same terminal, and only one of them is followed. They are read at
 // start and again every SWEEP_MS, as machines come and go.
 let topology = coreViews(cfg.sessions, new Map());
+
+// A machine that cannot be reached (its link down, or hc says "unavailable") is said
+// once when it goes and once when it is back; meanwhile its terminals are not checked,
+// so the log does not fill with the same error every few seconds.
+const unreachable = new Set(); // "<session>|<machine>"
+function machineDown(session, machine, why) {
+  const id = `${session}|${machine}`;
+  if (unreachable.has(id)) return;
+  unreachable.add(id);
+  logWarn(`machine ${machine} (seen from ${session}) is unreachable; its terminals wait until it is back${why ? `: ${why}` : ''}`);
+}
+function reachable(session, address) {
+  const machine = machineOf(address)?.split('/')[0];
+  return !machine || (!unreachable.has(`${session}|${machine}`) && topology.reachable(session, address));
+}
+
 async function readCores() {
   const found = new Map();
   for (const session of cfg.sessions) {
@@ -96,6 +112,13 @@ async function readCores() {
     }
   }
   topology = coreViews(cfg.sessions, found);
+  for (const [session, info] of found) {
+    for (const link of info.links) {
+      const id = `${session}|${link.name}`;
+      if (link.state !== 'connected') machineDown(session, link.name, link.state);
+      else if (unreachable.delete(id)) log(`machine ${link.name} (seen from ${session}) is back`);
+    }
+  }
 }
 const coresRead = readCores();
 
@@ -130,7 +153,10 @@ const ready = Promise.all([coresRead, ...[...firstSnapshot.values()].map((x) => 
 const lanes = new Map(); // terminal key -> its last queued work
 function later(session, address, label, fn) {
   const k = key(session, address);
-  const next = (lanes.get(k) || ready).then(fn).catch((err) => logError(`${label} ${address}:`, err));
+  const next = (lanes.get(k) || ready).then(fn).catch((err) => {
+    if (isUnavailable(err) && machineOf(address)) machineDown(session, machineOf(address).split('/')[0], plainError(err));
+    else logError(`${label} ${address}:`, err);
+  });
   lanes.set(k, next);
   next.then(() => { if (lanes.get(k) === next) lanes.delete(k); });
   return next;
@@ -930,7 +956,7 @@ async function onCardAction(data) {
 // Shown terminals this session runs whose program has a reader, with that reader.
 function readable(session) {
   return [...(views.get(session)?.terminals.values() || [])]
-    .filter((record) => shownWhere(record) && handles(session, record.address))
+    .filter((record) => shownWhere(record) && handles(session, record.address) && reachable(session, record.address))
     .map((record) => ({ record, reader: agentOf(record) }))
     .filter((x) => x.reader);
 }
