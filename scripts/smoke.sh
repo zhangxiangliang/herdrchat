@@ -67,7 +67,8 @@ expect "status token" 'token +missing' "$out"
 
 step "pair before the bot runs says to start it"
 if out="$(herdrchat pair 2>&1)"; then fail "pair with no bot running exited 0"; fi
-expect "pair needs the bot" 'not running.*herdrchat start' "$out"
+if command -v hc >/dev/null; then expect "pair needs the bot" 'not running.*herdrchat start' "$out"
+else expect "pair needs herdr" 'hc is not on PATH.*herdr' "$(printf '%s' "$out" | tr '\n' ' ')"; fi
 
 step "start names what is missing"
 if out="$(herdrchat start 2>&1)"; then fail "start with empty settings exited 0"; fi
