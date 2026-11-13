@@ -1,3 +1,17 @@
+# [1.2.0](https://github.com/zhangxiangliang/herdrchat/compare/v1.1.2...v1.2.0) (2026-11-13)
+
+
+### Bug Fixes
+
+* keep Telegram's dialog buttons across a restart ([c210173](https://github.com/zhangxiangliang/herdrchat/commit/c2101736efee28f4284f5d1d9605143acdb8845c))
+* pick an option in a question with previews by the arrows and Enter ([4742f0c](https://github.com/zhangxiangliang/herdrchat/commit/4742f0c6c21b6cd06322a032bca22573e26cb8ea))
+
+
+### Features
+
+* run herdrchat as a service that starts at login and comes back after a crash ([b6b4450](https://github.com/zhangxiangliang/herdrchat/commit/b6b445027a738fd19d70f9a6d94f057a504c5b72))
+* show a message another terminal sent with hc send as from that terminal ([2bc3b7a](https://github.com/zhangxiangliang/herdrchat/commit/2bc3b7af2c6e8d15a2523d53737f835f10b94f9f))
+
 ## [1.1.2](https://github.com/zhangxiangliang/herdrchat/compare/v1.1.1...v1.1.2) (2026-11-13)
 
 
