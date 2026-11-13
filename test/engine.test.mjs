@@ -350,3 +350,16 @@ test('a message another terminal sent with hc send shows who sent it, not "You"'
   assert.doesNotMatch(text, /<hc /);
   done();
 });
+
+test('a click in a question with previews moves with the arrows and presses Enter', async () => {
+  const t = terminal('t1', { program: 'fake', agent: true });
+  const { chat, hc, engine, done } = await setup([t]);
+  hc.screens.set('s|t1', ['────────────────────', ' ☐ Release', '│ Post it?', '❯ 1. Post it    ┌──────────────┐', '                                  │ preview', '  2. Not yet                       └──────────────'].join('\n'));
+  t.status = { app: 'fake-agent', state: 'blocked', kind: 'question' };
+  hc.turn('s', 't1', 'blocked');
+  await settle(engine);
+  const [, , value, message] = chat.of('postDialog')[0].args;
+  await engine.onAction({ value: { ...value, pick: 2, label: 'Not yet' }, message });
+  assert.deepEqual(hc.pressed.at(-1).names, ['down', 'enter']);
+  done();
+});

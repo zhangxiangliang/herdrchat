@@ -98,3 +98,15 @@ test('a question with previews: the box beside the options is neither label nor 
   assert.equal(a.key, b.key, 'moving the cursor changes the preview, not the dialog');
   assert.match(a.text, /^☐ Release\nThe tests passed\. Post the updates\?$/);
 });
+
+test('a question with previews says it takes arrows, and where the cursor is', async () => {
+  const { menuOf } = await import('../lib/core/menu.mjs');
+  const screen = ['────────────────────', ' ☐ Release', '│ Post it?', '  1. Post it    ┌──────────────┐', '    (Recommended)                 │ 1. a numbered preview line', '❯ 2. Not yet                       └──────────────', 'Enter to select · ↑/↓ to navigate'].join('\n');
+  const m = menuOf(screen);
+  assert.equal(m.beside, true);
+  assert.equal(m.cursor, 2);
+  assert.deepEqual(m.options.map((o) => o.label), ['Post it', 'Not yet']);
+  const plain = menuOf('──────────\nProceed?\n❯ 1. Yes\n  2. No');
+  assert.equal(plain.beside, false);
+  assert.equal(plain.cursor, 1);
+});
