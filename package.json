@@ -1,6 +1,6 @@
 {
   "name": "herdrchat",
-  "version": "1.3.3",
+  "version": "1.4.0",
   "description": "The chat client for hc (herdr): see and answer every hc terminal from Feishu or Telegram",
   "repository": {
     "type": "git",

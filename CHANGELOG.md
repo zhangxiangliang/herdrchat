@@ -1,3 +1,16 @@
+# [1.4.0](https://github.com/zhangxiangliang/herdrchat/compare/v1.3.3...v1.4.0) (2026-11-13)
+
+
+### Bug Fixes
+
+* never leave a dialog with no card to answer ([d74cfdd](https://github.com/zhangxiangliang/herdrchat/commit/d74cfdd51176edc059e26c15bceb55eefe229cdf))
+* tick a multi-select on the Feishu card with no loading, and keep a dialog's key through a resize ([00c3635](https://github.com/zhangxiangliang/herdrchat/commit/00c36350b6dd90de8ef69c99eaa076c1f8ebcf9f))
+
+
+### Features
+
+* set herdrchat up by answering a few questions, and pair the owner by code ([5654505](https://github.com/zhangxiangliang/herdrchat/commit/5654505e54ad678c3f933d111504b91a901ea977))
+
 ## [1.3.3](https://github.com/zhangxiangliang/herdrchat/compare/v1.3.2...v1.3.3) (2026-11-13)
 
 
