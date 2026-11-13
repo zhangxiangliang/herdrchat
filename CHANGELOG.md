@@ -1,3 +1,15 @@
+# [1.6.0](https://github.com/zhangxiangliang/herdrchat/compare/v1.5.0...v1.6.0) (2026-11-13)
+
+
+### Bug Fixes
+
+* give a card to a dialog that waited before the bot started, and keep it through a restart ([41a5c40](https://github.com/zhangxiangliang/herdrchat/commit/41a5c40b4ddd18a8dbea368aef5fd18909e89e69))
+
+
+### Features
+
+* read OpenCode through its own API: its conversation, its questions and permissions ([3793c12](https://github.com/zhangxiangliang/herdrchat/commit/3793c12641943fde6c174ce2b5ce3d897bdf017a))
+
 # [1.5.0](https://github.com/zhangxiangliang/herdrchat/compare/v1.4.1...v1.5.0) (2026-11-13)
 
 
