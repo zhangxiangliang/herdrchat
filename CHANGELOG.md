@@ -1,3 +1,11 @@
+## [1.2.1](https://github.com/zhangxiangliang/herdrchat/compare/v1.2.0...v1.2.1) (2026-11-13)
+
+
+### Bug Fixes
+
+* hold a message sent while a dialog waits, and never drop it ([a1924cd](https://github.com/zhangxiangliang/herdrchat/commit/a1924cd3ddceca787f78272ae225e8bc20cb6f80))
+* never lose a message: keep held ones, catch up on Feishu, say where none goes ([1b8871e](https://github.com/zhangxiangliang/herdrchat/commit/1b8871eb8f98a6e0baff7456339e28af0d0f4ff1))
+
 # [1.2.0](https://github.com/zhangxiangliang/herdrchat/compare/v1.1.2...v1.2.0) (2026-11-13)
 
 
