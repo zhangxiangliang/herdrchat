@@ -1,3 +1,15 @@
+# [1.3.0](https://github.com/zhangxiangliang/herdrchat/compare/v1.2.1...v1.3.0) (2026-11-13)
+
+
+### Bug Fixes
+
+* wait a minute for the chat app at start, and log a library's errors as warnings ([8cf676d](https://github.com/zhangxiangliang/herdrchat/commit/8cf676dcf60463b469078b22a4f34d6366e32a34))
+
+
+### Features
+
+* align Feishu and Telegram: pin the waiting card in Telegram, take Feishu's bot menu ([5a4a04f](https://github.com/zhangxiangliang/herdrchat/commit/5a4a04fd92a8d8152b8c193a957d6570965d05fe))
+
 ## [1.2.1](https://github.com/zhangxiangliang/herdrchat/compare/v1.2.0...v1.2.1) (2026-11-13)
 
 
