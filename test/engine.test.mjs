@@ -390,3 +390,34 @@ test('a message that comes while the status still looks blocked but hc says it w
   assert.equal(hc.sent.at(-1)?.text, 'hello');
   done();
 });
+
+test('a held message survives a restart and goes in when the new bot finds it no longer waits', async () => {
+  const t = terminal('t1', { program: 'fake', agent: true });
+  const first = await setup([t]);
+  const room = rooms(first.store)['s|t1'].chat;
+  first.hc.screens.set('s|t1', '──────────\nRun it?\n❯ 1. Yes\n  2. No');
+  t.status = { app: 'fake-agent', state: 'blocked', kind: 'permission' };
+  await first.engine.onMessage({ room, where: room, message: 'm-in', text: 'held across a restart', images: [] });
+  assert.equal(first.hc.sent.length, 0);
+  first.done();
+  // a new bot on the same state, the dialog answered meanwhile
+  const chat = fakeChat();
+  const hc = fakeHc();
+  const r = fakeReaders();
+  const engine = createEngine({ cfg: { sessions: ['s'] }, chat, hc, readers: r.readers, store: first.store, log: quiet, logWarn: quiet, logError: quiet, startedAt: '2026-01-01T00:00:00.000Z', inbox: os.tmpdir(), quick: true });
+  running.add(engine);
+  const started = engine.start();
+  hc.snapshot('s', [{ ...t, status: { app: 'fake-agent', state: 'idle' } }]);
+  await started;
+  await settle(engine);
+  assert.equal(hc.sent.at(-1)?.text, 'held across a restart');
+  assert.equal(first.store.read().waiting?.['s|t1'], undefined);
+  engine.stop();
+});
+
+test('a message in a room no terminal has says so', async () => {
+  const { chat, engine, done } = await setup([terminal('t1')]);
+  await engine.onMessage({ room: 'room-made-by-hand', where: 'room-made-by-hand', message: 'm-in', text: 'hello?', images: [] });
+  assert.match(chat.of('reply').at(-1).args[1], /^Not delivered: this room is not a terminal's/);
+  done();
+});
