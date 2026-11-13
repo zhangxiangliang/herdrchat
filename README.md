@@ -12,47 +12,111 @@ Every terminal hc runs, in the chat app you already use: Feishu or Telegram.
 
 </div>
 
-herdr-app has official phone and desktop apps. But to use them away from your desk, your
-phone has to reach the machine that runs hc, so you first need a VPN or a private network.
-And on a small phone screen, working with an agent is clumsy.
+[herdr](https://herdr.dev) runs your coding agents (Claude Code, codex, pi, …) in
+terminals that stay alive: **hc** (herdr-core) keeps them running, **herdr-app** shows
+them in spaces and tabs. herdr-app has phone and desktop apps, but your phone has to
+reach the machine that runs hc, so you first need a VPN or a private network, and working
+with an agent on a small phone screen is clumsy.
 
-Your chat app is already on your phone. herdrchat connects out to it by itself, so there
-is nothing to set up on your network: no public IP, no VPN. Each herdr-app tab becomes a
-Feishu group, or a topic in your private chat with the Telegram bot. You read what the
-agent says while it works, tap buttons to answer its questions, send and receive images,
-and see all terminals on one overview. A new room starts with the conversation so far.
-Your phone rings only when an agent needs you or is done. It works with any agent hc
-runs.
+herdrchat puts them in a chat app instead. It connects out to Feishu or Telegram by
+itself, so there is nothing to set up on your network: no public IP, no VPN. Each
+herdr-app tab gets its own Feishu group, or a topic in your private chat with the
+Telegram bot. You read what the agent says while it works, tap buttons to answer its
+questions, send and receive images, and see all terminals in one overview. A new group or
+topic starts with the conversation so far, and your phone rings only when an agent needs
+you or is done (on Feishu once you have sent `/auth` to the bot; on Telegram right away).
 
-Use one app or both at once (a profile each). Slack and Discord may follow.
+Claude Code is mirrored fully. Other agents show their screen when you type to them,
+until herdrchat learns to read their conversations too.
+
+## You need
+
+- **hc** running on this machine, with at least one session ([herdr.dev](https://herdr.dev)).
+- **Node.js 20** or newer, on **macOS or Linux**.
+- **Feishu**: a Feishu team (not Lark) where you may create a custom app and publish it.
+  **Telegram**: a Telegram account. Use one app, or both at once.
+
+A few words used below: a **session** is one hc core (its terminals); a **space** and a
+**tab** are how herdr-app groups terminals; a **profile** is one herdrchat setup for one
+chat app (`default` unless you name another).
 
 ## Install
 
 ```bash
-npx skills add zhangxiangliang/herdrchat   # the skill, for your agent (pick Symlink)
-npm install -g herdrchat                   # the herdrchat command it runs
+npm install -g herdrchat                    # the herdrchat command
+npx skills add zhangxiangliang/herdrchat    # optional: the skill, for your coding agent
 ```
 
-Then ask your agent:
+The skill teaches your coding agent (Claude Code, Codex, …) to set herdrchat up and look
+after it for you. When the `skills` tool asks Copy or Symlink, pick Symlink, so updates
+reach the agent.
 
-| Command | What it does |
+## Set up
+
+**With your agent:** ask it `/herdrchat setup`. It asks which chat app, then walks you
+through everything, clicking in the Feishu console for you when it can.
+
+**By hand:**
+
+```bash
+herdrchat init --chat telegram   # or --chat feishu; it prints where the settings file is
+# fill in that file (each line says where its value comes from), then:
+herdrchat start                  # starts it and waits until it is connected
+herdrchat install                # once it works: start at login, come back after a crash
+```
+
+The steps for each app (making the Feishu app, or the Telegram bot) are in the
+[guide](docs/guide.md#set-up-telegram).
+
+## Use
+
+In your chat app: type in a terminal's group or topic to talk to it; tap a card's buttons
+to answer a question. In the direct chat with the bot: `/ls` for the overview, `/new` to
+start a terminal, `/kill` to end one.
+
+| Ask your agent | What it does |
 |---|---|
 | `/herdrchat setup` | Sets everything up with you: the Feishu app or the Telegram bot, the settings, the first start. |
 | `/herdrchat status` | Says whether it runs, and what is wrong if anything is. |
 | `/herdrchat fix` | Finds the cause of a problem and fixes it. |
-| `/herdrchat config` | Changes a setting: which terminals, which groups stay quiet, tags. |
-| `/herdrchat feishu <task>` | Does a task in the Feishu developer console for you. |
+| `/herdrchat config` | Changes a setting: which terminals, which ones stay quiet, tags. |
+| `/herdrchat start`, `stop`, `install`, `logs`, `auth` | The same as the commands below, with checks first. |
+| `/herdrchat feishu <task>` | Does a task in the Feishu developer console (with the [Ego Lite](https://lite.ego.app/) browser, or step by step). |
 | `/herdrchat telegram <task>` | The Telegram bot, from @BotFather to the first topic. |
 
-On the command line, without an agent: `herdrchat init`, `start`, `stop`, `status`, `logs`;
-`herdrchat install` runs it as a service that starts at login and comes back after a
-crash. Add `--profile <name>` for a second chat app.
+On the command line: `herdrchat init`, `start`, `stop`, `status`, `logs`, `install`,
+`uninstall`, `version`; `herdrchat` alone lists them. Add `--profile <name>` to run a
+second chat app beside the first.
+
+## Update
+
+```bash
+npm install -g herdrchat@latest && npx skills add zhangxiangliang/herdrchat
+herdrchat start                  # for each profile: it keeps the old code until then
+```
 
 ## Where things are
 
 Settings in `~/.config/herdrchat/<profile>/config.env`, everything the bot writes in
-`~/.local/state/herdrchat/<profile>/` (the profile is `default` unless you name one).
-Updating or reinstalling herdrchat never touches them.
+`~/.local/state/herdrchat/<profile>/`. Updating or reinstalling herdrchat never touches
+them. `herdrchat status` prints both.
+
+## Privacy and safety
+
+- What your terminals show goes to Feishu's or Telegram's servers. Telegram bot chats are
+  not end-to-end encrypted.
+- Only the owner set in `config.env` can type into your terminals; everyone else is
+  ignored.
+- Keep the Feishu app secret or the Telegram bot token like a password: whoever has it
+  can drive your terminals.
+- On Feishu, the bot's tags are visible to your whole team (`HERDR_BOT_TAGS=off` turns
+  them off).
+
+## Remove
+
+`herdrchat uninstall` (for each profile), `npm rm -g herdrchat`, delete
+`~/.config/herdrchat` and `~/.local/state/herdrchat`, then delete the Feishu app or the
+Telegram bot (@BotFather, `/deletebot`).
 
 How it works and every setting: [docs/guide.md](docs/guide.md).
 

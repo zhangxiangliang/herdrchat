@@ -53,9 +53,10 @@ that applies or publishes something, and read it.
 ### Create the app (first setup only)
 
 Developer console home -> create a custom app (企业自建应用) with a name, a description
-and an icon -> Add capabilities -> Bot. Then import the scopes, set events and
-callbacks, start the bot (`herdrchat start`) and publish. The "Set up" section of `docs/guide.md`
-lists the same steps from the repo's side.
+and an icon -> Add capabilities -> Bot. Then import the scopes, have the user fill
+`config.env` (`herdrchat init`), start the bot (`herdrchat start`: the long-connection
+check below needs it running), set events and callbacks, and publish. "Set up: Feishu"
+in `docs/guide.md` lists the same steps from the user's side.
 
 ### Import scopes
 

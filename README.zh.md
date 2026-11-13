@@ -12,42 +12,96 @@ hc 跑的每个终端，都能在你常用的聊天软件里看到和回复：�
 
 </div>
 
-herdr-app 官方有手机端和电脑端。但想在外面用，手机得能连到跑 hc 的机器，
-所以要先折腾 VPN 或内网环境；而且在手机的小屏幕上和 agent 交互，体验并不好。
+[herdr](https://herdr.dev) 让你的编程 agent（Claude Code、codex、pi……）跑在不会断的终端里：
+**hc**（herdr-core）让它们一直跑着，**herdr-app** 按空间和标签页把它们展示出来。herdr-app 有手机端和电脑端，
+但手机得能连到跑 hc 的机器，所以要先折腾 VPN 或内网；而且在手机的小屏幕上和 agent 交互，体验并不好。
 
-聊天软件本来就在你手机上。herdrchat 自己主动连过去，网络上什么都不用配：不要公网 IP，也不要 VPN。
+herdrchat 把它们搬进聊天软件。它自己主动连到飞书或 Telegram，网络上什么都不用配：不要公网 IP，也不要 VPN。
 herdr-app 的每个标签页，在飞书里是一个群，在 Telegram 里是和 bot 私聊中的一个话题：
 agent 干活时说的话实时可见，它问你的问题点按钮就能回答，图片双向都能传，所有终端汇总在一张总览里。
-新开的群或话题会先补上之前的对话。只有 agent 需要你、或者做完的时候手机才会响。
-hc 能跑的 agent 都能用，我们自己用下来非常顺畅。
+新开的群或话题会先补上之前的对话；只有 agent 需要你、或者做完的时候手机才会响
+（飞书要先给 bot 发一次 `/auth`；Telegram 直接就是这样）。
 
-可以只用一个，也可以两个同时用（各开一个 profile）。后面有精力的话，也会考虑接入 Slack、Discord。
+目前 Claude Code 是完整同步的。其他 agent 在你给它发消息时会回一次屏幕内容，
+等 herdrchat 学会读它们的对话记录以后，也会完整同步。
+
+## 需要什么
+
+- 这台机器上在跑 **hc**，至少有一个 session（[herdr.dev](https://herdr.dev)）。
+- **Node.js 20** 或更新版本，系统是 **macOS 或 Linux**。
+- **飞书**：一个能创建并发布企业自建应用的飞书团队（暂不支持 Lark 国际版）。
+  **Telegram**：一个 Telegram 账号。可以只用一个，也可以两个同时用。
+
+下面会用到几个词：**session** 是一个 hc 核心（以及它的终端）；**空间**和**标签页**是 herdr-app 给终端分组的方式；
+**profile** 是 herdrchat 对一个聊天软件的一套配置（不指定就叫 `default`）。
 
 ## 安装
 
 ```bash
-npx skills add zhangxiangliang/herdrchat   # 给 agent 用的 skill（选 Symlink）
-npm install -g herdrchat                   # skill 要用到的 herdrchat 命令
+npm install -g herdrchat                    # herdrchat 命令
+npx skills add zhangxiangliang/herdrchat    # 可选：给编程 agent 用的 skill
 ```
 
-然后对你的 agent 说：
+skill 会教你的编程 agent（Claude Code、Codex……）替你配置和照看 herdrchat。
+`skills` 工具问你选 Copy 还是 Symlink 时，选 Symlink，以后更新才会同步给 agent。
 
-| 命令 | 做什么 |
+## 配置
+
+**让 agent 帮你：** 对它说 `/herdrchat setup`。它会先问你用哪个聊天软件，然后一步步带你配好，
+能自动点的飞书后台操作它会替你点。
+
+**自己动手：**
+
+```bash
+herdrchat init --chat telegram   # 或者 --chat feishu；它会告诉你配置文件在哪
+# 填好那个文件（每一行上面都写了值从哪来），然后：
+herdrchat start                  # 启动，并等到真的连上
+herdrchat install                # 跑通以后：装成系统服务，开机自动启动，崩溃自动重启
+```
+
+每个聊天软件的具体步骤（建飞书应用，或者建 Telegram bot）在[详细说明](docs/guide.md#set-up-telegram)里（英文）。
+
+## 使用
+
+在聊天软件里：在某个终端的群或话题里打字，就是在跟它说话；点卡片上的按钮回答它的问题。
+在和 bot 的私聊里：`/ls` 看总览，`/new` 启动一个终端，`/kill` 结束一个终端。
+
+| 对 agent 说 | 做什么 |
 |---|---|
 | `/herdrchat setup` | 和你一起从零配好：飞书应用或 Telegram bot、配置、第一次启动。 |
 | `/herdrchat status` | 告诉你它在不在跑，有问题的话问题在哪。 |
 | `/herdrchat fix` | 找出问题的原因并修好。 |
-| `/herdrchat config` | 改配置：接哪些终端、哪些群保持安静、标签。 |
-| `/herdrchat feishu <任务>` | 替你在飞书开发者后台完成操作。 |
+| `/herdrchat config` | 改配置：接哪些终端、哪些保持安静、标签。 |
+| `/herdrchat start`、`stop`、`install`、`logs`、`auth` | 和下面的命令一样，只是会先检查。 |
+| `/herdrchat feishu <任务>` | 替你在飞书开发者后台完成操作（用 [Ego Lite](https://lite.ego.app/) 浏览器，或者一步步带你点）。 |
 | `/herdrchat telegram <任务>` | Telegram bot：从 @BotFather 一直到第一个话题。 |
 
-不用 agent 也可以直接在命令行里用：`herdrchat init`、`start`、`stop`、`status`、`logs`；
-`herdrchat install` 把它装成系统服务，开机自动启动，崩溃后自动重启。第二个聊天软件加 `--profile <名字>`。
+命令行：`herdrchat init`、`start`、`stop`、`status`、`logs`、`install`、`uninstall`、`version`；
+只输入 `herdrchat` 会列出全部。加上 `--profile <名字>`，可以再开一个聊天软件。
+
+## 更新
+
+```bash
+npm install -g herdrchat@latest && npx skills add zhangxiangliang/herdrchat
+herdrchat start                  # 每个 profile 都要：在这之前它还跑着旧代码
+```
 
 ## 文件在哪
 
-配置在 `~/.config/herdrchat/<profile>/config.env`，bot 写的东西都在 `~/.local/state/herdrchat/<profile>/`（没指定 profile 时就是 `default`）。
-更新或重装 herdrchat 都不会动它们。
+配置在 `~/.config/herdrchat/<profile>/config.env`，bot 写的东西都在 `~/.local/state/herdrchat/<profile>/`。
+更新或重装 herdrchat 都不会动它们。`herdrchat status` 会把这两个位置都打印出来。
+
+## 隐私和安全
+
+- 终端里显示的内容会发到飞书或 Telegram 的服务器上。Telegram 的 bot 聊天不是端到端加密的。
+- 只有 `config.env` 里设置的 owner 能往你的终端里输入；其他人发的都会被忽略。
+- 飞书的 App Secret、Telegram 的 bot token 要像密码一样保管：谁拿到了，谁就能操作你的终端。
+- 飞书里 bot 打的标签，你整个团队都看得见（`HERDR_BOT_TAGS=off` 可以关掉）。
+
+## 卸载
+
+每个 profile 运行一次 `herdrchat uninstall`，然后 `npm rm -g herdrchat`，删掉 `~/.config/herdrchat`
+和 `~/.local/state/herdrchat`，最后删掉飞书应用或 Telegram bot（在 @BotFather 里用 `/deletebot`）。
 
 工作原理和全部配置：[docs/guide.md](docs/guide.md)（英文）。
 

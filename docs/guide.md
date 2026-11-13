@@ -8,17 +8,33 @@ dialogs, the overview), each behind one contract (`docs/architecture.md`); Slack
 Discord may follow the same way. A profile is one chat app (`HERDRCHAT_CHAT`); to use
 both, run a profile each.
 
+Words used here:
+
+| Word | Meaning |
+|---|---|
+| hc, herdr-core | the program that runs terminals and keeps them alive ([herdr.dev](https://herdr.dev)) |
+| herdr-app | its desktop and phone app, which shows the terminals in spaces and tabs |
+| session | one hc core and its terminals (`HC_SESSION`); `ls ~/.local/state/herdr-core` lists those on a machine |
+| space, tab | how herdr-app groups terminals in its sidebar |
+| room | where one tab is mirrored: a Feishu group or a Telegram topic |
+| direct chat | your private chat with the bot: the overview and the commands |
+| profile | one herdrchat setup for one chat app, with its own settings and state (`default` unless named) |
+| reader | the part that reads an agent's own conversation log (Claude Code so far) |
+
 ## Feishu
 
 herdr-app, moved into one Feishu bot:
 
 | herdr-app | Feishu |
 |---|---|
-| a terminal it shows (it has a `where` label) | a group named `<space> / <tab>`, tagged with the session; type there to talk to it. A tab only numbered (`2`) is named by the terminal's title instead (whatever the program sets, for any agent; Claude Code sets its session name or topic), else its hc name |
+| a tab | a group named `<space> / <tab>`, tagged with its session; type there to talk to it |
 | a space | one avatar for all of its groups: the space's first letter on a color of its own |
 | a terminal on another machine | a group named `<space> / <tab>`, tagged with the machine, made once |
 | a terminal that is gone | its group stays, with its history, tagged `ended` (untagged if it comes back) |
-| herdr itself | the direct chat with the bot: an overview card (every terminal's state, what waits for you first, each a link to its group), kept up to date in place; `/ls`, `/new`, `/kill` |
+| the sidebar | the direct chat with the bot: an overview card (every terminal's state, what waits for you first, each a link to its group), kept up to date in place; `/ls`, `/new`, `/kill` |
+
+A tab herdr-app only numbered (`2`) is named after the terminal's title instead (what the
+program sets; Claude Code sets its session name or topic), else its hc name.
 
 Everything comes from hc, so it works the same for Claude Code, codex, pi or any program
 hc shows, on this machine or on a machine hc has added. Nothing is installed in the agents.
@@ -26,18 +42,19 @@ hc shows, on this machine or on a machine hc has added. Nothing is installed in 
 ## Telegram
 
 A Telegram bot cannot make groups, so it uses topics in your private chat with the bot
-(topic mode must be on in @BotFather):
+(topic mode must be on: BotFather's mini app, the Open button in the BotFather chat, then
+the bot, Threaded Mode):
 
 | herdr-app | Telegram |
 |---|---|
 | a tab | a topic named `<space> / <tab>` in the bot's private chat; type there to talk to it |
 | a space | one topic icon color for all of its topics (Telegram offers six) |
 | a terminal that is gone | its topic stays, its name starting with 🔚 (taken off if it comes back) |
-| herdr itself | the chat's main thread: the overview message, edited in place; `/ls`, `/new`, `/kill`; `/` shows the commands |
+| the sidebar | the chat's main thread: the overview message, edited in place; `/ls`, `/new`, `/kill`; `/` shows the commands |
 
 What differs is in "Feishu and Telegram side by side" below. Telegram takes about one
 message a second in a chat, so the bot queues and waits as Telegram asks. Setting it up:
-`skills/herdrchat/references/telegram.md`.
+"Set up: Telegram" below.
 
 ## Feishu and Telegram side by side
 
@@ -79,16 +96,21 @@ In the profile's `config.env` (`herdrchat status` prints where it is):
 | `TELEGRAM_BOT_TOKEN` | Telegram | (required) | the bot's token from @BotFather |
 | `TELEGRAM_OWNER_ID` | Telegram | (empty) | you; the bot tells you yours when you message it |
 
+Where a profile's files are: settings in `~/.config/herdrchat/<profile>/config.env`,
+what the bot writes (state, logs, your `/auth` token) in
+`~/.local/state/herdrchat/<profile>/`; `herdrchat status` prints both.
+
 In the environment (not `config.env`): `HERDRCHAT_PROFILE` (or `--profile`) picks the
-profile; `HERDRCHAT_HOME` puts a profile's `config.env` and state in one folder;
-`XDG_CONFIG_HOME` and `XDG_STATE_HOME` move the usual folders. `herdrchat start` and
-`herdrchat install` hand the bot hc's full path as `HERDRCHAT_HC`. A setting changed in
-`config.env` takes effect at the next `herdrchat start`.
+profile; `HERDRCHAT_HOME` puts a profile's `config.env` and state in one folder of your
+choice (give each profile its own); `XDG_CONFIG_HOME` and `XDG_STATE_HOME` move the usual
+folders. A setup in a moved folder gets its own hc terminal and service name, so trying
+one never touches the usual one. A key set in the environment wins over `config.env`. A
+setting changed in `config.env` takes effect at the next `herdrchat start`.
 
 ## How it works: hc, plus a reader per agent
 
-**hc is the backbone.** The bot follows `hc events --json` for each session (format:
-herdr-core `schema/README.md`, "Events"). From hc it learns which terminals exist, where
+**hc is the backbone.** The bot follows `hc events --json` for each session (its format:
+`hc schema`). From hc it learns which terminals exist, where
 herdr-app shows them, their status, and when a turn ends (`turn` event: the status left
 `working`). Typing from a group goes through `hc send`.
 
@@ -103,7 +125,7 @@ each agent a reader reads the agent's own records. The status hc reports names t
 | anything else | none | nothing by itself; what you type gets its screen in reply |
 
 On another machine, a reader reads the same files through `hc exec --on`. To add an
-agent: `docs/architecture.md`, "Adding a harness".
+agent: `docs/architecture.md`, "Adding an agent".
 
 ## What a room shows
 
@@ -206,32 +228,50 @@ delivered (the terminal has ended) says so plainly.
   dialog it waits on, as is), `/esc`, `/history` (the conversation so far, as a file and
   a folded post). Dialog cards have buttons.
 
-## Set up
+## Set up: Telegram
 
-Telegram: `skills/herdrchat/references/telegram.md`. Feishu:
+1. In Telegram, message **@BotFather**: `/newbot`, give it a name and a username ending
+   in `bot`. It answers with a token; keep it private.
+2. Turn on topics for the bot: in the BotFather chat tap **Open** (its mini app), pick the
+   bot, turn on **Threaded Mode**. Without it the bot cannot make topics.
+3. `herdrchat init --chat telegram` (with `--profile <name>` too if you also run Feishu)
+   prints where its `config.env` is. Fill in `TELEGRAM_BOT_TOKEN` and `HERDR_SESSIONS`
+   (`ls ~/.local/state/herdr-core` lists your hc sessions).
+4. `herdrchat start`, then message the bot anything. It answers with the line to add,
+   `TELEGRAM_OWNER_ID=<your id>`; add it and run `herdrchat start` again. One topic per
+   tab appears in your private chat with the bot (Telegram takes about one message a
+   second, so many tabs take a moment).
+5. Once it works: `herdrchat install` (see "Running as a service").
 
-Steps 1, 2, 5 and 6 are in the Feishu developer console; the herdrchat skill
-(`/herdrchat setup`, see "Skills") does them with an agent, or guides you through them.
+If Telegram is your only app, use the default profile with `--chat telegram`. Use
+`--profile <name>` only for a second chat app beside the first.
 
-1. Feishu developer console: create a custom app (企业自建应用), add the bot ability.
-2. Permissions (batch import): `im:message:send_as_bot`, `im:message.p2p_msg:readonly`,
-   `im:message.group_msg`, `im:chat:create`, `im:chat:update`,
-   `im:message.reactions:write_only`, `im:resource` (images out),
-   `im:message:readonly` (images in), `im:tag:write`,
-   `im:biz_entity_tag_relation:write` (group tags).
-3. `herdrchat init` makes `~/.config/herdrchat/default/config.env`; fill the app ID, the
-   secret and `HERDR_SESSIONS`: the hc sessions on the machine the bot runs on that herdr-app shows
-   (the machines they connect to come along, as in herdr-app). See "Where things are"
-   for other places and more than one profile.
-4. `herdrchat start` (the console checks for a live connection in the next step).
+## Set up: Feishu
+
+Feishu only: Lark (the international version) is not supported yet. Steps 1, 2, 5 and 6
+are in the Feishu developer console (`https://open.feishu.cn/app`); the herdrchat skill
+(`/herdrchat setup`) can do them with you.
+
+1. Create a custom app (企业自建应用) and add the bot ability (机器人).
+2. Permissions: import the scopes listed in `skills/herdrchat/references/feishu.md`,
+   "Scopes this bot uses" (there as JSON for the batch import): sending as the bot,
+   reading the messages sent to it, making and renaming groups, reactions, images both
+   ways, and group tags.
+3. `herdrchat init` prints where its `config.env` is. Fill in the app's App ID and App
+   Secret (the app's 凭证与基础信息 page) and `HERDR_SESSIONS` (`ls
+   ~/.local/state/herdr-core` lists your hc sessions).
+4. `herdrchat start`. The bot must be running for the next step: the console checks for
+   a live connection.
 5. Events and callbacks (事件与回调): for events, choose the long connection mode (长连接)
    and add `im.message.receive_v1`; for callbacks (回调配置), choose the long connection
    mode too and add `card.action.trigger` (the dialog buttons).
-6. Publish a version.
+6. Publish a version. If the page does not say 本次发布免审核, your team's admin must
+   approve it first.
 7. Open `https://applink.feishu.cn/client/bot/open?appId=<app id>` and send anything.
-   The bot answers with your `open_id`; put it in `FEISHU_OWNER_OPEN_ID` and run
-   `herdrchat start` again.
-8. Optional: the bot menu in the direct chat (`skills/herdrchat/references/feishu.md`,
+   The bot answers with the line to add, `FEISHU_OWNER_OPEN_ID=<your open_id>`; add it
+   and run `herdrchat start` again. One group per tab appears.
+8. Optional: send `/auth` to the bot so it can mute its groups for you ("Optional: let
+   the bot act as you"), and add the bot menu (`skills/herdrchat/references/feishu.md`,
    "The bot menu").
 9. Once it works: `herdrchat install` (see "Running as a service").
 
@@ -283,18 +323,18 @@ refreshed, the bot says so once and falls back.
 `SKILL.md`): `/herdrchat setup`, `status`, `start`, `stop`, `install`, `logs`, `auth`,
 `config`, `fix`, `feishu <task>` (the developer console, with Ego Lite from
 https://lite.ego.app/ or as a guided walk-through) and `telegram <task>` (the bot, from
-@BotFather to the first topic). Details per part are in `skills/herdrchat/references/`. To use it
-with Claude Code, link it where skills are read, for example
-`ln -s "$PWD/skills/herdrchat" ~/.claude/skills/herdrchat`.
+@BotFather to the first topic). Details per part are in `skills/herdrchat/references/`.
+Install it with `npx skills add zhangxiangliang/herdrchat` (README); from a clone you can
+link it instead, for example `ln -s "$PWD/skills/herdrchat" ~/.claude/skills/herdrchat`.
 
 ## Logs
 
-Everything the bot logs goes to `logs/<YYYY-MM-DD>.log` in the state folder (one file a
-day, the last 14 kept) as `<time> <LEVEL> <text>`, besides its terminal: `grep ERROR
-~/.local/state/herdrchat/<profile>/logs/*.log` finds
-what went wrong, a retry that recovered is a `WARN`, and a crash leaves its stack there
-before it is started again. Tokens and secrets are never logged. The
-skill's `references/ops.md` explains the lines.
+Everything the bot logs goes to `logs/<YYYY-MM-DD>.log` in the state folder, one file a
+day by your local date (the last 14 kept), as `<time> <LEVEL> <text>` with the time in
+UTC. `herdrchat logs` shows today's (`--errors` only what went wrong, `--day 2026-01-31`
+another day); a retry that recovered is a `WARN`, and a crash leaves its stack there
+before it is started again. Tokens and secrets are never logged. The skill's
+`references/ops.md` explains the lines.
 
 ## Limits
 
@@ -303,6 +343,7 @@ skill's `references/ops.md` explains the lines.
   until each has a reader; what you type to them gets their screen in reply.
 - Only text, images and rich text are passed on; files, stickers and the rest are not.
 - An image that fails to upload three times is not sent; the group says so and why.
+- Feishu only, not Lark (the international version) yet: the bot talks to open.feishu.cn.
 - Feishu takes tag names of at most 16 characters; a longer session or machine name is cut
   at its last `-`, `_` or `.` that fits (`build-agent-server` becomes `build-agent`).
 - Avatars are drawn with `sips`, so only on macOS; elsewhere groups keep Feishu's default.

@@ -1,33 +1,36 @@
 # herdrchat architecture
 
-herdrchat has two kinds of plug-ins that grow over time: **chat apps** (Feishu now,
-Telegram next, then Slack and Discord) and **harnesses** (Claude Code now, then codex
-and pi). The core between them knows neither. This page says where everything is and
+herdrchat has two kinds of plug-ins that grow over time: **chat apps** (Feishu and
+Telegram now, Slack and Discord later) and **agents**, each read by its reader (Claude
+Code now, then codex and pi). The core between them knows neither. This page says where everything is and
 how to add one of each.
 
 ## The parts
 
 ```
 bin/
-  cli.mjs                  herdrchat init|start|stop|status|logs
+  cli.mjs                  herdrchat init|start|stop|status|logs|install|uninstall|run|version
   herdrchat.mjs            wires the parts: config, log, the chat app, the core
 lib/
-  core/                    the same for every chat app and every harness
+  core/                    the same for every chat app and every agent
     engine.mjs             follows hc, keeps one room per herdr-app tab, posts what agents
                            say, dialogs and clicks, what you type, the overview
-    hc.mjs  events.mjs     hc: commands, and its live event stream
+    hc.mjs  events.mjs     hc: commands, its live event stream, the sessions on a machine
     views.mjs              which view of a terminal is followed (hc core id + tN)
     cursor.mjs  home.mjs   what was posted already; reading an agent's log files
     menu.mjs               a dialog's options, read from the screen
     config.mjs  log.mjs    config.env, state.json, the daily log
-    readers/               one reader per harness (the contract is in index.mjs)
+    service.mjs            herdrchat as a launchd or systemd service
+    readers/               one reader per agent (the contract is in index.mjs)
   chats/
     contract.mjs           what a chat app gives the core, and the check for it
     index.mjs              the list of chat apps
-    feishu/                index.mjs (the contract), client.mjs, overview.mjs, ...
+    feishu/                index.mjs (the contract), client.mjs, overview.mjs, avatar.mjs, userauth.mjs
+    telegram/              index.mjs (the contract), client.mjs, format.mjs
 test/
   fakes.mjs                a fake chat app, a fake hc and a fake reader
-  engine.test.mjs          the core, run on the fakes
+  engine.test.mjs          the core, run on the fakes; the apps' contracts
+  *.test.mjs               the parts one by one
 ```
 
 The rules that keep it this way:
@@ -61,7 +64,7 @@ The rules that keep it this way:
    `HERDRCHAT_CHAT=<app>` in that profile's config.env), so the running Feishu bot is
    not touched.
 
-## Adding a harness
+## Adding an agent
 
 1. Read how the agent keeps its conversation on disk, from its docs or its source: where
    the log is, how to find the one for a running terminal, how a turn's last answer is
