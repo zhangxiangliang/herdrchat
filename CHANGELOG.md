@@ -1,3 +1,10 @@
+# [1.10.0](https://github.com/zhangxiangliang/herdrchat/compare/v1.9.0...v1.10.0) (2026-11-14)
+
+
+### Features
+
+* show the branch, context, and 5-hour and 7-day limits under each post ([3123a90](https://github.com/zhangxiangliang/herdrchat/commit/3123a900ab84eba4a263f57b50bb6c6d25746318))
+
 # [1.9.0](https://github.com/zhangxiangliang/herdrchat/compare/v1.8.1...v1.9.0) (2026-11-14)
 
 
