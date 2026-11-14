@@ -110,7 +110,7 @@ test('installing puts herdrchat\'s hook in beside what is there, once, keeps a c
   assert.deepEqual(JSON.parse(fs.readFileSync(path.join(h.dir, '.claude', 'settings.json.herdrchat-backup'), 'utf8')), mine);
   assert.equal(fs.existsSync(path.join(h.dir, '.codex')), false, 'an agent that is not set up here is left alone');
   assert.equal(fs.statSync(places.hook).mode & 0o777, 0o700);
-  assert.deepEqual(hooksStatus(places).map((a) => [a.agent, a.there, a.in]), [['claude', true, true], ['codex', false, false]]);
+  assert.deepEqual(hooksStatus(places).map((a) => [a.agent, a.there, a.in]), [['claude', true, true], ['codex', false, false], ['pi', false, false]]);
   uninstallHooks(places);
   assert.deepEqual(JSON.parse(fs.readFileSync(path.join(h.dir, '.claude', 'settings.json'), 'utf8')), mine);
   assert.equal(fs.existsSync(places.hook), false);
@@ -157,19 +157,22 @@ esac
       const labels = fs.existsSync(path.join(h.dir, 'labels')) ? fs.readFileSync(path.join(h.dir, 'labels'), 'utf8').trim().split('\n') : [];
       resolve({ stdout, labels, left, done: h.done });
     });
+    child.stdin.on('error', () => {}); // a hook that leaves at once (outside hc) reads nothing: EPIPE
     child.stdin.end(JSON.stringify({ tool_name: 'Bash', tool_input: { command: 'ls' } }));
     steps(h.dir);
   });
 }
 const until = async (check) => { for (let i = 0; i < 100 && !check(); i += 1) await new Promise((ok) => setTimeout(ok, 50)); };
 const reqDir = (dir) => path.join(dir, '.local/state/herdrchat/asks/req');
+// the requests written so far: a .json.tmp is one the hook is still writing, as herdrchat skips it
+const requests = (dir) => (fs.existsSync(reqDir(dir)) ? fs.readdirSync(reqDir(dir)).filter((f) => f.endsWith('.json')) : []);
 
 test('the hook leaves the request, labels its terminal, prints the answer written for it, and cleans up', async () => {
   let request;
   const r = await runHook({
     steps: async (dir) => {
-      await until(() => fs.existsSync(reqDir(dir)) && fs.readdirSync(reqDir(dir)).length);
-      const file = fs.readdirSync(reqDir(dir))[0];
+      await until(() => requests(dir).length);
+      const file = requests(dir)[0];
       request = JSON.parse(fs.readFileSync(path.join(reqDir(dir), file), 'utf8'));
       fs.writeFileSync(path.join(dir, '.local/state/herdrchat/asks/ans', file), '{"hookSpecificOutput":{"hookEventName":"PermissionRequest","decision":{"behavior":"allow"}}}');
     },
@@ -210,8 +213,8 @@ test('Codex through its background service runs the hook with no terminal: the r
     agent: 'codex',
     env: { HC_TERMINAL_ID: '' },
     steps: async (dir) => {
-      await until(() => fs.existsSync(reqDir(dir)) && fs.readdirSync(reqDir(dir)).length);
-      const file = fs.readdirSync(reqDir(dir))[0];
+      await until(() => requests(dir).length);
+      const file = requests(dir)[0];
       request = JSON.parse(fs.readFileSync(path.join(reqDir(dir), file), 'utf8'));
       fs.writeFileSync(path.join(dir, '.local/state/herdrchat/asks/ans', file), '{"hookSpecificOutput":{"hookEventName":"PermissionRequest","decision":{"behavior":"deny","message":"no"}}}');
     },
@@ -230,4 +233,44 @@ test('a request with no terminal is this Codex terminal\'s when it is of its ses
   assert.equal(codex.isOf({ request: { transcript_path: `/Users/x/${file}` } }, file), true);
   assert.equal(codex.isOf({ request: { session_id: 'th-2' } }, file), false);
   assert.equal(codex.isOf({ request: { session_id: 'th-1' } }, null), false);
+});
+
+test('Pi gets herdrchat\'s extension as a file of its own: installed, refreshed after an update, and taken out', async () => {
+  const { refreshHook } = await import('../lib/core/hooks.mjs');
+  const h = home();
+  const places = placesOfHooks({}, h.dir);
+  fs.mkdirSync(path.join(h.dir, '.pi', 'agent'), { recursive: true });
+  const pi = places.agents.find((a) => a.agent === 'pi');
+  assert.equal(pi.file, path.join(h.dir, '.pi', 'agent', 'extensions', 'herdrchat.js'));
+  const done = installHooks(['pi'], places);
+  assert.deepEqual(done, [`Pi: ${pi.file}`], 'only the extension: no hook script for Pi');
+  assert.equal(fs.existsSync(places.hook), false);
+  assert.match(fs.readFileSync(pi.file, 'utf8'), /herdrchat\.pi-session=/);
+  assert.deepEqual(hooksStatus(places).find((a) => a.agent === 'pi').in, true);
+  fs.writeFileSync(pi.file, '// an older one');
+  assert.match(refreshHook(places), /herdrchat\.js/);
+  assert.equal(refreshHook(places), null);
+  assert.deepEqual(uninstallHooks(places), [`Pi: ${pi.file}`]);
+  assert.equal(fs.existsSync(pi.file), false);
+  h.done();
+});
+
+test('the Pi extension labels its hc terminal with its pid and session file, and does nothing outside hc', async () => {
+  const { default: extension } = await import('../lib/hooks/pi-session.js');
+  const calls = [];
+  let onStart;
+  extension({ on: (name, fn) => { if (name === 'session_start') onStart = fn; }, exec: async (cmd, args) => { calls.push([cmd, ...args]); return { code: 0 }; } });
+  const ctx = { sessionManager: { getSessionFile: () => '/h/.pi/agent/sessions/--w--/a.jsonl' } };
+  const saved = process.env.HC_TERMINAL_ID;
+  try {
+    delete process.env.HC_TERMINAL_ID;
+    await onStart({}, ctx);
+    assert.deepEqual(calls, [], 'outside hc: nothing');
+    process.env.HC_TERMINAL_ID = 't7';
+    await onStart({ reason: 'new' }, ctx);
+    assert.deepEqual(calls, [['hc', 'label', 't7', `herdrchat.pi-session=${process.pid} /h/.pi/agent/sessions/--w--/a.jsonl`]]);
+  } finally {
+    if (saved === undefined) delete process.env.HC_TERMINAL_ID;
+    else process.env.HC_TERMINAL_ID = saved;
+  }
 });
