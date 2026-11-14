@@ -1,3 +1,15 @@
+## [1.14.1](https://github.com/zhangxiangliang/herdrchat/compare/v1.14.0...v1.14.1) (2026-11-14)
+
+
+### Bug Fixes
+
+* a message an agent never starts on gets its screen, and Codex's box is emptied ([d3a1cbc](https://github.com/zhangxiangliang/herdrchat/commit/d3a1cbc342b3a7f13157ff955b586885edb7c44b))
+* a new Claude session with nothing said yet is not an error ([9e31c4f](https://github.com/zhangxiangliang/herdrchat/commit/9e31c4f980ab26b35a48644c4653d624d5f3f9d5))
+* post a terminal's last words and the ended notice in its room ([0ae3c81](https://github.com/zhangxiangliang/herdrchat/commit/0ae3c8104ab2052fb93a5186eba9b7f1d21bf658))
+* post only what came on the screen after your message ([94def71](https://github.com/zhangxiangliang/herdrchat/commit/94def7187f79cbb21e4c6631b6b48b55a06749d5))
+* quote a post by its first line, not by its footer ([34b5194](https://github.com/zhangxiangliang/herdrchat/commit/34b51949af5e952e8b1deda578e0bd5ed1d1ce4e))
+* ring "done" only for an answer, and keep what a click picked on its card ([2303511](https://github.com/zhangxiangliang/herdrchat/commit/2303511dad82f80b2192db7dd09e2a57c7edc587))
+
 # [1.14.0](https://github.com/zhangxiangliang/herdrchat/compare/v1.13.0...v1.14.0) (2026-11-14)
 
 
