@@ -1,3 +1,10 @@
+# [1.7.0](https://github.com/zhangxiangliang/herdrchat/compare/v1.6.0...v1.7.0) (2026-11-14)
+
+
+### Features
+
+* answer Claude Code's and Codex's dialogs through their own hook ([b0077ba](https://github.com/zhangxiangliang/herdrchat/commit/b0077ba6e60f5777c0ab3074c93d268cf9cc2e73))
+
 # [1.6.0](https://github.com/zhangxiangliang/herdrchat/compare/v1.5.0...v1.6.0) (2026-11-13)
 
 
