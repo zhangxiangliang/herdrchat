@@ -898,3 +898,25 @@ test('a harness with a long name goes by its short one in the footer', async () 
   assert.equal(chat.of('post').at(-1).args[2].footer, 'fk · m');
   done();
 });
+
+test('a message the agent took as its own command, with nothing in its records, gets the screen, not silence', async () => {
+  const { chat, hc, store, engine, r, done } = await setup([terminal('t1', { program: 'fake', agent: true })]);
+  const room = rooms(store)['s|t1'].chat;
+  await engine.onMessage({ room, where: room, message: 'm-in', text: '/update please', images: [] });
+  hc.screens.set('s|t1', '⏺ Unknown command: /update\n❯ ');
+  hc.turn('s', 't1', 'done');
+  await settle(engine);
+  assert.match(chat.of('post').at(-1).args[1], /Unknown command: \/update/);
+  // a message its records answer posts the answer only
+  await engine.onMessage({ room, where: room, message: 'm-2', text: 'hi', images: [] });
+  r.queue('t1', [{ role: 'you', text: 'hi', at: '2026-01-02T00:00:00.000Z', id: 'a' }, { role: 'ai', text: 'Hello.', at: '2026-01-02T00:00:01.000Z', id: 'b', end: true }]);
+  hc.turn('s', 't1', 'done');
+  await settle(engine);
+  assert.equal(chat.of('post').at(-1).args[1], 'Hello.');
+  const screens = chat.of('post').filter((c) => /Unknown command/.test(c.args[1])).length;
+  // and a turn nobody sent anything for posts nothing more
+  hc.turn('s', 't1', 'done');
+  await settle(engine);
+  assert.equal(chat.of('post').filter((c) => /Unknown command/.test(c.args[1])).length, screens);
+  done();
+});
