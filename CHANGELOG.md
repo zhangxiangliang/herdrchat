@@ -1,3 +1,10 @@
+# [1.13.0](https://github.com/zhangxiangliang/herdrchat/compare/v1.12.0...v1.13.0) (2026-11-14)
+
+
+### Features
+
+* mirror Pi, from its own session log, with Zhipu's plan limits ([9fc8ee8](https://github.com/zhangxiangliang/herdrchat/commit/9fc8ee88408b794cb64de57e97f8a180875f44c0))
+
 # [1.12.0](https://github.com/zhangxiangliang/herdrchat/compare/v1.11.0...v1.12.0) (2026-11-14)
 
 
