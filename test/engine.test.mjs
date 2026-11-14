@@ -883,7 +883,7 @@ test('a post read off the screen says so in its footer, and so does a dialog car
 
 test('a footer is an italic last line in Telegram and a small line in a Feishu card, its marks shown as they are', async () => {
   const telegram = await import('../lib/chats/telegram/index.mjs');
-  const { textCard, menuCard } = await import('../lib/chats/feishu/client.mjs');
+  const { textCard, menuCard } = await import('../lib/chats/feishu/render.mjs');
   const store = fakeStore();
   const state = store.read();
   state.chats = { 'a|t1': { chat: '11', name: 'work / master' } };
@@ -1024,7 +1024,7 @@ test('Telegram: a card to the owner can carry buttons, and a tap gives back the 
   } finally {
     globalThis.fetch = realFetch;
   }
-  const { ownerCard } = await import('../lib/chats/feishu/client.mjs');
+  const { ownerCard } = await import('../lib/chats/feishu/render.mjs');
   const card = ownerCard({ title: 'New', tone: 'working', markdown: 'x', buttons: [{ label: 'Update to 9.9.9', value: { update: '9.9.9' } }] });
   assert.deepEqual(card.body.elements.at(-1).columns[0].elements[0].behaviors, [{ type: 'callback', value: { update: '9.9.9' } }]);
 });

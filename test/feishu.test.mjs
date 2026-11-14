@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { chunk, messageParts, summaryOf, tagName } from '../lib/chats/feishu/client.mjs';
+import { tagName } from '../lib/chats/feishu/client.mjs';
+import { chunk, messageParts, summaryOf } from '../lib/chats/feishu/render.mjs';
 
 test('chunk keeps short text whole', () => {
   assert.deepEqual(chunk('hello\nworld'), ['hello\nworld']);
@@ -45,7 +46,7 @@ test('tagName keeps short names and cuts long ones at a word', () => {
 });
 
 test('a multi-select card puts its boxes in a form as checkers that make no call, and Next submits it', async () => {
-  const { menuCard, ticksOf } = await import('../lib/chats/feishu/client.mjs');
+  const { menuCard, ticksOf } = await import('../lib/chats/feishu/render.mjs');
   const menu = { multi: true, free: null, options: [{ n: 1, label: 'Red', checked: true }, { n: 2, label: 'Green', checked: false }, { n: 3, label: 'Submit', checked: null }] };
   const card = menuCard({ title: 'T', markdown: 'Which?', menu, value: { s: 's', a: 't1', k: 'k' } });
   const form = card.body.elements.find((e) => e.tag === 'form' && e.name === 'boxes');
@@ -72,7 +73,7 @@ test('messageParts passes on text and images, and gives null for what it cannot 
 });
 
 test('a dialog card: an icon in its header, its options side by side and wrapping, Esc as quiet text', async () => {
-  const { menuCard, textCard } = await import('../lib/chats/feishu/client.mjs');
+  const { menuCard, textCard } = await import('../lib/chats/feishu/render.mjs');
   const menu = { multi: false, free: null, options: [{ n: 1, label: 'Yes', checked: null }, { n: 2, label: 'No', checked: null }] };
   const card = menuCard({ title: '⚠️ Needs you (permission)', markdown: 'Run it?', menu, value: { s: 's', a: 't1', k: 'k' } });
   assert.equal(card.header.title.content, 'Needs you (permission)', 'the emoji gives way to the icon');
@@ -86,7 +87,7 @@ test('a dialog card: an icon in its header, its options side by side and wrappin
 });
 
 test('an answered dialog shows one check: the icon, not the core\'s ✔ as well', async () => {
-  const { doneCard } = await import('../lib/chats/feishu/client.mjs');
+  const { doneCard } = await import('../lib/chats/feishu/render.mjs');
   const card = doneCard('✅ Done', 'Run it?', '✔ 1. Yes');
   const note = card.body.elements[1];
   assert.equal(note.content, '1. Yes');
@@ -94,7 +95,7 @@ test('an answered dialog shows one check: the icon, not the core\'s ✔ as well'
 });
 
 test('long options are a line each, at the left and as wide as their words; short ones sit side by side', async () => {
-  const { menuCard } = await import('../lib/chats/feishu/client.mjs');
+  const { menuCard } = await import('../lib/chats/feishu/render.mjs');
   const long = { multi: false, free: null, options: [{ n: 1, label: 'Yes, proceed (y)', checked: null }, { n: 2, label: "Yes, and don't ask again for commands that start with `curl` (p)", checked: null }, { n: 3, label: 'No, and tell Codex what to do differently (esc)', checked: null }] };
   const card = menuCard({ title: 'Needs you', markdown: 'Run it?', menu: long, value: {} });
   const buttons = card.body.elements.filter((e) => e.tag === 'button');

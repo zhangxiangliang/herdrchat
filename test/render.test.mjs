@@ -9,7 +9,8 @@ import path from 'node:path';
 import test, { after } from 'node:test';
 import { fileURLToPath } from 'node:url';
 import { createEngine } from '../lib/core/engine.mjs';
-import { doneCard, foldedCard, header, menuCard, ownerCard, sendMarkdown, textCard } from '../lib/chats/feishu/client.mjs';
+import { sendMarkdown } from '../lib/chats/feishu/client.mjs';
+import { doneCard, foldedCard, header, menuCard, ownerCard, textCard } from '../lib/chats/feishu/render.mjs';
 import { overviewCard, overviewText } from '../lib/chats/feishu/overview.mjs';
 import { fakeChat, fakeHc, fakeReaders, fakeStore, terminal } from './fakes.mjs';
 
