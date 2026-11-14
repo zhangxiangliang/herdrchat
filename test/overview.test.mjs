@@ -19,3 +19,13 @@ test('the overview puts what waits for you first and links every group', () => {
   assert.equal(card.header.title.content, '1 needs you · herdrchat · 4 terminals');
   assert.equal(card.header.icon.token, 'warning_outlined', 'an icon says what it is, not an emoji');
 });
+
+test('marks in a name are entities, which Feishu reads in link text; a tag shows its words as they are', () => {
+  const lines = overviewText([
+    { name: 'worker / T1_ABC-2', address: 't6j', state: 'done', room: 'oc_a' },
+    { name: 'a*b', address: 't7', program: 'my_prog <x>' },
+  ]).split('\n');
+  assert.ok(lines[0].includes('[worker / T1&#95;ABC-2]('), lines[0]);
+  assert.ok(!lines.join('\n').includes('\\'), 'no backslash: Feishu shows it in link text and in tags');
+  assert.ok(lines[1].startsWith("<text_tag color='neutral'>my_prog x</text_tag> **a&#42;b**"), lines[1]);
+});
