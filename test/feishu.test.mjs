@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { chunk, messageParts, tagName } from '../lib/chats/feishu/client.mjs';
+import { chunk, messageParts, summaryOf, tagName } from '../lib/chats/feishu/client.mjs';
 
 test('chunk keeps short text whole', () => {
   assert.deepEqual(chunk('hello\nworld'), ['hello\nworld']);
@@ -100,4 +100,13 @@ test('long options are a line each, at the left and as wide as their words; shor
   const buttons = card.body.elements.filter((e) => e.tag === 'button');
   assert.deepEqual(buttons.map((b) => [b.text.content.slice(0, 6), b.width]), [['1. Yes', 'default'], ['2. Yes', 'default'], ['3. No,', 'default']]);
   assert.equal(buttons[1].hover_tips.content, "2. Yes, and don't ask again for commands that start with `curl` (p)");
+});
+
+test('a post is quoted by its first line with words, not by its footer', () => {
+  // a screen: the code block's first line, not the footer under it
+  assert.equal(summaryOf('```\n⏺ Unknown command: /nosuchcmd\n\n❯\n```'), '⏺ Unknown command: /nosuchcmd');
+  // a label goes with what follows it; marks and entities are not shown
+  assert.equal(summaryOf('**You:**\n> fix &#42;it&#42;\n\nFixed.'), 'You: fix *it*');
+  assert.equal(summaryOf('```\n\n```'), '');
+  assert.equal(summaryOf('x'.repeat(100)).length, 80);
 });
