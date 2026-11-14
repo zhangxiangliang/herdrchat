@@ -92,10 +92,16 @@ Codex 的提问（Plan 模式里的，以及它不等你回答就继续的那种
 
 ## 更新
 
+npm 上有新版本时，机器人会在私聊里说一次，卡片上有一个**更新**按钮。也可以在终端里：
+
 ```bash
-npm install -g herdrchat@latest && npx skills add zhangxiangliang/herdrchat
-herdrchat start                  # 每个 profile 都要：在这之前它还跑着旧代码
+herdrchat update                 # 更新到最新版，skill 和 hook 一起更新
+herdrchat update 1.10.2          # 退回到这个版本
 ```
+
+两种方式都是用 npm 安装，装好后正在运行的机器人会在一分钟内自己重启到新版本（中间断开几秒），回来后会告诉你现在是哪个版本。没有你点按钮，herdrchat 绝不会自己更新。如果是手动运行的机器人（`herdrchat run`），它会提示你自己重启。
+
+如果你用的是 1.11.0 之前的版本（还没有 `herdrchat update`），需要手动更新一次：`npm install -g herdrchat@latest`，然后每个 profile 运行一次 `herdrchat start`。
 
 ## 文件在哪
 

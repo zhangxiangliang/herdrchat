@@ -112,10 +112,21 @@ from its own log.
 
 ## Update
 
+When npm has a newer herdrchat, the bot says so once in your direct chat, with an
+**Update** button. Or in a terminal:
+
 ```bash
-npm install -g herdrchat@latest && npx skills add zhangxiangliang/herdrchat
-herdrchat start                  # for each profile: it keeps the old code until then
+herdrchat update                 # the latest, with its skill and hook
+herdrchat update 1.10.2          # back to that version
 ```
+
+Either way npm installs it, and every running bot starts again on it by itself within a
+minute (a few seconds without the bot), then says which version it runs now. herdrchat
+never updates without your tap. A bot you run by hand (`herdrchat run`) says it needs a
+restart instead.
+
+From a version before 1.11.0 (no `herdrchat update` yet), once by hand:
+`npm install -g herdrchat@latest`, then `herdrchat start` for each profile.
 
 ## Where things are
 

@@ -5,12 +5,15 @@
 //
 // Usage: node bin/herdrchat.mjs (`herdrchat start` keeps it running)
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { STATE_DIR, chatOf, loadConfig, makeDirs, readState, setConfigValue, writeState } from '../lib/core/config.mjs';
 import { tryPairing } from '../lib/core/pairing.mjs';
 import { createEngine } from '../lib/core/engine.mjs';
 import { followEvents } from '../lib/core/events.mjs';
 import { cores, getTerminal, hc, keys, label, machines, nameTab, put, run, screenTail, send } from '../lib/core/hc.mjs';
+import { refreshHook } from '../lib/core/hooks.mjs';
 import { createLog } from '../lib/core/log.mjs';
+import { createUpdater } from '../lib/core/updater.mjs';
 import * as readers from '../lib/core/readers/index.mjs';
 import { chatModule, createChat } from '../lib/chats/index.mjs';
 
@@ -76,6 +79,10 @@ async function sayBack() {
 }
 logger.capture({ onCrash: sayCrash });
 
+// a newer herdrchat: said, offered, and started again on (lib/core/updater.mjs)
+const updater = createUpdater({ root: path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..'), store, chat, log, logWarn, logError, refreshHook });
+let updaterStarted = false;
+
 engine = createEngine({
   cfg,
   chat,
@@ -85,5 +92,14 @@ engine = createEngine({
   log,
   logWarn,
   logError,
+  ownerActions: updater.actions,
 });
-engine.start({ onReady: () => sayBack().catch((err) => logError(`back notice: ${err.message}`)) });
+engine.start({
+  onReady: () => {
+    sayBack().catch((err) => logError(`back notice: ${err.message}`));
+    if (!updaterStarted) {
+      updaterStarted = true;
+      updater.start().catch((err) => logError(`updater: ${err.message}`));
+    }
+  },
+});

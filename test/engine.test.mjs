@@ -14,13 +14,13 @@ const running = new Set();
 after(() => running.forEach((engine) => engine.stop()));
 
 // A core on the fakes, one session "s", started and given `list` as its first snapshot.
-async function setup(list = [], { logError = (...a) => { throw new Error(a.join(' ')); }, asks = {}, shell = async () => '' } = {}) {
+async function setup(list = [], { logError = (...a) => { throw new Error(a.join(' ')); }, asks = {}, shell = async () => '', ownerActions = {} } = {}) {
   const chat = fakeChat();
   const hc = fakeHc();
   const store = fakeStore();
   const r = fakeReaders();
   const inbox = fs.mkdtempSync(path.join(os.tmpdir(), 'herdrchat-engine-test-'));
-  const engine = createEngine({ cfg: { sessions: ['s'] }, chat, hc, readers: r.readers, store, log: quiet, logWarn: quiet, logError, startedAt: '2026-01-01T00:00:00.000Z', inbox, quick: true, asksWaiting: () => Boolean(asks.waiting), askLives: async (s, m, id) => (asks.live ? asks.live(id) : true), shell });
+  const engine = createEngine({ cfg: { sessions: ['s'] }, chat, hc, readers: r.readers, store, log: quiet, logWarn: quiet, logError, startedAt: '2026-01-01T00:00:00.000Z', inbox, quick: true, asksWaiting: () => Boolean(asks.waiting), askLives: async (s, m, id) => (asks.live ? asks.live(id) : true), shell, ownerActions });
   running.add(engine);
   running.add(engine);
   const started = engine.start();
@@ -919,4 +919,39 @@ test('a message the agent took as its own command, with nothing in its records, 
   await settle(engine);
   assert.equal(chat.of('post').filter((c) => /Unknown command/.test(c.args[1])).length, screens);
   done();
+});
+
+test('a button on a card to the owner goes to whoever made the card, not to a terminal', async () => {
+  const got = [];
+  const { engine, done } = await setup([], { ownerActions: { update: (v) => { got.push(v); return { toast: { type: 'info', text: 'Updating' } }; } } });
+  const out = await engine.onAction({ value: { update: '9.9.9' }, message: 'm1' });
+  assert.deepEqual(got, [{ update: '9.9.9' }]);
+  assert.equal(out.toast.text, 'Updating');
+  done();
+});
+
+test('Telegram: a card to the owner can carry buttons, and a tap gives back the button\'s value', async () => {
+  const telegram = await import('../lib/chats/telegram/index.mjs');
+  const store = fakeStore();
+  const cfg = { env: { TELEGRAM_BOT_TOKEN: '1:test', TELEGRAM_OWNER_ID: '42' }, sessions: ['a'], muted: { all: false, spaces: [] }, silent: { all: false, spaces: [] } };
+  const sent = [];
+  const realFetch = globalThis.fetch;
+  globalThis.fetch = async (url, opts) => {
+    sent.push({ method: url.split('/').pop(), body: JSON.parse(opts.body) });
+    return { ok: true, json: async () => ({ ok: true, result: { message_id: sent.length } }) };
+  };
+  try {
+    const chat = telegram.create({ cfg, store, log: quiet, logWarn: quiet, logError: quiet, stateDir: os.tmpdir(), lane: () => {}, scopeOf: () => 'a' });
+    await chat.tellOwner({ title: 'New', tone: 'working', markdown: 'x', buttons: [{ label: 'Update to 9.9.9', value: { update: '9.9.9' } }] });
+    const button = sent.find((x) => x.method === 'sendMessage').body.reply_markup.inline_keyboard[0][0];
+    assert.equal(button.text, 'Update to 9.9.9');
+    const [id] = Object.keys(store.read().buttons);
+    assert.deepEqual(store.read().buttons[id].picks, { 0: { update: '9.9.9' } });
+    assert.equal(button.callback_data, `${id}:0`);
+  } finally {
+    globalThis.fetch = realFetch;
+  }
+  const { ownerCard } = await import('../lib/chats/feishu/client.mjs');
+  const card = ownerCard({ title: 'New', tone: 'working', markdown: 'x', buttons: [{ label: 'Update to 9.9.9', value: { update: '9.9.9' } }] });
+  assert.deepEqual(card.body.elements.at(-1).columns[0].elements[0].behaviors, [{ type: 'callback', value: { update: '9.9.9' } }]);
 });

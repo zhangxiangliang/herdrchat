@@ -260,6 +260,27 @@ A group belongs to its herdr-app tab (by the tab's id): when the tab's terminal 
 replaced, the new terminal carries on in the same group. A message that cannot be
 delivered (the terminal has ended) says so plainly.
 
+## Updating
+
+When npm has a newer herdrchat than the one running, the bot says so once per version in
+the direct chat, with an **Update to x.y.z** button (it asks npm once a day, through npm,
+so a registry you set is used; only a copy installed with `npm install -g` is offered
+one). `herdrchat update [version]` in a terminal does the same; with an older version it
+goes back to it. Both:
+
+1. install it with `npm install -g herdrchat@<version>`;
+2. replace the copy of the hook the agents run, when it is in and differs (their
+   settings are left alone);
+3. update the skill with `npx skills update herdrchat -g`, when it is installed.
+
+Nothing is restarted by the update itself: every bot looks at its code on disk each
+minute, and once it is another version, a bot that its service or `herdrchat start`'s
+loop starts again stops and comes back on it; it then says "herdrchat is now x.y.z (was
+…)". So all profiles move together, however herdrchat was updated. A bot run by hand
+(`herdrchat run`) is never stopped: it says once that it needs a restart. A git checkout
+is never updated from here: pull it, and the running bots follow the version in its
+`package.json`.
+
 ## Commands
 
 - Direct chat: `/ls` (the overview again at the bottom of the chat; the old one is

@@ -13,6 +13,8 @@
 //     logs       today's log (-n <lines>, --errors for ERROR and WARN only, --day <date>)
 //     run        run in the foreground (what start keeps running)
 //     hooks      herdrchat's hook in Claude Code's and Codex's settings: status, install, uninstall
+//     update     the latest herdrchat from npm (or `update 1.2.3`: that one); running bots
+//                start again on it by themselves
 //     version    which herdrchat this is
 //
 // The profile is --profile or HERDRCHAT_PROFILE (default "default"); where its files are
@@ -40,6 +42,8 @@ herdrchat <command> [--profile <name>]
   run        run in the foreground (what start keeps running)
   hooks      what Claude Code and Codex ask you comes to the chat in their own words, and
              your answer goes back to them: hooks install (asks first) | uninstall
+  update     the latest herdrchat from npm, with its skill and hook; running bots start
+             again on it by themselves (update 1.2.3: that version, to go back)
   version    which herdrchat this is
 
 First time: herdrchat setup. (Or by hand: herdrchat init, fill in the file, herdrchat start.)
@@ -169,7 +173,9 @@ async function waitConnected(since) {
 function botEnv() {
   const hcPath = findHc();
   if (!hcPath) throw new Error(`hc is not on PATH. ${HERDR}`);
-  const env = { HERDRCHAT_HC: hcPath, HERDRCHAT_PROFILE: places.profile };
+  // HERDRCHAT_KEPT: something starts it again when it stops (the service, or the loop
+  // `start` runs it in), so it may stop to run new code after an update
+  const env = { HERDRCHAT_HC: hcPath, HERDRCHAT_PROFILE: places.profile, HERDRCHAT_KEPT: '1' };
   for (const k of ['PATH', 'HERDRCHAT_HOME', 'XDG_CONFIG_HOME', 'XDG_STATE_HOME']) if (process.env[k]) env[k] = process.env[k];
   return env;
 }
@@ -565,6 +571,21 @@ const commands = {
 
   async run() {
     await import('./herdrchat.mjs');
+  },
+
+  // For every profile at once: one install, and each running bot sees it and starts again.
+  async update() {
+    const { update } = await import('../lib/core/update.mjs');
+    const { refreshHook } = await import('../lib/core/hooks.mjs');
+    const [, version = 'latest'] = argv.filter((a) => !a.startsWith('-'));
+    console.log(version === 'latest' ? 'Looking for the latest herdrchat on npm…' : `Installing herdrchat ${version}…`);
+    const result = await update({ version, root: ROOT, refreshHook });
+    for (const line of result.lines) (result.ok ? tell : bad)(line);
+    if (!result.ok) {
+      process.exitCode = 1;
+      return;
+    }
+    if (result.changed) tell('Running bots start again on it by themselves within a minute; a bot run by hand (herdrchat run) needs a restart.');
   },
 
   // One hook for every profile: it is in the agents' settings, for this machine's user.
