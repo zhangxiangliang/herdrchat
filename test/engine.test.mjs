@@ -902,11 +902,15 @@ test('a harness with a long name goes by its short one in the footer', async () 
 test('a message the agent took as its own command, with nothing in its records, gets the screen, not silence', async () => {
   const { chat, hc, store, engine, r, done } = await setup([terminal('t1', { program: 'fake', agent: true })]);
   const room = rooms(store)['s|t1'].chat;
+  // only what came on the screen after your message: a long screen folds in the chat and
+  // shows its (old) top
+  const old = Array.from({ length: 30 }, (_, i) => `old line ${i}`).join('\n');
+  hc.screens.set('s|t1', `${old}\n❯ `);
   await engine.onMessage({ room, where: room, message: 'm-in', text: '/update please', images: [] });
-  hc.screens.set('s|t1', '⏺ Unknown command: /update\n❯ ');
+  hc.screens.set('s|t1', `${old}\n⏺ Unknown command: /update\n❯ `);
   hc.turn('s', 't1', 'done');
   await settle(engine);
-  assert.match(chat.of('post').at(-1).args[1], /Unknown command: \/update/);
+  assert.equal(chat.of('post').at(-1).args[1], '```\n⏺ Unknown command: /update\n❯\n```');
   // a message its records answer posts the answer only
   await engine.onMessage({ room, where: room, message: 'm-2', text: 'hi', images: [] });
   r.queue('t1', [{ role: 'you', text: 'hi', at: '2026-01-02T00:00:00.000Z', id: 'a' }, { role: 'ai', text: 'Hello.', at: '2026-01-02T00:00:01.000Z', id: 'b', end: true }]);

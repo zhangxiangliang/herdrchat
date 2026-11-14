@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { plainError, tidyScreen } from '../lib/core/hc.mjs';
+import { newOnScreen, plainError, tidyScreen } from '../lib/core/hc.mjs';
 import { agentOf } from '../lib/core/readers/index.mjs';
 
 test('a screen loses blank ends and runs of blank lines', () => {
@@ -8,6 +8,23 @@ test('a screen loses blank ends and runs of blank lines', () => {
   assert.equal(tidyScreen(raw), '  switch to which account?\n\n  2  someone\n\n  ⏎ Switch  esc Back');
   assert.equal(tidyScreen(raw, 1), '  ⏎ Switch  esc Back');
   assert.equal(tidyScreen('\n \n'), '');
+});
+
+test('what is new on a screen that has scrolled: after the lines it shares with the old one', () => {
+  const box = ['───', '❯', '───', ' main 5-hour 1%'];
+  const before = ['Claude Code v2', '❯ old test', '⏺ old answer', '', '✻ done 2:09 PM', '', ...box].join('\n');
+  // scrolled up by two lines; the input box moved down, under the new answer
+  const now = ['⏺ old answer', '', '✻ done 2:09 PM', '', '⏺ Unknown command: /nosuchcmd', '', ...box].join('\n');
+  assert.equal(newOnScreen(before, now), ['⏺ Unknown command: /nosuchcmd', '', ...box].join('\n'));
+  // its history drawn again above (another width), its box too: lined up from the bottom
+  const redrawn = ['❯ old test, wrapped', 'differently now', '⏺ old answer', '', '✻ done 2:09 PM', '', '⏺ Unknown command: /nosuchcmd', '', '─────', '❯', '─────', ' main 5-hour 2%'].join('\n');
+  assert.equal(newOnScreen(before, redrawn), ['⏺ Unknown command: /nosuchcmd', '', '─────', '❯', '─────', ' main 5-hour 2%'].join('\n'));
+  // only the status line changed: nothing new
+  assert.equal(newOnScreen(before, before.replace('1%', '2%')), null);
+  // nothing new, too little shared, or no screen before: null (the caller shows the tail)
+  assert.equal(newOnScreen(now, now), null);
+  assert.equal(newOnScreen('a\nb', 'x\ny\nz'), null);
+  assert.equal(newOnScreen('', now), null);
 });
 
 test('a failed hc call reads as hc says it, not as its command line', () => {
