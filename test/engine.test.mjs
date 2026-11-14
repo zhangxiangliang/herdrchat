@@ -955,3 +955,20 @@ test('Telegram: a card to the owner can carry buttons, and a tap gives back the 
   const card = ownerCard({ title: 'New', tone: 'working', markdown: 'x', buttons: [{ label: 'Update to 9.9.9', value: { update: '9.9.9' } }] });
   assert.deepEqual(card.body.elements.at(-1).columns[0].elements[0].behaviors, [{ type: 'callback', value: { update: '9.9.9' } }]);
 });
+
+test('a terminal that ends gets its last words and the ended notice in its room', async () => {
+  const t = terminal('t1', { program: 'fake', agent: true });
+  const { chat, hc, engine, r, done } = await setup([t]);
+  r.queue('t1', [{ role: 'ai', text: 'Bye.', at: '2026-01-02T00:00:01.000Z', id: 'a', end: true }]);
+  hc.turn('s', 't1', 'done');
+  await settle(engine);
+  r.reader.rest = async () => [{ role: 'ai', text: 'One more thing.', at: '2026-01-02T00:00:02.000Z', id: 'b', end: true }];
+  hc.change('s', 'finished', { ...t, state: 'finished', foreground: null }, { reason: 'exit 0' });
+  await settle(engine);
+  const posts = chat.of('post').map((c) => c.args[1]);
+  assert.ok(posts.includes('One more thing.'), 'what its log still held');
+  assert.equal(posts.at(-1), '🔚 **Terminal ended** (exit 0)');
+  assert.deepEqual(chat.of('endRoom').map((c) => c.args[0]), ['s|t1']);
+  assert.equal(chat.of('openRoom').length, 1, 'no new room for it');
+  done();
+});
