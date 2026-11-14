@@ -93,3 +93,10 @@ test('one Pi log named two ways (from home, or in full by the label) is read onc
   const both = [msg(1, 'q1', { role: 'user', content: 'one' }), msg(1, 'q2', { role: 'user', content: 'two' })];
   assert.deepEqual(conversationAfter(both, cursor).items.map((it) => it.text), ['two']);
 });
+
+test('a log not written yet is told apart from other failures (here and through hc exec)', async () => {
+  const { noSuchFile } = await import('../lib/core/home.mjs');
+  assert.ok(noSuchFile(new Error("ENOENT: no such file or directory, open '/x.jsonl'")));
+  assert.ok(noSuchFile(new Error('cat: /x.jsonl: No such file or directory')));
+  assert.ok(!noSuchFile(new Error('EACCES: permission denied')));
+});
