@@ -1,3 +1,10 @@
+## [1.8.1](https://github.com/zhangxiangliang/herdrchat/compare/v1.8.0...v1.8.1) (2026-11-14)
+
+
+### Bug Fixes
+
+* show marks in overview names without a backslash ([6b7368d](https://github.com/zhangxiangliang/herdrchat/commit/6b7368dfdba095589b8dbf57bc0e2a16c345d42c))
+
 # [1.8.0](https://github.com/zhangxiangliang/herdrchat/compare/v1.7.0...v1.8.0) (2026-11-14)
 
 
