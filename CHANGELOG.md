@@ -1,3 +1,15 @@
+# [1.12.0](https://github.com/zhangxiangliang/herdrchat/compare/v1.11.0...v1.12.0) (2026-11-14)
+
+
+### Bug Fixes
+
+* post an OpenCode answer that was read before its text was there ([08b949f](https://github.com/zhangxiangliang/herdrchat/commit/08b949f9ec42df86c42d8768665454a7c6165883))
+
+
+### Features
+
+* show Zhipu's GLM Coding Plan limits under OpenCode's posts ([9a3214a](https://github.com/zhangxiangliang/herdrchat/commit/9a3214ae2029856677b3a03d3a01aa4bfd91bab1))
+
 # [1.11.0](https://github.com/zhangxiangliang/herdrchat/compare/v1.10.2...v1.11.0) (2026-11-14)
 
 
