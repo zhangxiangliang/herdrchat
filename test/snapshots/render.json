@@ -1,0 +1,1000 @@
+{
+  "feishu.header": [
+    {
+      "title": {
+        "tag": "plain_text",
+        "content": "A title"
+      },
+      "template": "blue",
+      "icon": {
+        "tag": "standard_icon",
+        "token": "loading_outlined",
+        "color": "blue"
+      }
+    },
+    {
+      "title": {
+        "tag": "plain_text",
+        "content": "A title"
+      },
+      "template": "grey",
+      "icon": {
+        "tag": "standard_icon",
+        "token": "done_outlined",
+        "color": "grey"
+      }
+    },
+    {
+      "title": {
+        "tag": "plain_text",
+        "content": "A title"
+      },
+      "template": "orange",
+      "icon": {
+        "tag": "standard_icon",
+        "token": "warning_outlined",
+        "color": "orange"
+      }
+    },
+    {
+      "title": {
+        "tag": "plain_text",
+        "content": "A title"
+      },
+      "template": "grey",
+      "icon": {
+        "tag": "standard_icon",
+        "token": "done_outlined",
+        "color": "grey"
+      }
+    },
+    {
+      "title": {
+        "tag": "plain_text",
+        "content": "A title"
+      },
+      "template": "green",
+      "icon": {
+        "tag": "standard_icon",
+        "token": "done_outlined",
+        "color": "green"
+      }
+    },
+    {
+      "title": {
+        "tag": "plain_text",
+        "content": "A title"
+      },
+      "template": "red",
+      "icon": {
+        "tag": "standard_icon",
+        "token": "warning_outlined",
+        "color": "red"
+      }
+    }
+  ],
+  "feishu.textCard": {
+    "schema": "2.0",
+    "config": {
+      "update_multi": true
+    },
+    "header": {
+      "title": {
+        "tag": "plain_text",
+        "content": "Working…"
+      },
+      "template": "blue",
+      "icon": {
+        "tag": "standard_icon",
+        "token": "loading_outlined",
+        "color": "blue"
+      }
+    },
+    "body": {
+      "elements": [
+        {
+          "tag": "markdown",
+          "content": "**You:**\n> fix it\n\n▸ bash: ls"
+        },
+        {
+          "tag": "markdown",
+          "content": "claude · m · main",
+          "text_size": "notation"
+        }
+      ]
+    }
+  },
+  "feishu.menuCard": {
+    "schema": "2.0",
+    "config": {
+      "update_multi": true
+    },
+    "header": {
+      "title": {
+        "tag": "plain_text",
+        "content": "Needs you (permission)"
+      },
+      "template": "orange",
+      "icon": {
+        "tag": "standard_icon",
+        "token": "warning_outlined",
+        "color": "orange"
+      }
+    },
+    "body": {
+      "elements": [
+        {
+          "tag": "markdown",
+          "content": "Run ls?"
+        },
+        {
+          "tag": "button",
+          "type": "primary_filled",
+          "width": "default",
+          "size": "medium",
+          "text": {
+            "tag": "plain_text",
+            "content": "1. Yes"
+          },
+          "hover_tips": {
+            "tag": "plain_text",
+            "content": "1. Yes"
+          },
+          "behaviors": [
+            {
+              "type": "callback",
+              "value": {
+                "s": "s",
+                "a": "t1",
+                "k": "k1",
+                "pick": 1,
+                "label": "Yes"
+              }
+            }
+          ]
+        },
+        {
+          "tag": "button",
+          "type": "default",
+          "width": "default",
+          "size": "medium",
+          "text": {
+            "tag": "plain_text",
+            "content": "2. Yes, and don't ask again for this"
+          },
+          "hover_tips": {
+            "tag": "plain_text",
+            "content": "2. Yes, and don't ask again for this"
+          },
+          "behaviors": [
+            {
+              "type": "callback",
+              "value": {
+                "s": "s",
+                "a": "t1",
+                "k": "k1",
+                "pick": 2,
+                "label": "Yes, and don't ask again for this"
+              }
+            }
+          ]
+        },
+        {
+          "tag": "button",
+          "type": "default",
+          "width": "default",
+          "size": "medium",
+          "text": {
+            "tag": "plain_text",
+            "content": "3. No"
+          },
+          "hover_tips": {
+            "tag": "plain_text",
+            "content": "3. No"
+          },
+          "behaviors": [
+            {
+              "type": "callback",
+              "value": {
+                "s": "s",
+                "a": "t1",
+                "k": "k1",
+                "pick": 3,
+                "label": "No"
+              }
+            }
+          ]
+        },
+        {
+          "tag": "column_set",
+          "flex_mode": "flow",
+          "horizontal_spacing": "small",
+          "columns": [
+            {
+              "tag": "column",
+              "width": "auto",
+              "elements": [
+                {
+                  "tag": "button",
+                  "type": "danger_text",
+                  "width": "default",
+                  "size": "medium",
+                  "text": {
+                    "tag": "plain_text",
+                    "content": "Esc (cancel)"
+                  },
+                  "hover_tips": {
+                    "tag": "plain_text",
+                    "content": "Esc (cancel)"
+                  },
+                  "behaviors": [
+                    {
+                      "type": "callback",
+                      "value": {
+                        "s": "s",
+                        "a": "t1",
+                        "k": "k1",
+                        "pick": "esc"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "tag": "markdown",
+          "content": "codex · screen",
+          "text_size": "notation"
+        }
+      ]
+    }
+  },
+  "feishu.menuCard.multi": {
+    "schema": "2.0",
+    "config": {
+      "update_multi": true
+    },
+    "header": {
+      "title": {
+        "tag": "plain_text",
+        "content": "Needs you (question)"
+      },
+      "template": "orange",
+      "icon": {
+        "tag": "standard_icon",
+        "token": "warning_outlined",
+        "color": "orange"
+      }
+    },
+    "body": {
+      "elements": [
+        {
+          "tag": "markdown",
+          "content": "Which colors?"
+        },
+        {
+          "tag": "form",
+          "name": "boxes",
+          "elements": [
+            {
+              "tag": "checker",
+              "name": "box_1",
+              "checked": true,
+              "text": {
+                "tag": "plain_text",
+                "content": "1. Red"
+              }
+            },
+            {
+              "tag": "checker",
+              "name": "box_2",
+              "checked": false,
+              "text": {
+                "tag": "plain_text",
+                "content": "2. Green"
+              }
+            },
+            {
+              "tag": "button",
+              "type": "primary_filled",
+              "width": "default",
+              "size": "medium",
+              "text": {
+                "tag": "plain_text",
+                "content": "Next ⇥"
+              },
+              "hover_tips": {
+                "tag": "plain_text",
+                "content": "Next ⇥"
+              },
+              "behaviors": [
+                {
+                  "type": "callback",
+                  "value": {
+                    "s": "s",
+                    "a": "t1",
+                    "k": "k2",
+                    "pick": "tab"
+                  }
+                }
+              ],
+              "name": "next",
+              "form_action_type": "submit"
+            }
+          ]
+        },
+        {
+          "tag": "form",
+          "name": "free",
+          "elements": [
+            {
+              "tag": "input",
+              "name": "answer",
+              "required": true,
+              "placeholder": {
+                "tag": "plain_text",
+                "content": "Type something"
+              }
+            },
+            {
+              "tag": "button",
+              "type": "primary_filled",
+              "width": "default",
+              "size": "medium",
+              "text": {
+                "tag": "plain_text",
+                "content": "Send"
+              },
+              "hover_tips": {
+                "tag": "plain_text",
+                "content": "Send"
+              },
+              "behaviors": [
+                {
+                  "type": "callback",
+                  "value": {
+                    "s": "s",
+                    "a": "t1",
+                    "k": "k2",
+                    "pick": 3,
+                    "label": "Type something"
+                  }
+                }
+              ],
+              "name": "send",
+              "form_action_type": "submit"
+            }
+          ]
+        },
+        {
+          "tag": "column_set",
+          "flex_mode": "flow",
+          "horizontal_spacing": "small",
+          "columns": [
+            {
+              "tag": "column",
+              "width": "auto",
+              "elements": [
+                {
+                  "tag": "button",
+                  "type": "danger_text",
+                  "width": "default",
+                  "size": "medium",
+                  "text": {
+                    "tag": "plain_text",
+                    "content": "Esc (cancel)"
+                  },
+                  "hover_tips": {
+                    "tag": "plain_text",
+                    "content": "Esc (cancel)"
+                  },
+                  "behaviors": [
+                    {
+                      "type": "callback",
+                      "value": {
+                        "s": "s",
+                        "a": "t1",
+                        "k": "k2",
+                        "pick": "esc"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "feishu.doneCard": {
+    "schema": "2.0",
+    "config": {
+      "update_multi": true
+    },
+    "header": {
+      "title": {
+        "tag": "plain_text",
+        "content": "Done"
+      },
+      "template": "grey",
+      "icon": {
+        "tag": "standard_icon",
+        "token": "done_outlined",
+        "color": "grey"
+      }
+    },
+    "body": {
+      "elements": [
+        {
+          "tag": "markdown",
+          "content": "Run ls?"
+        },
+        {
+          "tag": "markdown",
+          "content": "Yes",
+          "text_size": "notation",
+          "icon": {
+            "tag": "standard_icon",
+            "token": "done_outlined",
+            "color": "grey"
+          }
+        },
+        {
+          "tag": "markdown",
+          "content": "claude · m",
+          "text_size": "notation"
+        }
+      ]
+    }
+  },
+  "feishu.ownerCard": {
+    "schema": "2.0",
+    "config": {
+      "update_multi": true
+    },
+    "header": {
+      "title": {
+        "tag": "plain_text",
+        "content": "herdrchat 9.9.9 is out"
+      },
+      "template": "blue",
+      "icon": {
+        "tag": "standard_icon",
+        "token": "loading_outlined",
+        "color": "blue"
+      }
+    },
+    "body": {
+      "elements": [
+        {
+          "tag": "markdown",
+          "content": "You run 1.0.0."
+        },
+        {
+          "tag": "column_set",
+          "flex_mode": "flow",
+          "horizontal_spacing": "small",
+          "columns": [
+            {
+              "tag": "column",
+              "width": "auto",
+              "elements": [
+                {
+                  "tag": "button",
+                  "type": "primary_filled",
+                  "width": "default",
+                  "size": "medium",
+                  "text": {
+                    "tag": "plain_text",
+                    "content": "Update to 9.9.9"
+                  },
+                  "hover_tips": {
+                    "tag": "plain_text",
+                    "content": "Update to 9.9.9"
+                  },
+                  "behaviors": [
+                    {
+                      "type": "callback",
+                      "value": {
+                        "update": "9.9.9"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "feishu.foldedCard": {
+    "schema": "2.0",
+    "body": {
+      "elements": [
+        {
+          "tag": "collapsible_panel",
+          "expanded": false,
+          "header": {
+            "title": {
+              "tag": "markdown",
+              "content": "**📜 Before this room**"
+            }
+          },
+          "border": {
+            "color": "grey",
+            "corner_radius": "5px"
+          },
+          "elements": [
+            {
+              "tag": "markdown",
+              "content": "**You:**\n> hi\n\nHello."
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "feishu.overview": {
+    "text": "<text_tag color='orange'>needs you (permission)</text_tag> **[beta / T1&#95;ABC-2](https://applink.feishu.cn/client/chat/open?openChatId=oc_b)** · `box/t2`\n<text_tag color='green'>done</text_tag> **[alpha / docs](https://applink.feishu.cn/client/chat/open?openChatId=oc_a)** · since 09:30 · `t1`\n<text_tag color='neutral'>zsh</text_tag> **alpha / shell** · `t4`",
+    "card": {
+      "schema": "2.0",
+      "config": {
+        "update_multi": true
+      },
+      "header": {
+        "title": {
+          "tag": "plain_text",
+          "content": "1 needs you · herdrchat · 3 terminals"
+        },
+        "template": "orange",
+        "icon": {
+          "tag": "standard_icon",
+          "token": "warning_outlined",
+          "color": "orange"
+        }
+      },
+      "body": {
+        "elements": [
+          {
+            "tag": "markdown",
+            "content": "<text_tag color='orange'>needs you (permission)</text_tag> **[beta / T1&#95;ABC-2](https://applink.feishu.cn/client/chat/open?openChatId=oc_b)** · `box/t2`\n<text_tag color='green'>done</text_tag> **[alpha / docs](https://applink.feishu.cn/client/chat/open?openChatId=oc_a)** · since 09:30 · `t1`\n<text_tag color='neutral'>zsh</text_tag> **alpha / shell** · `t4`"
+          },
+          {
+            "tag": "markdown",
+            "content": "Updated 10:00",
+            "text_size": "notation"
+          }
+        ]
+      }
+    }
+  },
+  "feishu.sendMarkdown": [
+    {
+      "params": {
+        "receive_id_type": "chat_id"
+      },
+      "data": {
+        "receive_id": "oc_room",
+        "msg_type": "interactive",
+        "content": "{\"schema\":\"2.0\",\"body\":{\"elements\":[{\"tag\":\"markdown\",\"content\":\"line one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\"}]}}"
+      }
+    },
+    {
+      "params": {
+        "receive_id_type": "chat_id"
+      },
+      "data": {
+        "receive_id": "oc_room",
+        "msg_type": "interactive",
+        "content": "{\"schema\":\"2.0\",\"body\":{\"elements\":[{\"tag\":\"markdown\",\"content\":\"line one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nline one\\nlast\"},{\"tag\":\"markdown\",\"content\":\"pi · glm\",\"text_size\":\"notation\"}]}}"
+      }
+    },
+    {
+      "params": {
+        "receive_id_type": "open_id"
+      },
+      "data": {
+        "receive_id": "ou_x",
+        "msg_type": "interactive",
+        "content": "{\"schema\":\"2.0\",\"body\":{\"elements\":[{\"tag\":\"markdown\",\"content\":\"a reply\"}]}}"
+      }
+    }
+  ],
+  "telegram.sent": [
+    {
+      "method": "sendMessage",
+      "body": {
+        "chat_id": "42",
+        "message_thread_id": 11,
+        "disable_notification": true,
+        "link_preview_options": {
+          "is_disabled": true
+        },
+        "text": "<b>You:</b>\n<blockquote>fix <code>it</code> &lt;now&gt;</blockquote>\n\nDone &amp; *dusted*.\n\n<i>claude · m · main</i>",
+        "parse_mode": "HTML"
+      }
+    },
+    {
+      "method": "sendMessage",
+      "body": {
+        "chat_id": "42",
+        "message_thread_id": 12,
+        "disable_notification": false,
+        "link_preview_options": {
+          "is_disabled": true
+        },
+        "text": "<b>⌛️ Working…</b>\n\n▸ bash: ls\n▸ read: a.txt\n\n<i>codex · m</i>",
+        "parse_mode": "HTML"
+      }
+    },
+    {
+      "method": "editMessageText",
+      "body": {
+        "chat_id": "42",
+        "message_id": 2,
+        "text": "<b>✅ Worked</b>\n\n▸ bash: ls\n\n<i>codex · m</i>",
+        "parse_mode": "HTML",
+        "link_preview_options": {
+          "is_disabled": true
+        }
+      }
+    },
+    {
+      "method": "sendMessage",
+      "body": {
+        "chat_id": "42",
+        "message_thread_id": 11,
+        "disable_notification": true,
+        "link_preview_options": {
+          "is_disabled": true
+        },
+        "reply_markup": {
+          "inline_keyboard": [
+            [
+              {
+                "text": "1. Yes",
+                "callback_data": "<id0>:1"
+              }
+            ],
+            [
+              {
+                "text": "2. Yes, and don't ask again for this",
+                "callback_data": "<id0>:2"
+              }
+            ],
+            [
+              {
+                "text": "3. No",
+                "callback_data": "<id0>:3"
+              }
+            ],
+            [
+              {
+                "text": "Esc (cancel)",
+                "callback_data": "<id0>:esc"
+              }
+            ]
+          ]
+        },
+        "text": "<b>⚠️ Needs you (permission)</b>\n\nRun ls?\n\n<i>claude · screen</i>",
+        "parse_mode": "HTML"
+      }
+    },
+    {
+      "method": "sendMessage",
+      "body": {
+        "chat_id": "42",
+        "message_thread_id": 11,
+        "disable_notification": true,
+        "link_preview_options": {
+          "is_disabled": true
+        },
+        "reply_markup": {
+          "inline_keyboard": [
+            [
+              {
+                "text": "1. ☑ Red",
+                "callback_data": "<id1>:1"
+              }
+            ],
+            [
+              {
+                "text": "2. ☐ Green",
+                "callback_data": "<id1>:2"
+              }
+            ],
+            [
+              {
+                "text": "Next ⇥",
+                "callback_data": "<id1>:tab"
+              }
+            ],
+            [
+              {
+                "text": "Esc (cancel)",
+                "callback_data": "<id1>:esc"
+              }
+            ]
+          ]
+        },
+        "text": "<b>⚠️ Needs you (question)</b>\n\nWhich colors?\n\n<i>Or type your answer here (Type something).</i>",
+        "parse_mode": "HTML"
+      }
+    },
+    {
+      "method": "editMessageText",
+      "body": {
+        "chat_id": "42",
+        "message_id": 4,
+        "text": "<b>✅ Done</b>\n\nRun ls?\n\n<b>✔ Yes</b>\n\n<i>claude · m</i>",
+        "parse_mode": "HTML",
+        "link_preview_options": {
+          "is_disabled": true
+        },
+        "reply_markup": {
+          "inline_keyboard": []
+        }
+      }
+    },
+    {
+      "method": "sendMessage",
+      "body": {
+        "chat_id": "42",
+        "message_thread_id": 11,
+        "disable_notification": false,
+        "link_preview_options": {
+          "is_disabled": true
+        },
+        "reply_parameters": {
+          "message_id": 1,
+          "allow_sending_without_reply": true
+        },
+        "text": "✅ done",
+        "parse_mode": "HTML"
+      }
+    },
+    {
+      "method": "sendMessage",
+      "body": {
+        "chat_id": "11",
+        "disable_notification": true,
+        "link_preview_options": {
+          "is_disabled": true
+        },
+        "text": "It asks something first.",
+        "parse_mode": "HTML"
+      }
+    },
+    {
+      "method": "sendMessage",
+      "body": {
+        "chat_id": "42",
+        "message_thread_id": 11,
+        "disable_notification": true,
+        "link_preview_options": {
+          "is_disabled": true
+        },
+        "text": "<b>📜 Before this room</b>\n<blockquote expandable>**You:**\n&gt; hi\n\nHello.</blockquote>",
+        "parse_mode": "HTML"
+      }
+    },
+    {
+      "method": "sendMessage",
+      "body": {
+        "chat_id": "42",
+        "disable_notification": false,
+        "link_preview_options": {
+          "is_disabled": true
+        },
+        "reply_markup": {
+          "inline_keyboard": [
+            [
+              {
+                "text": "Update to 9.9.9",
+                "callback_data": "<id2>:0"
+              }
+            ]
+          ]
+        },
+        "text": "<b>⬆️ herdrchat 9.9.9 is out</b>\n\nYou run 1.0.0.",
+        "parse_mode": "HTML"
+      }
+    },
+    {
+      "method": "sendMessage",
+      "body": {
+        "chat_id": "42",
+        "disable_notification": true,
+        "link_preview_options": {
+          "is_disabled": true
+        },
+        "text": "<b>⚠️ 1 needs you · herdrchat · 3 terminals</b>\n\n⚠️ <b>beta / T1_ABC-2</b> · needs you (permission) · <code>box/t2</code>\n✅ <b>alpha / docs</b> · done · since 09:30 · <code>t1</code>\n❓ <b>alpha / shell</b> · zsh · <code>t4</code>",
+        "parse_mode": "HTML"
+      }
+    }
+  ],
+  "core.calls": [
+    [
+      "openRoom",
+      {
+        "name": "proj / master",
+        "intro": "hc terminal t1 (hc session \"s\"). Type here to talk to it."
+      },
+      "room1"
+    ],
+    [
+      "placeRoom",
+      "s|t1",
+      {
+        "space": "proj"
+      }
+    ],
+    [
+      "placeRoom",
+      "s|t1",
+      {
+        "space": "proj"
+      }
+    ],
+    [
+      "postCard",
+      "room1",
+      {
+        "title": "⌛️ Working…",
+        "tone": "working",
+        "markdown": "**You:**\n> typed in the terminal too\n\n▸ bash: ls\n▸ read: a.txt\n\n![image](img)\n\n**From t7 review** _(answer: t1)_\n> look at this",
+        "footer": "fake-agent · model-a · main · context 25% (50k)"
+      }
+    ],
+    [
+      "editCard",
+      "m2",
+      {
+        "title": "✅ Worked",
+        "tone": "closed",
+        "markdown": "**You:**\n> typed in the terminal too\n\n▸ bash: ls\n▸ read: a.txt\n\n![image](img)\n\n**From t7 review** _(answer: t1)_\n> look at this",
+        "footer": "fake-agent · model-a · main · context 25% (50k)"
+      }
+    ],
+    [
+      "placeRoom",
+      "s|t1",
+      {
+        "space": "proj"
+      }
+    ],
+    [
+      "post",
+      "room1",
+      "Fixed it.",
+      {
+        "footer": "fake-agent · model-a · main · context 25% (50k)"
+      }
+    ],
+    [
+      "ring",
+      "s|t1",
+      "m3",
+      "✅ done"
+    ],
+    [
+      "placeRoom",
+      "s|t1",
+      {
+        "space": "proj"
+      }
+    ],
+    [
+      "postDialog",
+      "room1",
+      {
+        "menu": {
+          "beside": false,
+          "cursor": 1,
+          "key": "3edc02f48551",
+          "framed": false,
+          "text": "╭──────╮\nAllow ls?",
+          "options": [
+            {
+              "n": 1,
+              "label": "Yes",
+              "checked": null
+            },
+            {
+              "n": 2,
+              "label": "No",
+              "checked": null
+            }
+          ],
+          "multi": false,
+          "free": null
+        },
+        "title": "⚠️ Needs you (permission)",
+        "markdown": "╭──────╮\nAllow ls?",
+        "doneTitle": "✅ Done",
+        "footer": "fake-agent · screen · main"
+      },
+      {
+        "s": "s",
+        "a": "t1",
+        "k": "3edc02f48551"
+      },
+      "m4"
+    ],
+    [
+      "pin",
+      "s|t1",
+      "room1"
+    ],
+    [
+      "ring",
+      "s|t1",
+      "m4",
+      "⚠️ needs you"
+    ],
+    [
+      "placeRoom",
+      "s|t1",
+      {
+        "space": "proj"
+      }
+    ],
+    [
+      "unpin",
+      "s|t1"
+    ],
+    [
+      "closeDialog",
+      "m4",
+      {
+        "menu": {
+          "beside": false,
+          "cursor": 1,
+          "key": "3edc02f48551",
+          "framed": false,
+          "text": "╭──────╮\nAllow ls?",
+          "options": [
+            {
+              "n": 1,
+              "label": "Yes",
+              "checked": null
+            },
+            {
+              "n": 2,
+              "label": "No",
+              "checked": null
+            }
+          ],
+          "multi": false,
+          "free": null
+        },
+        "title": "⚠️ Needs you (permission)",
+        "markdown": "╭──────╮\nAllow ls?",
+        "doneTitle": "✅ Done",
+        "footer": "fake-agent · screen · main"
+      },
+      "✔ Answered."
+    ],
+    [
+      "placeRoom",
+      "s|t1",
+      {
+        "space": "proj"
+      }
+    ],
+    [
+      "post",
+      "room1",
+      "🔚 **Terminal ended** (exit 0)",
+      {}
+    ],
+    [
+      "endRoom",
+      "s|t1"
+    ]
+  ]
+}
