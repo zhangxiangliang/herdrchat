@@ -89,5 +89,13 @@ test('a Codex approval is a menu: › for the cursor, no border, the dialog unde
 
 test('a Codex turn names its model once, at its start: an item of its own', () => {
   const lines = [JSON.stringify({ timestamp: at(1), type: 'turn_context', payload: { cwd: '/w', model: 'gpt-model-x' } }), done(2, { type: 'AgentMessage', id: 'a', content: [{ type: 'Text', text: 'Hi.' }], phase: 'final_answer' })];
-  assert.deepEqual(conversationAfter(lines, startCursor(at(0))).items.map((it) => [it.role, it.model || it.text]), [['model', 'gpt-model-x'], ['ai', 'Hi.']]);
+  assert.deepEqual(conversationAfter(lines, startCursor(at(0))).items.map((it) => [it.role, it.model || it.text]), [['meta', 'gpt-model-x'], ['ai', 'Hi.']]);
+});
+
+test('a Codex token_count tells how full the context is and the limits, shortest window first', () => {
+  const tc = (payload) => JSON.stringify({ timestamp: at(1), type: 'event_msg', payload: { type: 'token_count', ...payload } });
+  const lines = [tc({ info: { last_token_usage: { total_tokens: 25871 }, model_context_window: 475000 }, rate_limits: { primary: { used_percent: 65, window_minutes: 10080 }, secondary: { used_percent: 3, window_minutes: 300 } } })];
+  assert.deepEqual(conversationAfter(lines, startCursor(at(0))).items.map(({ role, context, limits }) => ({ role, context, limits })),
+    [{ role: 'meta', context: { used: 25871, size: 475000 }, limits: [{ name: '5-hour', used: 3 }, { name: '7-day', used: 65 }] }]);
+  assert.deepEqual(conversationAfter([tc({ info: null, rate_limits: null })], startCursor(at(0))).items, [], 'one that tells nothing is nothing');
 });

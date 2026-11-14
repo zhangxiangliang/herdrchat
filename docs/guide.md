@@ -146,10 +146,17 @@ A room is a Feishu group or a Telegram topic.
   - Images too: ones it looked at (a screenshot, an image file it read) and ones you
     pasted in the terminal, shown in the card.
   - What you sent from the group is not repeated.
-  - Under each post and card, one small line says where it came from: the harness hc
-    names and the model the agent's own records name (`codex · gpt-6.1-sol`), or
-    `screen` when it was read off the screen (`codex · screen`). herdrchat adds it; the
-    agent is never asked to.
+  - Under each post and card, one small line says where it came from and how it stands:
+    the harness hc names, the model the agent's own records name (or `screen` when it was
+    read off the screen), the git branch of its folder, how full its context is, and the
+    account's limits:
+    `claude-code · claude-opus-5-5 · main · context 23% (234k) · 5-hour 2% · 7-day 57%`.
+    herdrchat adds it, never the agent, and spends nothing on it: Codex writes all of it
+    in its own log; Claude Code's window and limits come from `claude -p /context` and
+    `claude -p /usage`, which Claude Code answers itself without asking a model (the
+    limits at most every 5 minutes per machine); OpenCode's window from its model list.
+    What is not known is left out: limits for an API key, or OpenCode's plans, which
+    name none.
 - Anything else (a shell, a tool, an agent that has quit): nothing by itself. A terminal
   counts as an agent only while its foreground process is that agent, so a status left
   over after it quits posts nothing.

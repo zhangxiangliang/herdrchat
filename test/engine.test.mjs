@@ -14,13 +14,13 @@ const running = new Set();
 after(() => running.forEach((engine) => engine.stop()));
 
 // A core on the fakes, one session "s", started and given `list` as its first snapshot.
-async function setup(list = [], { logError = (...a) => { throw new Error(a.join(' ')); }, asks = {} } = {}) {
+async function setup(list = [], { logError = (...a) => { throw new Error(a.join(' ')); }, asks = {}, shell = async () => '' } = {}) {
   const chat = fakeChat();
   const hc = fakeHc();
   const store = fakeStore();
   const r = fakeReaders();
   const inbox = fs.mkdtempSync(path.join(os.tmpdir(), 'herdrchat-engine-test-'));
-  const engine = createEngine({ cfg: { sessions: ['s'] }, chat, hc, readers: r.readers, store, log: quiet, logWarn: quiet, logError, startedAt: '2026-01-01T00:00:00.000Z', inbox, quick: true, asksWaiting: () => Boolean(asks.waiting), askLives: async (s, m, id) => (asks.live ? asks.live(id) : true) });
+  const engine = createEngine({ cfg: { sessions: ['s'] }, chat, hc, readers: r.readers, store, log: quiet, logWarn: quiet, logError, startedAt: '2026-01-01T00:00:00.000Z', inbox, quick: true, asksWaiting: () => Boolean(asks.waiting), askLives: async (s, m, id) => (asks.live ? asks.live(id) : true), shell });
   running.add(engine);
   running.add(engine);
   const started = engine.start();
@@ -786,7 +786,7 @@ test('an idle question answered while the bot was not looking: the sweep closes 
 test('under each post: the harness and the model, as its records name them, not as the agent says', async () => {
   const { chat, hc, engine, r, done } = await setup([terminal('t1', { program: 'fake', agent: true })]);
   r.queue('t1', [
-    { role: 'model', model: 'model-a', at: '2026-01-02T00:00:00.000Z', id: 'm' }, // as Codex names it: once, at a turn's start
+    { role: 'meta', model: 'model-a', at: '2026-01-02T00:00:00.000Z', id: 'm' }, // as Codex names it: once, at a turn's start
     { role: 'tool', text: '▸ exec: ls', at: '2026-01-02T00:00:01.000Z', id: 'b' },
     { role: 'ai', text: 'Done.', at: '2026-01-02T00:00:02.000Z', id: 'c', end: true },
   ]);
@@ -867,4 +867,24 @@ test('a footer is an italic last line in Telegram and a small line in a Feishu c
   assert.deepEqual(foot(textCard('hi', 'Worked', 'closed', 'codex · gpt_x')), { tag: 'markdown', content: 'codex · gpt&#95;x', text_size: 'notation' });
   assert.equal(textCard('hi', 'Worked', 'closed').body.elements.length, 1, 'no footer, no line');
   assert.equal(foot(menuCard({ title: 'Needs you', markdown: 'Allow?', menu: { options: [{ n: 1, label: 'Yes' }], multi: false, free: null }, value: {}, footer: 'codex · screen' })).content, 'codex · screen');
+});
+
+test('the footer has the branch of its folder, how full its context is, and the limits, as the reader knows them', async () => {
+  const t = terminal('t1', { program: 'fake', agent: true });
+  t.foreground.cwd = '/w/proj';
+  const shells = [];
+  const { chat, hc, engine, r, done } = await setup([t], { shell: async (session, machine, script) => { shells.push(script); return 'feature/x\n'; } });
+  r.reader.meter = (s, a, meta) => ({ contextSize: meta.model === 'model-a' ? 200000 : undefined, limits: [{ name: '5-hour', used: 2 }, { name: '7-day', used: 57 }] });
+  r.queue('t1', [{ role: 'ai', text: 'Done.', at: '2026-01-02T00:00:02.000Z', id: 'c', end: true, model: 'model-a', context: { used: 50000 } }]);
+  hc.turn('s', 't1', 'done');
+  await settle(engine);
+  assert.equal(chat.of('post').at(-1).args[2].footer, 'fake-agent · model-a · feature/x · context 25% (50k) · 5-hour 2% · 7-day 57%');
+  assert.ok(shells[0].includes("cd '/w/proj'"), 'git runs in the terminal\'s folder');
+  // limits a reader's own records name (Codex) come before what its meter knows
+  r.queue('t1', [{ role: 'meta', limits: [{ name: '7-day', used: 65 }], context: { used: 1000, size: 10000 }, at: '2026-01-02T00:01:00.000Z', id: 'm2' },
+    { role: 'ai', text: 'Again.', at: '2026-01-02T00:01:01.000Z', id: 'd', end: true }]);
+  hc.turn('s', 't1', 'done');
+  await settle(engine);
+  assert.equal(chat.of('post').at(-1).args[2].footer, 'fake-agent · model-a · feature/x · context 10% (1k) · 7-day 65%', 'and what was named before still stands');
+  done();
 });

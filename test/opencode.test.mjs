@@ -75,3 +75,13 @@ test('each OpenCode answer names the model that wrote it', () => {
   const said = [{ id: 'x', type: 'assistant', time: { created: ms(1) }, model: { id: 'model-x', providerID: 'p' }, content: [{ type: 'text', text: 'Hi.' }] }];
   assert.deepEqual(conversationAfter(linesOf(said), startCursor('2026-01-01T00:00:00.000Z')).items.map((it) => it.model), ['model-x']);
 });
+
+test('OpenCode: how full the context is comes with each answer, its window from its own model list', async () => {
+  const { windowOf } = await import('../lib/core/readers/opencode.mjs');
+  const said = [{ id: 'x', type: 'assistant', time: { created: ms(1) }, model: { id: 'glm', providerID: 'zhipu' }, tokens: { input: 3609, output: 20, cache: { read: 4096, write: 1 } }, content: [{ type: 'text', text: 'Hi.' }] }];
+  assert.deepEqual(conversationAfter(linesOf(said), startCursor('2026-01-01T00:00:00.000Z')).items.map((it) => [it.provider, it.context]), [['zhipu', { used: 7706 }]]);
+  const models = [{ modelID: 'glm', providerID: 'other', limit: { context: 200000 } }, { modelID: 'glm', providerID: 'zhipu', limit: { context: 1000000 } }];
+  assert.equal(windowOf(models, 'glm', 'zhipu'), 1000000, 'the provider it runs through');
+  assert.equal(windowOf(models, 'glm', 'gone'), 200000);
+  assert.equal(windowOf(null, 'glm'), undefined);
+});

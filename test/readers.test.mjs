@@ -83,3 +83,16 @@ test('each Claude answer names the model that wrote it; a reply Claude Code made
   ];
   assert.deepEqual(conversationAfter(lines, startCursor(at(0))).items.map((x) => x.model), ['claude-model-x', 'claude-model-x', undefined]);
 });
+
+test('Claude: how full the context is comes with each answer; its window and the limits are Claude Code\'s own /context and /usage', async () => {
+  const { contextWindowIn, limitsIn } = await import('../lib/core/readers/claude.mjs');
+  const lines = [entry({ type: 'assistant', uuid: 'a', timestamp: at(1), message: { model: 'm', stop_reason: 'end_turn', usage: { input_tokens: 2, cache_read_input_tokens: 225208, cache_creation_input_tokens: 1608, output_tokens: 234 }, content: [{ type: 'text', text: 'Hi.' }] } }),
+    entry({ type: 'assistant', uuid: 'b', timestamp: at(2), message: { model: 'm', stop_reason: 'tool_use', usage: { input_tokens: 5, cache_read_input_tokens: 0, cache_creation_input_tokens: 0 }, content: [{ type: 'thinking', thinking: 'private', signature: 'x' }] } })];
+  assert.deepEqual(conversationAfter(lines, startCursor(at(0))).items.map((x) => [x.role, x.context?.used]), [['ai', 226818], ['meta', 5]], 'output tokens do not count; thinking alone still tells it');
+  assert.equal(contextWindowIn('## Context Usage\n\n**Model:** claude-opus-5-5  \n**Tokens:** 13.8k / 1m (1%)'), 1000000);
+  assert.equal(contextWindowIn('**Tokens:** 5k / 200k (2%)'), 200000);
+  assert.equal(contextWindowIn('something else'), undefined);
+  const usage = 'You are currently using your subscription\n\nCurrent session: 2% used · resets Nov 14 at 6:09pm (Asia/Singapore)\nCurrent week (all models): 57% used · resets Nov 15\nCurrent week (Fable): 4% used';
+  assert.deepEqual(limitsIn(usage), [{ name: '5-hour', used: 2 }, { name: '7-day', used: 57 }]);
+  assert.equal(limitsIn('You are using an API key'), undefined, 'no limits: none shown, never a made-up 0%');
+});
