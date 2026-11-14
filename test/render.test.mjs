@@ -1,7 +1,8 @@
 // What the chat apps are sent, held still: the Feishu cards, the Telegram messages and
-// what the core hands the chat side, for one fixed set of inputs. A change in how anything
-// looks shows here as a diff against test/snapshots/render.json; when the change is meant,
-// write the file again: UPDATE_SNAPSHOTS=1 node --test test/render.test.mjs
+// what the core hands the chat side, for one fixed set of made-up inputs (nothing real:
+// no terminal, chat or account of yours). test/expected/sent.json holds what they must
+// come out as; a change in how anything looks shows here as a diff against it. When the
+// change is meant, write the file again: UPDATE_EXPECTED=1 node --test test/render.test.mjs
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -15,8 +16,8 @@ import { overviewCard, overviewText } from '../lib/chats/feishu/overview.mjs';
 import { fakeChat, fakeHc, fakeReaders, fakeStore, terminal } from './fakes.mjs';
 
 process.env.TZ = 'UTC'; // the overview's clock
-const FILE = path.join(path.dirname(fileURLToPath(import.meta.url)), 'snapshots', 'render.json');
-const update = process.env.UPDATE_SNAPSHOTS === '1';
+const FILE = path.join(path.dirname(fileURLToPath(import.meta.url)), 'expected', 'sent.json');
+const update = process.env.UPDATE_EXPECTED === '1';
 const saved = fs.existsSync(FILE) ? JSON.parse(fs.readFileSync(FILE, 'utf8')) : {};
 const seen = {};
 after(() => {
@@ -28,7 +29,7 @@ function same(name, value) {
   const plain = JSON.parse(JSON.stringify(value));
   seen[name] = plain;
   if (update) return;
-  assert.ok(name in saved, `no snapshot "${name}" yet: UPDATE_SNAPSHOTS=1 node --test test/render.test.mjs`);
+  assert.ok(name in saved, `nothing expected for "${name}" yet: UPDATE_EXPECTED=1 node --test test/render.test.mjs`);
   assert.deepEqual(plain, saved[name]);
 }
 
@@ -149,4 +150,134 @@ test('the core: what it hands the chat app for a turn, a dialog, a screen and an
   fs.rmSync(inbox, { recursive: true, force: true });
   const calls = chat.calls.filter((c) => !['start', 'showOverview', 'markWorking', 'markDone'].includes(c.name)).map((c) => [c.name, ...c.args]);
   same('core.calls', calls);
+});
+
+// End to end: the core driving each real chat app, with only the network faked, so what
+// Feishu and Telegram are sent is held still across a change in what the core hands them.
+// The scenario: a terminal's room opens; your message; a turn with tools, an image, a note
+// from another terminal and the answer; a dialog read off the screen, answered; one with no
+// menu; /screen; the terminal ends, and a message to it after that.
+// the clock in the overview ("Updated 15:31", "since 15:31") is the time the test ran
+const atNoTime = (value) => JSON.parse(JSON.stringify(value).replace(/\b(Updated|since) \d{2}:\d{2}\b/g, '$1 <time>'));
+
+async function playEndToEnd(makeChat) {
+  const hc = fakeHc();
+  const store = fakeStore();
+  const r = fakeReaders();
+  const inbox = fs.mkdtempSync(path.join(os.tmpdir(), 'herdrchat-render-e2e-'));
+  const t = terminal('t1', { program: 'fake', agent: true });
+  t.foreground.cwd = '/w';
+  let engine = null;
+  const chat = makeChat({ store, lane: (k, label, fn) => engine.laneOf(k, label, fn), scopeOf: (k) => engine.scopeOfKey(k) });
+  chat.start = () => {}; // the app's own connection is not the network faked here
+  const dialogs = [];
+  const postDialog = chat.postDialog;
+  chat.postDialog = async (room, dialog, value) => {
+    const message = await postDialog(room, dialog, value);
+    dialogs.push({ dialog, value, message });
+    return message;
+  };
+  engine = createEngine({ cfg: { sessions: ['s'] }, chat, hc, readers: r.readers, store, log: quiet, logWarn: quiet, logError: (...a) => { throw new Error(a.join(' ')); }, startedAt: '2026-01-01T00:00:00.000Z', inbox, quick: true, asksWaiting: () => false, askLives: async () => true, shell: async () => 'main\n' });
+  running.add(engine);
+  const started = engine.start();
+  hc.snapshot('s', [t]);
+  await started;
+  await settle(engine);
+  const room = store.read().chats['s|t1'].chat;
+  await engine.onMessage({ room, where: room, message: 'm-in', text: 'fix it', images: [] });
+  await settle(engine);
+  r.queue('t1', [
+    { role: 'meta', model: 'model-a', at: '2026-01-02T00:00:00.000Z', id: 'm' },
+    { role: 'you', text: 'fix it', at: '2026-01-02T00:00:01.000Z', id: 'a' },
+    { role: 'you', text: 'typed in the terminal too', at: '2026-01-02T00:00:02.000Z', id: 'b' },
+    { role: 'tool', text: '▸ bash: ls *.md', at: '2026-01-02T00:00:03.000Z', id: 'c', context: { used: 50000, size: 200000 } },
+    { role: 'tool', text: '▸ read: a_b.txt', at: '2026-01-02T00:00:04.000Z', id: 'd' },
+    { role: 'image', from: 'ai', media: 'image/png', data: 'AAAA', at: '2026-01-02T00:00:05.000Z', id: 'e' },
+    { role: 'you', text: '<hc from="t7 review" reach="t1">look at this</hc>', at: '2026-01-02T00:00:06.000Z', id: 'f' },
+    { role: 'ai', text: 'Fixed it: `T1_ABC` <now> & **done**.\n\n```\nok\n```', at: '2026-01-02T00:00:07.000Z', id: 'g', end: true },
+  ]);
+  hc.turn('s', 't1', 'done');
+  await settle(engine);
+  hc.screens.set('s|t1', '╭──────╮\n│ Allow ls?\n│ ❯ 1. Yes\n│   2. No\n╰──────╯');
+  t.status = { app: 'fake-agent', state: 'blocked', kind: 'permission' };
+  hc.change('s', 'status', t);
+  hc.turn('s', 't1', 'blocked');
+  await settle(engine);
+  const asked = dialogs.at(-1);
+  assert.ok(asked, 'the dialog was posted');
+  const yes = asked.dialog.menu.options.find((o) => o.label === 'Yes');
+  hc.screens.set('s|t1', 'Running ls');
+  await engine.onAction({ value: { ...asked.value, pick: yes.n, label: yes.label }, message: asked.message, answer: '' });
+  await settle(engine);
+  hc.screens.set('s|t1', 'Press any key to go on');
+  t.status = { app: 'fake-agent', state: 'working' };
+  hc.change('s', 'status', t);
+  await settle(engine);
+  await engine.onMessage({ room, where: room, message: 'm-screen', text: '/screen', images: [] });
+  await settle(engine);
+  hc.change('s', 'finished', { ...t, state: 'finished', foreground: null }, { reason: 'exit 0' });
+  await settle(engine);
+  await engine.onMessage({ room, where: room, message: 'm-late', text: 'still there?', images: [] });
+  await settle(engine);
+  engine.stop();
+  running.delete(engine);
+  fs.rmSync(inbox, { recursive: true, force: true });
+}
+
+test('end to end: what Feishu is sent', async () => {
+  const Lark = await import('@larksuiteoapi/node-sdk');
+  const feishu = await import('../lib/chats/feishu/index.mjs');
+  const http = Lark.defaultHttpInstance;
+  const sent = [];
+  let n = 0;
+  const realAdapter = http.defaults.adapter;
+  http.defaults.adapter = async (config) => {
+    const url = new URL(config.url, 'https://open.feishu.cn');
+    let data = config.data;
+    if (typeof data === 'string') data = JSON.parse(data);
+    else if (data && typeof data === 'object' && typeof data.getHeaders === 'function') data = '(form)';
+    if (!url.pathname.endsWith('/tenant_access_token/internal')) sent.push({ method: config.method, path: url.pathname, params: config.params, data });
+    n += 1;
+    const body = { code: 0, msg: 'ok', tenant_access_token: 't-test', expire: 7200, image_key: `img_${n}`, file_key: `file_${n}`, data: { chat_id: `oc_${n}`, message_id: `om_${n}`, id: `tag_${n}`, image_key: `img_${n}`, items: [], has_more: false } };
+    return { data: body, status: 200, statusText: 'OK', headers: {}, config };
+  };
+  const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), 'herdrchat-render-e2e-feishu-'));
+  try {
+    const cfg = { appId: 'cli_test', appSecret: 'secret', ownerOpenId: 'ou_owner', sessions: ['s'], muted: { all: true, spaces: [] }, silent: { all: false, spaces: [] }, botTags: true, userTags: true };
+    await playEndToEnd(({ store, lane, scopeOf }) => feishu.create({ cfg, store, log: quiet, logWarn: quiet, logError: quiet, stateDir, lane, scopeOf }));
+  } finally {
+    http.defaults.adapter = realAdapter;
+    fs.rmSync(stateDir, { recursive: true, force: true });
+  }
+  same('e2e.feishu', atNoTime(sent));
+});
+
+test('end to end: what Telegram is sent', async () => {
+  const telegram = await import('../lib/chats/telegram/index.mjs');
+  const sent = [];
+  const realFetch = globalThis.fetch;
+  globalThis.fetch = async (url, opts) => {
+    const method = String(url).split('/').pop();
+    const body = opts.body instanceof FormData ? Object.fromEntries([...opts.body.entries()].map(([k, v]) => [k, typeof v === 'string' ? v : `(file ${v.name || ''})`])) : JSON.parse(opts.body);
+    sent.push({ method, body });
+    return { ok: true, json: async () => ({ ok: true, result: { message_id: sent.length, message_thread_id: 77, username: 'testbot', has_topics_enabled: true } }) };
+  };
+  try {
+    const cfg = { env: { TELEGRAM_BOT_TOKEN: '1:test', TELEGRAM_OWNER_ID: '42' }, sessions: ['s'], muted: { all: true, spaces: [] }, silent: { all: false, spaces: [] } };
+    await playEndToEnd(({ store, lane, scopeOf }) => telegram.create({ cfg, store, log: quiet, logWarn: quiet, logError: quiet, stateDir: os.tmpdir(), lane, scopeOf }));
+  } finally {
+    globalThis.fetch = realFetch;
+  }
+  const ids = new Map();
+  const steady = JSON.parse(JSON.stringify(sent), (k, v) => (k === 'callback_data' && typeof v === 'string' ? v.replace(/^[^:]+/, (id) => { if (!ids.has(id)) ids.set(id, `<id${ids.size}>`); return ids.get(id); }) : v));
+  same('e2e.telegram', atNoTime(steady));
+});
+
+// The file is in git, so it may hold made-up data only: a home folder, a Feishu id of
+// the real length, an app id, a bot token or an email address here means something real
+// got into a test's inputs.
+test('what is expected holds nothing real', () => {
+  const text = fs.readFileSync(FILE, 'utf8');
+  const REAL = [/\/(Users|home)\/\w/, /\b(ou|oc|om|on)_[0-9a-f]{20,}\b/, /\bcli_[0-9a-f]{12,}\b/, /\b\d{8,}:[\w-]{30,}\b/, /[\w.+-]+@[\w-]+\.[\w.]+/];
+  for (const pattern of REAL) assert.doesNotMatch(text, pattern);
 });

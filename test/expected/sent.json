@@ -996,5 +996,549 @@
       "endRoom",
       "s|t1"
     ]
+  ],
+  "e2e.feishu": [
+    {
+      "method": "post",
+      "path": "/open-apis/im/v1/chats",
+      "params": {
+        "user_id_type": "open_id"
+      },
+      "data": {
+        "name": "proj / master",
+        "description": "hc terminal t1 (hc session \"s\"). Type here to talk to it.",
+        "user_id_list": [
+          "ou_owner"
+        ],
+        "group_message_type": "chat"
+      }
+    },
+    {
+      "method": "post",
+      "path": "/open-apis/im/v1/messages",
+      "params": {
+        "receive_id_type": "open_id"
+      },
+      "data": {
+        "receive_id": "ou_owner",
+        "msg_type": "interactive",
+        "content": "{\"schema\":\"2.0\",\"config\":{\"update_multi\":true},\"header\":{\"title\":{\"tag\":\"plain_text\",\"content\":\"herdrchat · 1 terminals\"},\"template\":\"green\",\"icon\":{\"tag\":\"standard_icon\",\"token\":\"done_outlined\",\"color\":\"green\"}},\"body\":{\"elements\":[{\"tag\":\"markdown\",\"content\":\"<text_tag color='neutral'>idle</text_tag> **[proj / master](https://applink.feishu.cn/client/chat/open?openChatId=oc_2)** · `t1`\"},{\"tag\":\"markdown\",\"content\":\"Updated <time>\",\"text_size\":\"notation\"}]}}"
+      }
+    },
+    {
+      "method": "post",
+      "path": "/open-apis/im/v1/images",
+      "params": {},
+      "data": "(form)"
+    },
+    {
+      "method": "put",
+      "path": "/open-apis/im/v1/chats/oc_2",
+      "params": {},
+      "data": {
+        "avatar": "img_4"
+      }
+    },
+    {
+      "method": "post",
+      "path": "/open-apis/im/v2/tags",
+      "params": {},
+      "data": {
+        "create_tag": {
+          "tag_type": "tenant",
+          "name": "s"
+        }
+      }
+    },
+    {
+      "method": "post",
+      "path": "/open-apis/im/v2/biz_entity_tag_relation",
+      "params": {},
+      "data": {
+        "tag_biz_type": "chat",
+        "biz_entity_id": "oc_2",
+        "tag_ids": [
+          "tag_6"
+        ]
+      }
+    },
+    {
+      "method": "post",
+      "path": "/open-apis/im/v1/messages/m-in/reactions",
+      "params": {},
+      "data": {
+        "reaction_type": {
+          "emoji_type": "THINKING"
+        }
+      }
+    },
+    {
+      "method": "post",
+      "path": "/open-apis/im/v1/messages",
+      "params": {
+        "receive_id_type": "chat_id"
+      },
+      "data": {
+        "receive_id": "oc_2",
+        "msg_type": "interactive",
+        "content": "{\"schema\":\"2.0\",\"config\":{\"summary\":{\"content\":\"(blank)\"}},\"body\":{\"elements\":[{\"tag\":\"markdown\",\"content\":\"```\\n(blank)\\n```\"},{\"tag\":\"markdown\",\"content\":\"fake-agent · screen · main\",\"text_size\":\"notation\"}]}}"
+      }
+    },
+    {
+      "method": "post",
+      "path": "/open-apis/im/v1/messages/m-in/reactions",
+      "params": {},
+      "data": {
+        "reaction_type": {
+          "emoji_type": "OK"
+        }
+      }
+    },
+    {
+      "method": "post",
+      "path": "/open-apis/im/v1/images",
+      "params": {},
+      "data": "(form)"
+    },
+    {
+      "method": "post",
+      "path": "/open-apis/im/v1/messages",
+      "params": {
+        "receive_id_type": "chat_id"
+      },
+      "data": {
+        "receive_id": "oc_2",
+        "msg_type": "interactive",
+        "content": "{\"schema\":\"2.0\",\"config\":{\"update_multi\":true},\"header\":{\"title\":{\"tag\":\"plain_text\",\"content\":\"Working…\"},\"template\":\"blue\",\"icon\":{\"tag\":\"standard_icon\",\"token\":\"loading_outlined\",\"color\":\"blue\"}},\"body\":{\"elements\":[{\"tag\":\"markdown\",\"content\":\"**You:**\\n> typed in the terminal too\\n\\n▸ bash: ls *.md\\n▸ read: a_b.txt\\n\\n![image](img_11)\\n\\n**From t7 review** _(answer: t1)_\\n> look at this\"},{\"tag\":\"markdown\",\"content\":\"fake-agent · model-a · main · context 25% (50k)\",\"text_size\":\"notation\"}]}}"
+      }
+    },
+    {
+      "method": "patch",
+      "path": "/open-apis/im/v1/messages/om_12",
+      "params": {},
+      "data": {
+        "content": "{\"schema\":\"2.0\",\"config\":{\"update_multi\":true},\"header\":{\"title\":{\"tag\":\"plain_text\",\"content\":\"Worked\"},\"template\":\"grey\",\"icon\":{\"tag\":\"standard_icon\",\"token\":\"done_outlined\",\"color\":\"grey\"}},\"body\":{\"elements\":[{\"tag\":\"markdown\",\"content\":\"**You:**\\n> typed in the terminal too\\n\\n▸ bash: ls *.md\\n▸ read: a_b.txt\\n\\n![image](img_11)\\n\\n**From t7 review** _(answer: t1)_\\n> look at this\"},{\"tag\":\"markdown\",\"content\":\"fake-agent · model-a · main · context 25% (50k)\",\"text_size\":\"notation\"}]}}"
+      }
+    },
+    {
+      "method": "post",
+      "path": "/open-apis/im/v1/messages",
+      "params": {
+        "receive_id_type": "chat_id"
+      },
+      "data": {
+        "receive_id": "oc_2",
+        "msg_type": "interactive",
+        "content": "{\"schema\":\"2.0\",\"config\":{\"summary\":{\"content\":\"Fixed it: T1_ABC <now> & done.\"}},\"body\":{\"elements\":[{\"tag\":\"markdown\",\"content\":\"Fixed it: `T1_ABC` <now> & **done**.\\n\\n```\\nok\\n```\"},{\"tag\":\"markdown\",\"content\":\"fake-agent · model-a · main · context 25% (50k)\",\"text_size\":\"notation\"}]}}"
+      }
+    },
+    {
+      "method": "patch",
+      "path": "/open-apis/im/v1/messages/om_3",
+      "params": {},
+      "data": {
+        "content": "{\"schema\":\"2.0\",\"config\":{\"update_multi\":true},\"header\":{\"title\":{\"tag\":\"plain_text\",\"content\":\"1 needs you · herdrchat · 1 terminals\"},\"template\":\"orange\",\"icon\":{\"tag\":\"standard_icon\",\"token\":\"warning_outlined\",\"color\":\"orange\"}},\"body\":{\"elements\":[{\"tag\":\"markdown\",\"content\":\"<text_tag color='orange'>needs you (permission)</text_tag> **[proj / master](https://applink.feishu.cn/client/chat/open?openChatId=oc_2)** · since <time> · `t1`\"},{\"tag\":\"markdown\",\"content\":\"Updated <time>\",\"text_size\":\"notation\"}]}}"
+      }
+    },
+    {
+      "method": "post",
+      "path": "/open-apis/im/v1/messages",
+      "params": {
+        "receive_id_type": "chat_id"
+      },
+      "data": {
+        "receive_id": "oc_2",
+        "msg_type": "interactive",
+        "content": "{\"schema\":\"2.0\",\"config\":{\"update_multi\":true},\"header\":{\"title\":{\"tag\":\"plain_text\",\"content\":\"Needs you (permission)\"},\"template\":\"orange\",\"icon\":{\"tag\":\"standard_icon\",\"token\":\"warning_outlined\",\"color\":\"orange\"}},\"body\":{\"elements\":[{\"tag\":\"markdown\",\"content\":\"╭──────╮\\nAllow ls?\"},{\"tag\":\"column_set\",\"flex_mode\":\"flow\",\"horizontal_spacing\":\"small\",\"columns\":[{\"tag\":\"column\",\"width\":\"auto\",\"elements\":[{\"tag\":\"button\",\"type\":\"primary_filled\",\"width\":\"default\",\"size\":\"medium\",\"text\":{\"tag\":\"plain_text\",\"content\":\"1. Yes\"},\"hover_tips\":{\"tag\":\"plain_text\",\"content\":\"1. Yes\"},\"behaviors\":[{\"type\":\"callback\",\"value\":{\"s\":\"s\",\"a\":\"t1\",\"k\":\"3edc02f48551\",\"pick\":1,\"label\":\"Yes\"}}]}]},{\"tag\":\"column\",\"width\":\"auto\",\"elements\":[{\"tag\":\"button\",\"type\":\"default\",\"width\":\"default\",\"size\":\"medium\",\"text\":{\"tag\":\"plain_text\",\"content\":\"2. No\"},\"hover_tips\":{\"tag\":\"plain_text\",\"content\":\"2. No\"},\"behaviors\":[{\"type\":\"callback\",\"value\":{\"s\":\"s\",\"a\":\"t1\",\"k\":\"3edc02f48551\",\"pick\":2,\"label\":\"No\"}}]}]}]},{\"tag\":\"column_set\",\"flex_mode\":\"flow\",\"horizontal_spacing\":\"small\",\"columns\":[{\"tag\":\"column\",\"width\":\"auto\",\"elements\":[{\"tag\":\"button\",\"type\":\"danger_text\",\"width\":\"default\",\"size\":\"medium\",\"text\":{\"tag\":\"plain_text\",\"content\":\"Esc (cancel)\"},\"hover_tips\":{\"tag\":\"plain_text\",\"content\":\"Esc (cancel)\"},\"behaviors\":[{\"type\":\"callback\",\"value\":{\"s\":\"s\",\"a\":\"t1\",\"k\":\"3edc02f48551\",\"pick\":\"esc\"}}]}]}]},{\"tag\":\"markdown\",\"content\":\"fake-agent · screen · main\",\"text_size\":\"notation\"}]}}"
+      }
+    },
+    {
+      "method": "patch",
+      "path": "/open-apis/im/v1/messages/om_16",
+      "params": {},
+      "data": {
+        "content": "{\"schema\":\"2.0\",\"config\":{\"update_multi\":true},\"header\":{\"title\":{\"tag\":\"plain_text\",\"content\":\"Done\"},\"template\":\"grey\",\"icon\":{\"tag\":\"standard_icon\",\"token\":\"done_outlined\",\"color\":\"grey\"}},\"body\":{\"elements\":[{\"tag\":\"markdown\",\"content\":\"╭──────╮\\nAllow ls?\"},{\"tag\":\"markdown\",\"content\":\"Answered.\",\"text_size\":\"notation\",\"icon\":{\"tag\":\"standard_icon\",\"token\":\"done_outlined\",\"color\":\"grey\"}},{\"tag\":\"markdown\",\"content\":\"fake-agent · screen · main\",\"text_size\":\"notation\"}]}}"
+      }
+    },
+    {
+      "method": "patch",
+      "path": "/open-apis/im/v1/messages/om_3",
+      "params": {},
+      "data": {
+        "content": "{\"schema\":\"2.0\",\"config\":{\"update_multi\":true},\"header\":{\"title\":{\"tag\":\"plain_text\",\"content\":\"herdrchat · 1 terminals\"},\"template\":\"blue\",\"icon\":{\"tag\":\"standard_icon\",\"token\":\"loading_outlined\",\"color\":\"blue\"}},\"body\":{\"elements\":[{\"tag\":\"markdown\",\"content\":\"<text_tag color='blue'>working</text_tag> **[proj / master](https://applink.feishu.cn/client/chat/open?openChatId=oc_2)** · since <time> · `t1`\"},{\"tag\":\"markdown\",\"content\":\"Updated <time>\",\"text_size\":\"notation\"}]}}"
+      }
+    },
+    {
+      "method": "post",
+      "path": "/open-apis/im/v1/messages",
+      "params": {
+        "receive_id_type": "chat_id"
+      },
+      "data": {
+        "receive_id": "oc_2",
+        "msg_type": "interactive",
+        "content": "{\"schema\":\"2.0\",\"config\":{\"summary\":{\"content\":\"Press any key to go on\"}},\"body\":{\"elements\":[{\"tag\":\"markdown\",\"content\":\"```\\nPress any key to go on\\n```\"}]}}"
+      }
+    },
+    {
+      "method": "post",
+      "path": "/open-apis/im/v1/messages",
+      "params": {
+        "receive_id_type": "chat_id"
+      },
+      "data": {
+        "receive_id": "oc_2",
+        "msg_type": "interactive",
+        "content": "{\"schema\":\"2.0\",\"config\":{\"summary\":{\"content\":\"🔚 Terminal ended (exit 0)\"}},\"body\":{\"elements\":[{\"tag\":\"markdown\",\"content\":\"🔚 **Terminal ended** (exit 0)\"}]}}"
+      }
+    },
+    {
+      "method": "post",
+      "path": "/open-apis/im/v2/tags",
+      "params": {},
+      "data": {
+        "create_tag": {
+          "tag_type": "tenant",
+          "name": "ended"
+        }
+      }
+    },
+    {
+      "method": "post",
+      "path": "/open-apis/im/v2/biz_entity_tag_relation",
+      "params": {},
+      "data": {
+        "tag_biz_type": "chat",
+        "biz_entity_id": "oc_2",
+        "tag_ids": [
+          "tag_21"
+        ]
+      }
+    },
+    {
+      "method": "patch",
+      "path": "/open-apis/im/v1/messages/om_3",
+      "params": {},
+      "data": {
+        "content": "{\"schema\":\"2.0\",\"config\":{\"update_multi\":true},\"header\":{\"title\":{\"tag\":\"plain_text\",\"content\":\"herdrchat · 0 terminals\"},\"template\":\"green\",\"icon\":{\"tag\":\"standard_icon\",\"token\":\"done_outlined\",\"color\":\"green\"}},\"body\":{\"elements\":[{\"tag\":\"markdown\",\"content\":\"No terminal is shown in herdr-app.\"},{\"tag\":\"markdown\",\"content\":\"Updated <time>\",\"text_size\":\"notation\"}]}}"
+      }
+    },
+    {
+      "method": "post",
+      "path": "/open-apis/im/v1/messages",
+      "params": {
+        "receive_id_type": "chat_id"
+      },
+      "data": {
+        "receive_id": "oc_2",
+        "msg_type": "interactive",
+        "content": "{\"schema\":\"2.0\",\"config\":{\"summary\":{\"content\":\"Not delivered: this terminal has ended. Nothing you send here reaches it.\"}},\"body\":{\"elements\":[{\"tag\":\"markdown\",\"content\":\"Not delivered: this terminal has ended. Nothing you send here reaches it.\"}]}}"
+      }
+    }
+  ],
+  "e2e.telegram": [
+    {
+      "method": "createForumTopic",
+      "body": {
+        "chat_id": "42",
+        "name": "proj / master",
+        "icon_color": 7322096
+      }
+    },
+    {
+      "method": "sendMessage",
+      "body": {
+        "chat_id": "42",
+        "disable_notification": true,
+        "link_preview_options": {
+          "is_disabled": true
+        },
+        "text": "<b>herdrchat · 1 terminals</b>\n\n❓ <b>proj / master</b> · idle · <code>t1</code>",
+        "parse_mode": "HTML"
+      }
+    },
+    {
+      "method": "setMessageReaction",
+      "body": {
+        "chat_id": "42",
+        "message_id": null,
+        "reaction": [
+          {
+            "type": "emoji",
+            "emoji": "👀"
+          }
+        ]
+      }
+    },
+    {
+      "method": "sendMessage",
+      "body": {
+        "chat_id": "42",
+        "message_thread_id": 77,
+        "disable_notification": true,
+        "link_preview_options": {
+          "is_disabled": true
+        },
+        "text": "<pre>(blank)</pre>\n\n<i>fake-agent · screen · main</i>",
+        "parse_mode": "HTML"
+      }
+    },
+    {
+      "method": "sendMessage",
+      "body": {
+        "chat_id": "42",
+        "message_thread_id": 77,
+        "disable_notification": false,
+        "link_preview_options": {
+          "is_disabled": true
+        },
+        "reply_parameters": {
+          "message_id": 4,
+          "allow_sending_without_reply": true
+        },
+        "text": "⚠️ needs you",
+        "parse_mode": "HTML"
+      }
+    },
+    {
+      "method": "setMessageReaction",
+      "body": {
+        "chat_id": "42",
+        "message_id": null,
+        "reaction": [
+          {
+            "type": "emoji",
+            "emoji": "👌"
+          }
+        ]
+      }
+    },
+    {
+      "method": "sendMessage",
+      "body": {
+        "chat_id": "42",
+        "message_thread_id": 77,
+        "disable_notification": true,
+        "link_preview_options": {
+          "is_disabled": true
+        },
+        "text": "<b>⌛️ Working…</b>\n\n<b>You:</b>\n<blockquote>typed in the terminal too</blockquote>\n\n▸ bash: ls *.md\n▸ read: a_b.txt\n\n<b>From t7 review</b> <i>(answer: t1)</i>\n<blockquote>look at this</blockquote>\n\n<i>fake-agent · model-a · main · context 25% (50k)</i>",
+        "parse_mode": "HTML"
+      }
+    },
+    {
+      "method": "sendPhoto",
+      "body": {
+        "chat_id": "42",
+        "message_thread_id": "77",
+        "disable_notification": "true",
+        "photo": "(file image.png)"
+      }
+    },
+    {
+      "method": "editMessageText",
+      "body": {
+        "chat_id": "42",
+        "message_id": 7,
+        "text": "<b>✅ Worked</b>\n\n<b>You:</b>\n<blockquote>typed in the terminal too</blockquote>\n\n▸ bash: ls *.md\n▸ read: a_b.txt\n\n<b>From t7 review</b> <i>(answer: t1)</i>\n<blockquote>look at this</blockquote>\n\n<i>fake-agent · model-a · main · context 25% (50k)</i>",
+        "parse_mode": "HTML",
+        "link_preview_options": {
+          "is_disabled": true
+        }
+      }
+    },
+    {
+      "method": "sendMessage",
+      "body": {
+        "chat_id": "42",
+        "message_thread_id": 77,
+        "disable_notification": true,
+        "link_preview_options": {
+          "is_disabled": true
+        },
+        "text": "Fixed it: <code>T1_ABC</code> &lt;now&gt; &amp; <b>done</b>.\n\n<pre>ok</pre>\n\n<i>fake-agent · model-a · main · context 25% (50k)</i>",
+        "parse_mode": "HTML"
+      }
+    },
+    {
+      "method": "sendMessage",
+      "body": {
+        "chat_id": "42",
+        "message_thread_id": 77,
+        "disable_notification": false,
+        "link_preview_options": {
+          "is_disabled": true
+        },
+        "reply_parameters": {
+          "message_id": 10,
+          "allow_sending_without_reply": true
+        },
+        "text": "✅ done",
+        "parse_mode": "HTML"
+      }
+    },
+    {
+      "method": "editMessageText",
+      "body": {
+        "chat_id": "42",
+        "message_id": 2,
+        "text": "<b>⚠️ 1 needs you · herdrchat · 1 terminals</b>\n\n⚠️ <b>proj / master</b> · needs you (permission) · since <time> · <code>t1</code>",
+        "parse_mode": "HTML",
+        "link_preview_options": {
+          "is_disabled": true
+        }
+      }
+    },
+    {
+      "method": "sendMessage",
+      "body": {
+        "chat_id": "42",
+        "message_thread_id": 77,
+        "disable_notification": true,
+        "link_preview_options": {
+          "is_disabled": true
+        },
+        "reply_markup": {
+          "inline_keyboard": [
+            [
+              {
+                "text": "1. Yes",
+                "callback_data": "<id0>:1"
+              }
+            ],
+            [
+              {
+                "text": "2. No",
+                "callback_data": "<id0>:2"
+              }
+            ],
+            [
+              {
+                "text": "Esc (cancel)",
+                "callback_data": "<id0>:esc"
+              }
+            ]
+          ]
+        },
+        "text": "<b>⚠️ Needs you (permission)</b>\n\n╭──────╮\nAllow ls?\n\n<i>fake-agent · screen · main</i>",
+        "parse_mode": "HTML"
+      }
+    },
+    {
+      "method": "pinChatMessage",
+      "body": {
+        "chat_id": "42",
+        "message_id": 13,
+        "disable_notification": true
+      }
+    },
+    {
+      "method": "sendMessage",
+      "body": {
+        "chat_id": "42",
+        "message_thread_id": 77,
+        "disable_notification": false,
+        "link_preview_options": {
+          "is_disabled": true
+        },
+        "reply_parameters": {
+          "message_id": 13,
+          "allow_sending_without_reply": true
+        },
+        "text": "⚠️ needs you",
+        "parse_mode": "HTML"
+      }
+    },
+    {
+      "method": "unpinChatMessage",
+      "body": {
+        "chat_id": "42",
+        "message_id": 13
+      }
+    },
+    {
+      "method": "editMessageText",
+      "body": {
+        "chat_id": "42",
+        "message_id": 2,
+        "text": "<b>herdrchat · 1 terminals</b>\n\n⌛️ <b>proj / master</b> · working · since <time> · <code>t1</code>",
+        "parse_mode": "HTML",
+        "link_preview_options": {
+          "is_disabled": true
+        }
+      }
+    },
+    {
+      "method": "editMessageText",
+      "body": {
+        "chat_id": "42",
+        "message_id": 13,
+        "text": "<b>✅ Done</b>\n\n╭──────╮\nAllow ls?\n\n<b>✔ Answered.</b>\n\n<i>fake-agent · screen · main</i>",
+        "parse_mode": "HTML",
+        "link_preview_options": {
+          "is_disabled": true
+        },
+        "reply_markup": {
+          "inline_keyboard": []
+        }
+      }
+    },
+    {
+      "method": "sendMessage",
+      "body": {
+        "chat_id": "77",
+        "disable_notification": true,
+        "link_preview_options": {
+          "is_disabled": true
+        },
+        "text": "<pre>Press any key to go on</pre>",
+        "parse_mode": "HTML"
+      }
+    },
+    {
+      "method": "sendMessage",
+      "body": {
+        "chat_id": "42",
+        "message_thread_id": 77,
+        "disable_notification": true,
+        "link_preview_options": {
+          "is_disabled": true
+        },
+        "text": "🔚 <b>Terminal ended</b> (exit 0)",
+        "parse_mode": "HTML"
+      }
+    },
+    {
+      "method": "editMessageText",
+      "body": {
+        "chat_id": "42",
+        "message_id": 2,
+        "text": "<b>herdrchat · 0 terminals</b>\n\nNo terminal is shown in herdr-app.",
+        "parse_mode": "HTML",
+        "link_preview_options": {
+          "is_disabled": true
+        }
+      }
+    },
+    {
+      "method": "editForumTopic",
+      "body": {
+        "chat_id": "42",
+        "message_thread_id": 77,
+        "name": "🔚 proj / master"
+      }
+    },
+    {
+      "method": "sendMessage",
+      "body": {
+        "chat_id": "77",
+        "disable_notification": true,
+        "link_preview_options": {
+          "is_disabled": true
+        },
+        "text": "Not delivered: this terminal has ended. Nothing you send here reaches it.",
+        "parse_mode": "HTML"
+      }
+    }
   ]
 }
