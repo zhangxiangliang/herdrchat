@@ -109,7 +109,10 @@ read off the screen, as before. Codex asks you once to trust the new hook (`/hoo
 Codex), and while the hook waits Codex shows no prompt of its own: tap "Answer in the
 terminal" on the card to get it there. `herdrchat hooks uninstall` takes it out. Codex's
 questions (in Plan mode, and the ones it asks without waiting) need no hook: they are read
-from its own log.
+from its own log. For Pi it puts in a small Pi extension instead
+(`~/.pi/agent/extensions/herdrchat.js`), which tells herdrchat which session each pi
+writes, so two pi in one folder each keep to their own room (in a pi that runs already:
+`/reload`).
 
 ## Update
 

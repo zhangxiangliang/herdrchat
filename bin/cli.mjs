@@ -604,16 +604,21 @@ const commands = {
       for (const line of done) ok(`taken out: ${line}`);
       return;
     }
-    if (sub !== 'install') fail('herdrchat hooks: status (default), install [claude|codex] or uninstall');
-    const wanted = only.length ? only : ['claude', 'codex'];
-    const unknown = wanted.filter((w) => !['claude', 'codex'].includes(w));
-    if (unknown.length) fail(`herdrchat hooks install: ${unknown.join(', ')}? Name claude, codex or both (or none: both).`);
+    if (sub !== 'install') fail('herdrchat hooks: status (default), install [claude|codex|pi] or uninstall');
+    const AGENTS = ['claude', 'codex', 'pi'];
+    const wanted = only.length ? only : AGENTS;
+    const unknown = wanted.filter((w) => !AGENTS.includes(w));
+    if (unknown.length) fail(`herdrchat hooks install: ${unknown.join(', ')}? Name claude, codex or pi (or none: all of them).`);
     const picked = status.filter((a) => wanted.includes(a.agent) && a.there);
     if (!picked.length) fail(`Neither of ${wanted.join(', ')} is set up here (no ${status.filter((a) => wanted.includes(a.agent)).map((a) => a.dir).join(', ')}).`);
-    console.log('herdrchat adds its hook to:');
-    for (const a of picked) tell(`${a.name}: ${a.file} (PermissionRequest; a copy of the file is kept first)`);
-    console.log(`
-With it, when ${picked.map((a) => a.name).join(' or ')} asks you something in an hc terminal (a permission,
+    console.log('herdrchat adds:');
+    for (const a of picked) tell(a.extension ? `${a.name}: ${a.file} (a Pi extension of its own: it tells herdrchat which session file each pi writes)` : `${a.name}: ${a.file} (PermissionRequest; a copy of the file is kept first)`);
+    const asking = picked.filter((a) => !a.extension);
+    if (picked.some((a) => a.extension)) console.log(`
+With the Pi extension, each pi labels its hc terminal with its session file, so two pi in
+one folder are told apart (without it, both rooms follow the folder's newest session).${asking.length ? '' : '\nTake it out any time: herdrchat hooks uninstall'}`);
+    if (asking.length) console.log(`
+With it, when ${asking.map((a) => a.name).join(' or ')} asks you something in an hc terminal (a permission,
 a question, a plan), the card in your chat shows its own words and options, and your
 answer goes straight back to it. The terminal still works: answer there and the card closes.
 Claude Code shows its prompt as usual. Codex shows its prompt only once the hook is done: tap
@@ -632,6 +637,7 @@ Take it out any time: herdrchat hooks uninstall`);
     for (const line of installHooks(picked.map((a) => a.agent))) ok(`in: ${line}`);
     if (picked.some((a) => a.agent === 'claude')) tell('Claude Code: sessions started from now on use it (restart one that runs now).');
     if (picked.some((a) => a.agent === 'codex')) tell('Codex: it asks you once to trust a new hook: in Codex, open /hooks and trust herdrchat\'s.');
+    if (picked.some((a) => a.agent === 'pi')) tell('Pi: sessions started from now on use it (in a pi that runs now: /reload).');
   },
 };
 

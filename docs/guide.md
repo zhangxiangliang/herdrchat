@@ -301,9 +301,13 @@ is never updated from here: pull it, and the running bots follow the version in 
   dialog it waits on, as is), `/esc`, `/history` (the conversation so far, as a file and
   a folded post). Dialog cards have buttons.
 - On the command line, `herdrchat hooks` says whether herdrchat's hook is in Claude Code's
-  and Codex's settings; `herdrchat hooks install [claude|codex]` puts it in (it shows the
-  files and asks first; `--yes` does not ask), `herdrchat hooks uninstall` takes it out.
-  See "From the agent itself, when it can say".
+  and Codex's settings and its extension in Pi's; `herdrchat hooks install
+  [claude|codex|pi]` puts them in (it shows the files and asks first; `--yes` does not
+  ask), `herdrchat hooks uninstall` takes them out. See "From the agent itself, when it can
+  say". Pi's is not a hook: `~/.pi/agent/extensions/herdrchat.js` labels the terminal with
+  the session file each pi writes (`herdrchat.pi-session`), which Pi names to nobody else,
+  so two pi in one folder each keep to their own room; without it each room follows the
+  folder's newest session.
 
 `herdrchat setup` does the steps below by asking: it checks the token or the Feishu keys
 at once, picks the sessions, starts the bot and pairs you as its owner with a 6-digit

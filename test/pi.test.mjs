@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { conversationAfter, pickSession, sessionFolder, titleOf, windowIn } from '../lib/core/readers/pi.mjs';
 import { agentOf, LISTED } from '../lib/core/readers/index.mjs';
-import { startCursor } from '../lib/core/cursor.mjs';
+import { advance, startCursor } from '../lib/core/cursor.mjs';
 
 // A Pi session log, shaped as Pi 1.5 writes it (made up, not a real session).
 const at = (s) => `2026-01-02T00:00:${String(s).padStart(2, '0')}.000Z`;
@@ -72,4 +72,24 @@ test('Pi on Zhipu\'s plan: the host from the model\'s base URL, the key from Pi\
   assert.equal(keyIn({ 'zai-coding-cn': { type: 'api_key', key: 'k' } }, 'zai-coding-cn'), 'k');
   assert.equal(keyIn({ anthropic: { type: 'oauth', access: 'a' } }, 'anthropic'), null, 'a sign-in, not a key: none');
   assert.equal(keyIn(null, 'zai-coding-cn'), null);
+});
+
+test('with herdrchat\'s Pi extension, the label names each pi\'s own log: two pi in one folder are told apart', async () => {
+  const { labelledFile } = await import('../lib/core/readers/pi.mjs');
+  assert.equal(labelledFile('4242 /h/.pi/agent/sessions/--w--/a b.jsonl', 4242), '/h/.pi/agent/sessions/--w--/a b.jsonl');
+  assert.equal(labelledFile('4242 /h/.pi/agent/sessions/--w--/a.jsonl', 5151), null, 'another pi\'s (one that quit): not believed');
+  assert.equal(labelledFile('4242 ', 4242), null, 'an ephemeral session names no file');
+  assert.equal(labelledFile(undefined, 4242), null, 'no extension: none');
+});
+
+test('one Pi log named two ways (from home, or in full by the label) is read once; two entries in one millisecond are both read', async () => {
+  const { sameLog } = await import('../lib/core/readers/pi.mjs');
+  assert.equal(sameLog('.pi/agent/sessions/--w--/a.jsonl', '/home/x/.pi/agent/sessions/--w--/a.jsonl'), true);
+  assert.equal(sameLog('/home/x/.pi/agent/sessions/--w--/a.jsonl', '.pi/agent/sessions/--w--/a.jsonl'), true);
+  assert.equal(sameLog('.pi/agent/sessions/--w--/a.jsonl', '/home/x/.pi/agent/sessions/--w--/b.jsonl'), false);
+  // read once with the first, then again once the second (written in the same millisecond) is there
+  const first = conversationAfter([msg(1, 'q1', { role: 'user', content: 'one' })], startCursor(at(0)));
+  const cursor = advance(startCursor(at(0)), first.items);
+  const both = [msg(1, 'q1', { role: 'user', content: 'one' }), msg(1, 'q2', { role: 'user', content: 'two' })];
+  assert.deepEqual(conversationAfter(both, cursor).items.map((it) => it.text), ['two']);
 });
