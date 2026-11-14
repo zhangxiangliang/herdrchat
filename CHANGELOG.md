@@ -1,3 +1,10 @@
+# [1.11.0](https://github.com/zhangxiangliang/herdrchat/compare/v1.10.2...v1.11.0) (2026-11-14)
+
+
+### Features
+
+* tell when a newer herdrchat is out, and update it from the chat or a terminal ([1d72302](https://github.com/zhangxiangliang/herdrchat/commit/1d723028befdd654859c55b7b15ace19e56a7384))
+
 ## [1.10.2](https://github.com/zhangxiangliang/herdrchat/compare/v1.10.1...v1.10.2) (2026-11-14)
 
 
