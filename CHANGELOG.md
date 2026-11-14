@@ -1,3 +1,10 @@
+## [1.10.1](https://github.com/zhangxiangliang/herdrchat/compare/v1.10.0...v1.10.1) (2026-11-14)
+
+
+### Bug Fixes
+
+* call Claude Code "claude" in the footer, and fill it in after a restart ([cc6bf10](https://github.com/zhangxiangliang/herdrchat/commit/cc6bf10f6e75b4b39fcd0cb30fcfa62a0fcc5c50))
+
 # [1.10.0](https://github.com/zhangxiangliang/herdrchat/compare/v1.9.0...v1.10.0) (2026-11-14)
 
 
