@@ -45,16 +45,16 @@ const ROWS = [
 
 test('Feishu: every kind of card', async () => {
   same('feishu.header', ['working', 'closed', 'needs', 'done', 'good', 'bad'].map((tone) => header('✅ A title', tone)));
-  same('feishu.textCard', textCard('**You:**\n> fix it\n\n▸ bash: ls', '⌛️ Working…', 'working', 'claude · m · main'));
-  same('feishu.menuCard', menuCard({ title: '⚠️ Needs you (permission)', markdown: 'Run ls?', menu: MENU, value: { s: 's', a: 't1', k: 'k1' }, footer: 'codex · screen' }));
+  same('feishu.textCard', textCard('**You:**\n> fix it\n\n▸ bash: ls', '⌛️ Working…', 'working', { app: 'claude', model: 'm', branch: 'main' }));
+  same('feishu.menuCard', menuCard({ title: '⚠️ Needs you (permission)', markdown: 'Run ls?', menu: MENU, value: { s: 's', a: 't1', k: 'k1' }, footer: { app: 'codex', screen: true } }));
   same('feishu.menuCard.multi', menuCard({ title: '⚠️ Needs you (question)', markdown: 'Which colors?', menu: MULTI, value: { s: 's', a: 't1', k: 'k2' } }));
-  same('feishu.doneCard', doneCard('✅ Done', 'Run ls?', '✔ Yes', 'claude · m'));
+  same('feishu.doneCard', doneCard('✅ Done', 'Run ls?', '✔ Yes', { app: 'claude', model: 'm' }));
   same('feishu.ownerCard', ownerCard({ title: '⬆️ herdrchat 9.9.9 is out', tone: 'working', markdown: 'You run 1.0.0.', buttons: [{ label: 'Update to 9.9.9', value: { update: '9.9.9' } }] }));
   same('feishu.foldedCard', foldedCard('📜 Before this room', '**You:**\n> hi\n\nHello.'));
   same('feishu.overview', { text: overviewText(ROWS), card: overviewCard(ROWS, Date.UTC(2026, 0, 1, 10, 0)) });
   const sent = [];
   const client = { im: { v1: { message: { create: async (req) => { sent.push(req); return { data: { message_id: `m${sent.length}` } }; } } } } };
-  await sendMarkdown(client, 'oc_room', `${'line one\n'.repeat(800)}last`, 'pi · glm');
+  await sendMarkdown(client, 'oc_room', `${'line one\n'.repeat(800)}last`, { app: 'pi', model: 'glm' });
   await sendMarkdown(client, 'open_id:ou_x', 'a reply');
   same('feishu.sendMarkdown', sent);
 });
@@ -74,12 +74,12 @@ test('Telegram: every kind of message', async () => {
   };
   try {
     const chat = telegram.create({ cfg, store, log: quiet, logWarn: quiet, logError: quiet, stateDir: os.tmpdir(), lane: () => {}, scopeOf: () => 'a' });
-    await chat.post('11', '**You:**\n> fix `it` <now>\n\nDone & *dusted*.', { footer: 'claude · m · main' });
-    await chat.postCard('12', { title: '⌛️ Working…', tone: 'working', markdown: '▸ bash: ls\n▸ read: a.txt', footer: 'codex · m' });
-    await chat.editCard('2', { title: '✅ Worked', tone: 'closed', markdown: '▸ bash: ls', footer: 'codex · m' });
-    await chat.postDialog('11', { title: '⚠️ Needs you (permission)', markdown: 'Run ls?', menu: MENU, footer: 'claude · screen' }, { s: 'a', a: 't1', k: 'k1' });
+    await chat.post('11', '**You:**\n> fix `it` <now>\n\nDone & *dusted*.', { footer: { app: 'claude', model: 'm', branch: 'main' } });
+    await chat.postCard('12', { title: '⌛️ Working…', tone: 'working', markdown: '▸ bash: ls\n▸ read: a.txt', footer: { app: 'codex', model: 'm' } });
+    await chat.editCard('2', { title: '✅ Worked', tone: 'closed', markdown: '▸ bash: ls', footer: { app: 'codex', model: 'm' } });
+    await chat.postDialog('11', { title: '⚠️ Needs you (permission)', markdown: 'Run ls?', menu: MENU, footer: { app: 'claude', screen: true } }, { s: 'a', a: 't1', k: 'k1' });
     await chat.postDialog('11', { title: '⚠️ Needs you (question)', markdown: 'Which colors?', menu: MULTI }, { s: 'a', a: 't1', k: 'k2' });
-    await chat.closeDialog('4', { doneTitle: '✅ Done', markdown: 'Run ls?', footer: 'claude · m' }, '✔ Yes');
+    await chat.closeDialog('4', { doneTitle: '✅ Done', markdown: 'Run ls?', footer: { app: 'claude', model: 'm' } }, '✔ Yes');
     await chat.ring('a|t1', '1', '✅ done');
     await chat.reply('11', 'It asks something first.');
     await chat.postFolded('11', { title: '📜 Before this room', markdown: '**You:**\n> hi\n\nHello.' });

@@ -847,7 +847,16 @@
         "title": "⌛️ Working…",
         "tone": "working",
         "markdown": "**You:**\n> typed in the terminal too\n\n▸ bash: ls\n▸ read: a.txt\n\n![image](img)\n\n**From t7 review** _(answer: t1)_\n> look at this",
-        "footer": "fake-agent · model-a · main · context 25% (50k)"
+        "footer": {
+          "app": "fake-agent",
+          "model": "model-a",
+          "screen": false,
+          "branch": "main",
+          "context": {
+            "used": 50000,
+            "size": 200000
+          }
+        }
       }
     ],
     [
@@ -857,7 +866,16 @@
         "title": "✅ Worked",
         "tone": "closed",
         "markdown": "**You:**\n> typed in the terminal too\n\n▸ bash: ls\n▸ read: a.txt\n\n![image](img)\n\n**From t7 review** _(answer: t1)_\n> look at this",
-        "footer": "fake-agent · model-a · main · context 25% (50k)"
+        "footer": {
+          "app": "fake-agent",
+          "model": "model-a",
+          "screen": false,
+          "branch": "main",
+          "context": {
+            "used": 50000,
+            "size": 200000
+          }
+        }
       }
     ],
     [
@@ -872,7 +890,16 @@
       "room1",
       "Fixed it.",
       {
-        "footer": "fake-agent · model-a · main · context 25% (50k)"
+        "footer": {
+          "app": "fake-agent",
+          "model": "model-a",
+          "screen": false,
+          "branch": "main",
+          "context": {
+            "used": 50000,
+            "size": 200000
+          }
+        }
       }
     ],
     [
@@ -916,7 +943,11 @@
         "title": "⚠️ Needs you (permission)",
         "markdown": "╭──────╮\nAllow ls?",
         "doneTitle": "✅ Done",
-        "footer": "fake-agent · screen · main"
+        "footer": {
+          "app": "fake-agent",
+          "screen": true,
+          "branch": "main"
+        }
       },
       {
         "s": "s",
@@ -975,7 +1006,11 @@
         "title": "⚠️ Needs you (permission)",
         "markdown": "╭──────╮\nAllow ls?",
         "doneTitle": "✅ Done",
-        "footer": "fake-agent · screen · main"
+        "footer": {
+          "app": "fake-agent",
+          "screen": true,
+          "branch": "main"
+        }
       },
       "✔ Answered."
     ],

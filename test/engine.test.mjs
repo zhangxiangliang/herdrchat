@@ -5,6 +5,7 @@ import path from 'node:path';
 import test, { after } from 'node:test';
 import { createEngine } from '../lib/core/engine.mjs';
 import { checkChat } from '../lib/chats/contract.mjs';
+import { footer } from '../lib/core/words.mjs';
 import { fakeChat, fakeHc, fakeReaders, fakeStore, terminal } from './fakes.mjs';
 
 const quiet = () => {};
@@ -836,9 +837,9 @@ test('under each post: the harness and the model, as its records name them, not 
   ]);
   hc.turn('s', 't1', 'done');
   await settle(engine);
-  assert.deepEqual(chat.of('post').map((c) => [c.args[1], c.args[2].footer]), [['Done.', 'fake-agent · model-a']], 'the model item itself is not shown');
-  assert.equal(chat.of('postCard')[0].args[1].footer, 'fake-agent · model-a', 'the live card too');
-  assert.equal(chat.of('editCard').at(-1).args[1].footer, 'fake-agent · model-a', 'and once it is closed');
+  assert.deepEqual(chat.of('post').map((c) => [c.args[1], footer(c.args[2].footer)]), [['Done.', 'fake-agent · model-a']], 'the model item itself is not shown');
+  assert.equal(footer(chat.of('postCard')[0].args[1].footer), 'fake-agent · model-a', 'the live card too');
+  assert.equal(footer(chat.of('editCard').at(-1).args[1].footer), 'fake-agent · model-a', 'and once it is closed');
   done();
 });
 
@@ -851,16 +852,16 @@ test('a live card that began before the model was named gets it once it is close
   r.queue('t1', [{ role: 'ai', text: 'Done.', at: '2026-01-02T00:00:02.000Z', id: 'c', end: true, model: 'model-a' }]);
   hc.turn('s', 't1', 'done');
   await settle(engine);
-  assert.equal(chat.of('editCard').at(-1).args[1].footer, 'fake-agent · model-a');
+  assert.equal(footer(chat.of('editCard').at(-1).args[1].footer), 'fake-agent · model-a');
   // the next turn names no model: the last one named still stands; an item's own model wins
   r.queue('t1', [{ role: 'ai', text: 'Again.', at: '2026-01-02T00:01:00.000Z', id: 'd', end: true }]);
   hc.turn('s', 't1', 'done');
   await settle(engine);
-  assert.equal(chat.of('post').at(-1).args[2].footer, 'fake-agent · model-a');
+  assert.equal(footer(chat.of('post').at(-1).args[2].footer), 'fake-agent · model-a');
   r.queue('t1', [{ role: 'ai', text: 'Switched.', at: '2026-01-02T00:02:00.000Z', id: 'e', end: true, model: 'model-b' }]);
   hc.turn('s', 't1', 'done');
   await settle(engine);
-  assert.equal(chat.of('post').at(-1).args[2].footer, 'fake-agent · model-b');
+  assert.equal(footer(chat.of('post').at(-1).args[2].footer), 'fake-agent · model-b');
   done();
 });
 
@@ -871,13 +872,13 @@ test('a post read off the screen says so in its footer, and so does a dialog car
   hc.screens.set('s|t1', 'all done');
   hc.turn('s', 't1', 'done');
   await settle(engine);
-  assert.equal(chat.of('post').at(-1).args[2].footer, 'fake-agent · screen');
+  assert.equal(footer(chat.of('post').at(-1).args[2].footer), 'fake-agent · screen');
   hc.screens.set('s|t1', '╭──────╮\n│ Allow?\n│ ❯ 1. Yes\n│   2. No\n╰──────╯');
   t.status = { app: 'fake-agent', state: 'blocked', kind: 'permission' };
   hc.change('s', 'status', t);
   hc.turn('s', 't1', 'blocked');
   await settle(engine);
-  assert.equal(chat.of('postDialog').at(-1).args[1].footer, 'fake-agent · screen');
+  assert.equal(footer(chat.of('postDialog').at(-1).args[1].footer), 'fake-agent · screen');
   done();
 });
 
@@ -897,8 +898,8 @@ test('a footer is an italic last line in Telegram and a small line in a Feishu c
   };
   try {
     const chat = telegram.create({ cfg, store, log: quiet, logWarn: quiet, logError: quiet, stateDir: os.tmpdir(), lane: () => {}, scopeOf: () => 'a' });
-    await chat.post('11', `${'x'.repeat(3000)}\n${'y'.repeat(3000)}`, { footer: 'codex · gpt_x <1>' });
-    await chat.postCard('11', { title: 'Worked', tone: 'closed', markdown: 'hi', footer: 'codex · gpt_x' });
+    await chat.post('11', `${'x'.repeat(3000)}\n${'y'.repeat(3000)}`, { footer: { app: 'codex', model: 'gpt_x <1>' } });
+    await chat.postCard('11', { title: 'Worked', tone: 'closed', markdown: 'hi', footer: { app: 'codex', model: 'gpt_x' } });
     const texts = sent.filter((x) => x.method === 'sendMessage').map((x) => x.body.text);
     assert.equal(texts.length, 3);
     assert.ok(!texts[0].includes('<i>'), 'only the last piece');
@@ -908,9 +909,9 @@ test('a footer is an italic last line in Telegram and a small line in a Feishu c
     globalThis.fetch = realFetch;
   }
   const foot = (card) => card.body.elements.at(-1);
-  assert.deepEqual(foot(textCard('hi', 'Worked', 'closed', 'codex · gpt_x')), { tag: 'markdown', content: 'codex · gpt&#95;x', text_size: 'notation' });
+  assert.deepEqual(foot(textCard('hi', 'Worked', 'closed', { app: 'codex', model: 'gpt_x' })), { tag: 'markdown', content: 'codex · gpt&#95;x', text_size: 'notation' });
   assert.equal(textCard('hi', 'Worked', 'closed').body.elements.length, 1, 'no footer, no line');
-  assert.equal(foot(menuCard({ title: 'Needs you', markdown: 'Allow?', menu: { options: [{ n: 1, label: 'Yes' }], multi: false, free: null }, value: {}, footer: 'codex · screen' })).content, 'codex · screen');
+  assert.equal(foot(menuCard({ title: 'Needs you', markdown: 'Allow?', menu: { options: [{ n: 1, label: 'Yes' }], multi: false, free: null }, value: {}, footer: { app: 'codex', screen: true } })).content, 'codex · screen');
 });
 
 test('the footer has the branch of its folder, how full its context is, and the limits, as the reader knows them', async () => {
@@ -922,14 +923,14 @@ test('the footer has the branch of its folder, how full its context is, and the 
   r.queue('t1', [{ role: 'ai', text: 'Done.', at: '2026-01-02T00:00:02.000Z', id: 'c', end: true, model: 'model-a', context: { used: 50000 } }]);
   hc.turn('s', 't1', 'done');
   await settle(engine);
-  assert.equal(chat.of('post').at(-1).args[2].footer, 'fake-agent · model-a · feature/x · context 25% (50k) · 5-hour 2% · 7-day 57%');
+  assert.equal(footer(chat.of('post').at(-1).args[2].footer), 'fake-agent · model-a · feature/x · context 25% (50k) · 5-hour 2% · 7-day 57%');
   assert.ok(shells[0].includes("cd '/w/proj'"), 'git runs in the terminal\'s folder');
   // limits a reader's own records name (Codex) come before what its meter knows
   r.queue('t1', [{ role: 'meta', limits: [{ name: '7-day', used: 65 }], context: { used: 1000, size: 10000 }, at: '2026-01-02T00:01:00.000Z', id: 'm2' },
     { role: 'ai', text: 'Again.', at: '2026-01-02T00:01:01.000Z', id: 'd', end: true }]);
   hc.turn('s', 't1', 'done');
   await settle(engine);
-  assert.equal(chat.of('post').at(-1).args[2].footer, 'fake-agent · model-a · feature/x · context 10% (1k) · 7-day 65%', 'and what was named before still stands');
+  assert.equal(footer(chat.of('post').at(-1).args[2].footer), 'fake-agent · model-a · feature/x · context 10% (1k) · 7-day 65%', 'and what was named before still stands');
   done();
 });
 
@@ -939,7 +940,7 @@ test('a harness with a long name goes by its short one in the footer', async () 
   r.queue('t1', [{ role: 'ai', text: 'Done.', at: '2026-01-02T00:00:02.000Z', id: 'c', end: true, model: 'm' }]);
   hc.turn('s', 't1', 'done');
   await settle(engine);
-  assert.equal(chat.of('post').at(-1).args[2].footer, 'fk · m');
+  assert.equal(footer(chat.of('post').at(-1).args[2].footer), 'fk · m');
   done();
 });
 

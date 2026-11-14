@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { asked, branchOf, footerWords, forgetAll, knownSoon, lastKnown, tokens, windowName } from '../lib/core/meter.mjs';
+import { asked, branchOf, forgetAll, knownSoon, lastKnown, tokens, windowName } from '../lib/core/meter.mjs';
+import { footer as footerWords } from '../lib/core/words.mjs';
 
 test('the footer says what is known, in the status line\'s words, and leaves out what is not', () => {
   assert.equal(footerWords({ app: 'claude', model: 'claude-opus-5-5', branch: 'main', context: { used: 234480, size: 1e6 }, limits: [{ name: '5-hour', used: 2 }, { name: '7-day', used: 56.6 }] }),
