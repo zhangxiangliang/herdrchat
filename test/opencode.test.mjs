@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { conversationAfter, dialogOf, linesOf, pickSession, titleOf } from '../lib/core/readers/opencode.mjs';
 import { LISTED, agentOf } from '../lib/core/readers/index.mjs';
-import { startCursor } from '../lib/core/cursor.mjs';
+import { advance, startCursor } from '../lib/core/cursor.mjs';
 
 // Shaped as OpenCode 2.3's API gives them (made up, not a real session).
 const ms = (s) => Date.parse(`2026-01-02T00:00:${String(s).padStart(2, '0')}.000Z`);
@@ -84,4 +84,14 @@ test('OpenCode: how full the context is comes with each answer, its window from 
   assert.equal(windowOf(models, 'glm', 'zhipu'), 1000000, 'the provider it runs through');
   assert.equal(windowOf(models, 'glm', 'gone'), 200000);
   assert.equal(windowOf(null, 'glm'), undefined);
+});
+
+test('an OpenCode answer read before its text is there is read again once it is: nothing is lost', () => {
+  const thinking = [{ id: 'u', type: 'user', text: 'hi', time: { created: ms(1) } },
+    { id: 'a', type: 'assistant', time: { created: ms(2) }, model: { id: 'glm', providerID: 'zhipu' }, tokens: { input: 10, cache: { read: 0, write: 0 } }, content: [{ type: 'reasoning', text: 'thinking' }] }];
+  const first = conversationAfter(linesOf(thinking), startCursor('2026-01-01T00:00:00.000Z'));
+  assert.deepEqual(first.items.map((it) => it.role), ['you'], 'only reasoning so far: nothing for it yet');
+  const cursor = advance(startCursor('2026-01-01T00:00:00.000Z'), first.items);
+  const done = [...thinking.slice(0, 1), { ...thinking[1], content: [...thinking[1].content, { type: 'text', text: 'Hello.' }] }, { id: 'i', type: 'idle', time: { created: ms(3) } }];
+  assert.deepEqual(conversationAfter(linesOf(done), cursor).items.map((it) => [it.role, it.text, it.end]), [['ai', 'Hello.', true]]);
 });
