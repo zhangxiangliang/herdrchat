@@ -14,6 +14,7 @@ import { cores, getTerminal, hc, keys, label, machines, nameTab, put, run, scree
 import { refreshHook } from '../lib/core/hooks.mjs';
 import { createLog } from '../lib/core/log.mjs';
 import { createUpdater } from '../lib/core/updater.mjs';
+import * as words from '../lib/core/words.mjs';
 import * as readers from '../lib/core/readers/index.mjs';
 import { chatModule, createChat } from '../lib/chats/index.mjs';
 
@@ -65,7 +66,7 @@ async function sayCrash(err) {
   state.down = down;
   writeState(state);
   if (!say) return;
-  await chat.tellOwner({ title: '🔴 herdrchat is down', tone: 'bad', markdown: `herdrchat stopped: ${down.why}\n\nIt is being started again. Until it is back, nothing you send here reaches your terminals.` });
+  await chat.tellOwner(words.down(down.why));
 }
 async function sayBack() {
   const state = readState();
@@ -75,7 +76,7 @@ async function sayBack() {
   writeState(state);
   if (!chat.ready()) return;
   const minutes = Math.max(1, Math.round((Date.now() - down.since) / 60000));
-  await chat.tellOwner({ title: '✅ herdrchat is back', tone: 'good', markdown: `herdrchat is back after about ${minutes} min. What stopped it: ${down.why}` });
+  await chat.tellOwner(words.back(minutes, down.why));
 }
 logger.capture({ onCrash: sayCrash });
 

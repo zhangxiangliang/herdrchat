@@ -15,6 +15,7 @@ lib/
   core/                    the same for every chat app and every agent
     engine.mjs             follows hc, keeps one room per herdr-app tab, posts what agents
                            say, dialogs and clicks, what you type, the overview
+    words.mjs              every word the bot says in the chat (titles, notes, replies, notices)
     hc.mjs  events.mjs     hc: commands, its live event stream, the sessions on a machine
     views.mjs              which view of a terminal is followed (hc core id + tN)
     cursor.mjs  home.mjs   what was posted already; reading an agent's log files
