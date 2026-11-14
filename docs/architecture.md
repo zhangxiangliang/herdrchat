@@ -29,7 +29,7 @@ lib/
     contract.mjs           what a chat app gives the core, and the check for it
     index.mjs              the list of chat apps
     feishu/                index.mjs (the contract), client.mjs (API calls), render.mjs (cards), overview.mjs, avatar.mjs, userauth.mjs
-    telegram/              index.mjs (the contract), client.mjs, format.mjs
+    telegram/              index.mjs (the contract), client.mjs (API calls), render.mjs (HTML, buttons)
 test/
   fakes.mjs                a fake chat app, a fake hc and a fake reader
   engine.test.mjs          the core, run on the fakes; the apps' contracts

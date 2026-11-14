@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { split, toHtml } from '../lib/chats/telegram/format.mjs';
+import { split, toHtml } from '../lib/chats/telegram/render.mjs';
 
 test('markdown becomes Telegram HTML, with everything else escaped', () => {
   assert.equal(toHtml('**You:**\n> a < b & c\n> two'), '<b>You:</b>\n<blockquote>a &lt; b &amp; c\ntwo</blockquote>');
