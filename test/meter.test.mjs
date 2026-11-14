@@ -7,6 +7,9 @@ test('the footer says what is known, in the status line\'s words, and leaves out
     'claude · claude-opus-5-5 · main · context 23% (234k) · 5-hour 2% · 7-day 57%');
   assert.equal(footerWords({ app: 'codex', model: 'gpt-x', screen: true }), 'codex · screen', 'read off the screen: no model claimed');
   assert.equal(footerWords({ app: 'opencode', context: { used: 1404175 } }), 'opencode · context 1.4M', 'no window known: the tokens only');
+  // a small share of a big window: one decimal, never "0%" (Pi on GLM: 3k of 1M)
+  assert.equal(footerWords({ app: 'pi', context: { used: 3000, size: 1e6 } }), 'pi · context 0.3% (3k)');
+  assert.equal(footerWords({ app: 'pi', context: { used: 200, size: 1e6 } }), 'pi · context 0.1% (200)');
   assert.equal(footerWords({ app: 'x', limits: [{ name: '7-day', used: NaN }] }), 'x');
   assert.equal(tokens(999), '999');
   assert.equal(tokens(2000000), '2M');
