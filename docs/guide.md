@@ -146,6 +146,10 @@ A room is a Feishu group or a Telegram topic.
   - Images too: ones it looked at (a screenshot, an image file it read) and ones you
     pasted in the terminal, shown in the card.
   - What you sent from the group is not repeated.
+  - Under each post and card, one small line says where it came from: the harness hc
+    names and the model the agent's own records name (`codex · gpt-6.1-sol`), or
+    `screen` when it was read off the screen (`codex · screen`). herdrchat adds it; the
+    agent is never asked to.
 - Anything else (a shell, a tool, an agent that has quit): nothing by itself. A terminal
   counts as an agent only while its foreground process is that agent, so a status left
   over after it quits posts nothing.

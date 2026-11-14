@@ -75,3 +75,11 @@ test('images: ones you pasted and ones a tool showed it, never meta or subagent 
   assert.deepEqual(items.map((x) => `${x.role}/${x.from || ''}/${x.data || x.text}`), ['you//look', 'image/you/AAA', 'image/ai/BBB']);
   assert.equal(new Set(items.map((x) => x.id)).size, 3);
 });
+
+test('each Claude answer names the model that wrote it; a reply Claude Code made up names none', () => {
+  const lines = [
+    entry({ type: 'assistant', uuid: 'a', timestamp: at(1), message: { model: 'claude-model-x', stop_reason: 'tool_use', content: [{ type: 'text', text: 'Looking.' }, { type: 'tool_use', id: 'x' }] } }),
+    entry({ type: 'assistant', uuid: 'b', timestamp: at(2), message: { model: '<synthetic>', stop_reason: 'end_turn', content: [{ type: 'text', text: 'No response requested.' }] } }),
+  ];
+  assert.deepEqual(conversationAfter(lines, startCursor(at(0))).items.map((x) => x.model), ['claude-model-x', 'claude-model-x', undefined]);
+});

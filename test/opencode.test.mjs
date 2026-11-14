@@ -70,3 +70,8 @@ test('an OpenCode permission request is a dialog: once, always, reject', () => {
   assert.match(d.text, /Edit a\.txt\?\nedit\n\/w\/a\.txt/);
   assert.equal(dialogOf([], []), null);
 });
+
+test('each OpenCode answer names the model that wrote it', () => {
+  const said = [{ id: 'x', type: 'assistant', time: { created: ms(1) }, model: { id: 'model-x', providerID: 'p' }, content: [{ type: 'text', text: 'Hi.' }] }];
+  assert.deepEqual(conversationAfter(linesOf(said), startCursor('2026-01-01T00:00:00.000Z')).items.map((it) => it.model), ['model-x']);
+});

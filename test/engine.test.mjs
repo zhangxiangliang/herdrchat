@@ -782,3 +782,89 @@ test('an idle question answered while the bot was not looking: the sweep closes 
   assert.equal(chat.of('closeDialog').length, 1);
   done();
 });
+
+test('under each post: the harness and the model, as its records name them, not as the agent says', async () => {
+  const { chat, hc, engine, r, done } = await setup([terminal('t1', { program: 'fake', agent: true })]);
+  r.queue('t1', [
+    { role: 'model', model: 'model-a', at: '2026-01-02T00:00:00.000Z', id: 'm' }, // as Codex names it: once, at a turn's start
+    { role: 'tool', text: '▸ exec: ls', at: '2026-01-02T00:00:01.000Z', id: 'b' },
+    { role: 'ai', text: 'Done.', at: '2026-01-02T00:00:02.000Z', id: 'c', end: true },
+  ]);
+  hc.turn('s', 't1', 'done');
+  await settle(engine);
+  assert.deepEqual(chat.of('post').map((c) => [c.args[1], c.args[2].footer]), [['Done.', 'fake-agent · model-a']], 'the model item itself is not shown');
+  assert.equal(chat.of('postCard')[0].args[1].footer, 'fake-agent · model-a', 'the live card too');
+  assert.equal(chat.of('editCard').at(-1).args[1].footer, 'fake-agent · model-a', 'and once it is closed');
+  done();
+});
+
+test('a live card that began before the model was named gets it once it is closed', async () => {
+  const { chat, hc, store, engine, r, done } = await setup([terminal('t1', { program: 'fake', agent: true })]);
+  // a live card posted while only your prompt was read: no model named yet
+  const state = store.read();
+  state.cursors = { ...state.cursors, 's|t1': { ...state.cursors?.['s|t1'], at: '2026-01-01T00:00:00.000Z', seen: [], reader: 'fake-agent', file: 'log', live: { message: 'm-live', text: '**You:** hi', footer: 'fake-agent' } } };
+  store.write(state);
+  r.queue('t1', [{ role: 'ai', text: 'Done.', at: '2026-01-02T00:00:02.000Z', id: 'c', end: true, model: 'model-a' }]);
+  hc.turn('s', 't1', 'done');
+  await settle(engine);
+  assert.equal(chat.of('editCard').at(-1).args[1].footer, 'fake-agent · model-a');
+  // the next turn names no model: the last one named still stands; an item's own model wins
+  r.queue('t1', [{ role: 'ai', text: 'Again.', at: '2026-01-02T00:01:00.000Z', id: 'd', end: true }]);
+  hc.turn('s', 't1', 'done');
+  await settle(engine);
+  assert.equal(chat.of('post').at(-1).args[2].footer, 'fake-agent · model-a');
+  r.queue('t1', [{ role: 'ai', text: 'Switched.', at: '2026-01-02T00:02:00.000Z', id: 'e', end: true, model: 'model-b' }]);
+  hc.turn('s', 't1', 'done');
+  await settle(engine);
+  assert.equal(chat.of('post').at(-1).args[2].footer, 'fake-agent · model-b');
+  done();
+});
+
+test('a post read off the screen says so in its footer, and so does a dialog card', async () => {
+  const t = terminal('t1', { program: 'fake', agent: true });
+  const { chat, hc, engine, r, done } = await setup([t]);
+  r.reader.after = async () => null; // its records are not found
+  hc.screens.set('s|t1', 'all done');
+  hc.turn('s', 't1', 'done');
+  await settle(engine);
+  assert.equal(chat.of('post').at(-1).args[2].footer, 'fake-agent · screen');
+  hc.screens.set('s|t1', '╭──────╮\n│ Allow?\n│ ❯ 1. Yes\n│   2. No\n╰──────╯');
+  t.status = { app: 'fake-agent', state: 'blocked', kind: 'permission' };
+  hc.change('s', 'status', t);
+  hc.turn('s', 't1', 'blocked');
+  await settle(engine);
+  assert.equal(chat.of('postDialog').at(-1).args[1].footer, 'fake-agent · screen');
+  done();
+});
+
+test('a footer is an italic last line in Telegram and a small line in a Feishu card, its marks shown as they are', async () => {
+  const telegram = await import('../lib/chats/telegram/index.mjs');
+  const { textCard, menuCard } = await import('../lib/chats/feishu/client.mjs');
+  const store = fakeStore();
+  const state = store.read();
+  state.chats = { 'a|t1': { chat: '11', name: 'work / master' } };
+  store.write(state);
+  const cfg = { env: { TELEGRAM_BOT_TOKEN: '1:test', TELEGRAM_OWNER_ID: '42' }, sessions: ['a'], muted: { all: false, spaces: [] }, silent: { all: false, spaces: [] } };
+  const sent = [];
+  const realFetch = globalThis.fetch;
+  globalThis.fetch = async (url, opts) => {
+    sent.push({ method: url.split('/').pop(), body: JSON.parse(opts.body) });
+    return { ok: true, json: async () => ({ ok: true, result: { message_id: sent.length } }) };
+  };
+  try {
+    const chat = telegram.create({ cfg, store, log: quiet, logWarn: quiet, logError: quiet, stateDir: os.tmpdir(), lane: () => {}, scopeOf: () => 'a' });
+    await chat.post('11', `${'x'.repeat(3000)}\n${'y'.repeat(3000)}`, { footer: 'codex · gpt_x <1>' });
+    await chat.postCard('11', { title: 'Worked', tone: 'closed', markdown: 'hi', footer: 'codex · gpt_x' });
+    const texts = sent.filter((x) => x.method === 'sendMessage').map((x) => x.body.text);
+    assert.equal(texts.length, 3);
+    assert.ok(!texts[0].includes('<i>'), 'only the last piece');
+    assert.ok(texts[1].endsWith('\n\n<i>codex · gpt_x &lt;1&gt;</i>'), texts[1].slice(-60));
+    assert.ok(texts[2].endsWith('hi\n\n<i>codex · gpt_x</i>'));
+  } finally {
+    globalThis.fetch = realFetch;
+  }
+  const foot = (card) => card.body.elements.at(-1);
+  assert.deepEqual(foot(textCard('hi', 'Worked', 'closed', 'codex · gpt_x')), { tag: 'markdown', content: 'codex · gpt&#95;x', text_size: 'notation' });
+  assert.equal(textCard('hi', 'Worked', 'closed').body.elements.length, 1, 'no footer, no line');
+  assert.equal(foot(menuCard({ title: 'Needs you', markdown: 'Allow?', menu: { options: [{ n: 1, label: 'Yes' }], multi: false, free: null }, value: {}, footer: 'codex · screen' })).content, 'codex · screen');
+});

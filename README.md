@@ -30,7 +30,8 @@ you or is done (on Feishu once you have sent `/auth` to the bot; on Telegram rig
 
 Claude Code, Codex and OpenCode are mirrored fully, their dialogs answered with buttons.
 Other agents show their screen when you type to them, until herdrchat learns to read their
-conversations too.
+conversations too. Under every post a small line says where it came from: the harness and
+model (`claude-code · claude-opus-5-5`), or `screen` when it was read off the screen.
 
 ## You need
 

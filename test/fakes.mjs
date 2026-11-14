@@ -30,7 +30,7 @@ export function fakeChat() {
     placeRoom: async (...a) => record('placeRoom', ...a),
     endRoom: async (...a) => record('endRoom', ...a),
     reviveRoom: async (...a) => record('reviveRoom', ...a),
-    post: async (room, markdown) => { record('post', room, markdown); return id('m'); },
+    post: async (room, markdown, opts = {}) => { record('post', room, markdown, opts); return id('m'); },
     reply: async (where, markdown) => { record('reply', where, markdown); return id('m'); },
     postCard: async (room, look) => { record('postCard', room, look); return id('m'); },
     editCard: async (...a) => record('editCard', ...a),

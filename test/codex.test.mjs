@@ -86,3 +86,8 @@ test('a Codex approval is a menu: › for the cursor, no border, the dialog unde
   assert.equal(m.text, '• Running curl -sI https://example.com\nWould you like to run the following command?\n$ curl -sI https://example.com');
   assert.equal(menuOf(screen.replace('› 1.', '  1.').replace('  2.', '› 2.')).key, m.key, 'the cursor moving keeps the key');
 });
+
+test('a Codex turn names its model once, at its start: an item of its own', () => {
+  const lines = [JSON.stringify({ timestamp: at(1), type: 'turn_context', payload: { cwd: '/w', model: 'gpt-model-x' } }), done(2, { type: 'AgentMessage', id: 'a', content: [{ type: 'Text', text: 'Hi.' }], phase: 'final_answer' })];
+  assert.deepEqual(conversationAfter(lines, startCursor(at(0))).items.map((it) => [it.role, it.model || it.text]), [['model', 'gpt-model-x'], ['ai', 'Hi.']]);
+});
