@@ -268,6 +268,50 @@ test('an agent with its own API: its dialog comes from the API, and a tap answer
   done();
 });
 
+test('an agent that moves on as your answer lands: its card says what you picked, not "Answered"', async () => {
+  const t = terminal('t1', { program: 'fake', agent: true });
+  const { chat, hc, engine, r, done } = await setup([t]);
+  let waiting = { key: 'f1#q0', kind: 'question', text: 'Which fruit?', options: [{ n: 1, label: 'Apple' }, { n: 2, label: 'Banana' }], multi: false, free: null };
+  r.reader.dialog = async () => waiting;
+  // as Codex: the keys go in, it is working again before the answer call returns
+  r.reader.answer = async () => {
+    waiting = null;
+    t.status = { app: 'fake-agent', state: 'working' };
+    hc.change('s', 'status', t);
+    await settle(engine);
+    return true;
+  };
+  t.status = { app: 'fake-agent', state: 'blocked', kind: 'question' };
+  hc.change('s', 'status', t);
+  hc.turn('s', 't1', 'blocked');
+  await settle(engine);
+  const [, , value, message] = chat.of('postDialog')[0].args;
+  const out = await engine.onAction({ value: { ...value, pick: 2, label: 'Banana' }, message });
+  await settle(engine);
+  assert.equal(out.card?.done, '✔ 2. Banana');
+  assert.equal(chat.of('closeDialog').length, 0, 'nothing closes the card over the click');
+  done();
+});
+
+test('what an agent says before asking, first thing in a turn, rings no "done": the question rings you', async () => {
+  const t = terminal('t1', { program: 'fake', agent: true });
+  const { chat, hc, store, engine, r, done } = await setup([t]);
+  const room = rooms(store)['s|t1'].chat;
+  await engine.onMessage({ room, where: room, message: 'm-in', text: 'pick one for me', images: [] });
+  r.queue('t1', [
+    { role: 'you', text: 'pick one for me', at: '2026-01-02T00:00:00.000Z', id: 'a' },
+    { role: 'tool', text: '▸ AskUserQuestion', at: '2026-01-02T00:00:01.000Z', id: 'b' },
+  ]);
+  hc.screens.set('s|t1', '╭──────╮\n│ Which one?\n│ ❯ 1. Apple\n│   2. Banana\n╰──────╯');
+  t.status = { app: 'fake-agent', state: 'blocked', kind: 'question' };
+  hc.change('s', 'status', t);
+  hc.turn('s', 't1', 'blocked');
+  await settle(engine);
+  assert.ok(chat.of('post').some((c) => /AskUserQuestion/.test(c.args[1])), 'what it said is posted');
+  assert.deepEqual(chat.of('ring').map((c) => c.args[2]), ['⚠️ needs you']);
+  done();
+});
+
 test('an agent with its own API: words typed while it asks go in as your own answer, through the API', async () => {
   const t = terminal('t1', { program: 'fake', agent: true });
   const { hc, store, engine, r, done } = await setup([t]);
