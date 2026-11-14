@@ -150,7 +150,7 @@ A room is a Feishu group or a Telegram topic.
     the harness hc names, the model the agent's own records name (or `screen` when it was
     read off the screen), the git branch of its folder, how full its context is, and the
     account's limits:
-    `claude-code · claude-opus-5-5 · main · context 23% (234k) · 5-hour 2% · 7-day 57%`.
+    `claude · claude-opus-5-5 · main · context 23% (234k) · 5-hour 2% · 7-day 57%`.
     herdrchat adds it, never the agent, and spends nothing on it: Codex writes all of it
     in its own log; Claude Code's window and limits come from `claude -p /context` and
     `claude -p /usage`, which Claude Code answers itself without asking a model (the

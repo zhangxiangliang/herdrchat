@@ -32,7 +32,7 @@ Claude Code, Codex and OpenCode are mirrored fully, their dialogs answered with 
 Other agents show their screen when you type to them, until herdrchat learns to read their
 conversations too. Under every post a small line says where it came from and how it stands: the
 harness, model and git branch, how full the context is, and the 5-hour and 7-day limits
-(`claude-code · claude-opus-5-5 · main · context 23% (234k) · 5-hour 2% · 7-day 57%`).
+(`claude · claude-opus-5-5 · main · context 23% (234k) · 5-hour 2% · 7-day 57%`).
 
 ## You need
 

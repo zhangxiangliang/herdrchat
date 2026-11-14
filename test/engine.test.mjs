@@ -888,3 +888,13 @@ test('the footer has the branch of its folder, how full its context is, and the 
   assert.equal(chat.of('post').at(-1).args[2].footer, 'fake-agent · model-a · feature/x · context 10% (1k) · 7-day 65%', 'and what was named before still stands');
   done();
 });
+
+test('a harness with a long name goes by its short one in the footer', async () => {
+  const { chat, hc, engine, r, done } = await setup([terminal('t1', { program: 'fake', agent: true })]);
+  r.reader.short = 'fk';
+  r.queue('t1', [{ role: 'ai', text: 'Done.', at: '2026-01-02T00:00:02.000Z', id: 'c', end: true, model: 'm' }]);
+  hc.turn('s', 't1', 'done');
+  await settle(engine);
+  assert.equal(chat.of('post').at(-1).args[2].footer, 'fk · m');
+  done();
+});

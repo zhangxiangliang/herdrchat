@@ -25,7 +25,7 @@ agent 干活时说的话实时可见，它问你的问题点按钮就能回答�
 （飞书要先给 bot 发一次 `/auth`；Telegram 直接就是这样）。
 
 目前 Claude Code、Codex 和 OpenCode 是完整同步的，它们的对话框都能点按钮回答。其他 agent 在你给它发消息时会回一次屏幕内容，
-等 herdrchat 学会读它们的对话记录以后，也会完整同步。每条消息底部有一行小字，写着它来自哪里、现在的状态：harness、模型、git 分支、上下文用了多少，以及 5 小时和 7 天的额度（`claude-code · claude-opus-5-5 · main · context 23% (234k) · 5-hour 2% · 7-day 57%`）。
+等 herdrchat 学会读它们的对话记录以后，也会完整同步。每条消息底部有一行小字，写着它来自哪里、现在的状态：harness、模型、git 分支、上下文用了多少，以及 5 小时和 7 天的额度（`claude · claude-opus-5-5 · main · context 23% (234k) · 5-hour 2% · 7-day 57%`）。
 
 ## 需要什么
 

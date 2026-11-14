@@ -1,10 +1,10 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { asked, branchOf, footerWords, forgetAll, lastKnown, tokens, windowName } from '../lib/core/meter.mjs';
+import { asked, branchOf, footerWords, forgetAll, knownSoon, lastKnown, tokens, windowName } from '../lib/core/meter.mjs';
 
 test('the footer says what is known, in the status line\'s words, and leaves out what is not', () => {
-  assert.equal(footerWords({ app: 'claude-code', model: 'claude-opus-5-5', branch: 'main', context: { used: 234480, size: 1e6 }, limits: [{ name: '5-hour', used: 2 }, { name: '7-day', used: 56.6 }] }),
-    'claude-code · claude-opus-5-5 · main · context 23% (234k) · 5-hour 2% · 7-day 57%');
+  assert.equal(footerWords({ app: 'claude', model: 'claude-opus-5-5', branch: 'main', context: { used: 234480, size: 1e6 }, limits: [{ name: '5-hour', used: 2 }, { name: '7-day', used: 56.6 }] }),
+    'claude · claude-opus-5-5 · main · context 23% (234k) · 5-hour 2% · 7-day 57%');
   assert.equal(footerWords({ app: 'codex', model: 'gpt-x', screen: true }), 'codex · screen', 'read off the screen: no model claimed');
   assert.equal(footerWords({ app: 'opencode', context: { used: 1404175 } }), 'opencode · context 1.4M', 'no window known: the tokens only');
   assert.equal(footerWords({ app: 'x', limits: [{ name: '7-day', used: NaN }] }), 'x');
@@ -38,5 +38,12 @@ test('a reading that costs a command is given as last known, and asked again onl
   assert.equal(lastKnown('f', 60000, failing), undefined);
   await asked();
   assert.equal(lastKnown('f', 60000, failing), undefined, 'a failure is not retried at once');
+  forgetAll();
+});
+
+test('the first reading is waited for, briefly; after that the last one known is given at once', async () => {
+  forgetAll();
+  assert.equal(await knownSoon('w', 60000, async () => 1000000, 1000), 1000000, 'a restart\'s first post has it too');
+  assert.equal(await knownSoon('slow', 60000, () => new Promise(() => {}), 20), undefined, 'one that hangs holds a post up only so long');
   forgetAll();
 });
