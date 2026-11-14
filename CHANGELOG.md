@@ -1,3 +1,10 @@
+## [1.10.2](https://github.com/zhangxiangliang/herdrchat/compare/v1.10.1...v1.10.2) (2026-11-14)
+
+
+### Bug Fixes
+
+* post the screen when a message you sent left nothing in the agent's records ([1a7dfd8](https://github.com/zhangxiangliang/herdrchat/commit/1a7dfd8fbba846d646b396ef79e568d6b893ca3c))
+
 ## [1.10.1](https://github.com/zhangxiangliang/herdrchat/compare/v1.10.0...v1.10.1) (2026-11-14)
 
 
