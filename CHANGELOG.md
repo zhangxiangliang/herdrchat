@@ -1,3 +1,10 @@
+# [1.14.0](https://github.com/zhangxiangliang/herdrchat/compare/v1.13.0...v1.14.0) (2026-11-14)
+
+
+### Features
+
+* tell two pi in one folder apart, with herdrchat's Pi extension ([723f627](https://github.com/zhangxiangliang/herdrchat/commit/723f62738c474667a7539324760a8187de9e75b7))
+
 # [1.13.0](https://github.com/zhangxiangliang/herdrchat/compare/v1.12.0...v1.13.0) (2026-11-14)
 
 
