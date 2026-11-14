@@ -1,3 +1,13 @@
+## [1.14.2](https://github.com/zhangxiangliang/herdrchat/compare/v1.14.1...v1.14.2) (2026-11-14)
+
+
+### Bug Fixes
+
+* a new Pi session with nothing said yet is not an error ([1efc7aa](https://github.com/zhangxiangliang/herdrchat/commit/1efc7aa558b635fb8dee20c2a905e17582f293cb))
+* an ended group says "ended" once ([6a6cfca](https://github.com/zhangxiangliang/herdrchat/commit/6a6cfca2ad9c7004188dd17f654fc0e19774e1f3))
+* send an image Telegram will not take as a photo as a file ([c431e75](https://github.com/zhangxiangliang/herdrchat/commit/c431e7512808dd92a0ac5ac9acc5e4c8dafd4aeb))
+* show a context under 1% with one decimal, not as 0% ([20d55d5](https://github.com/zhangxiangliang/herdrchat/commit/20d55d5ef52e46992bb4bf494d85ae4a6e0eeac5))
+
 ## [1.14.1](https://github.com/zhangxiangliang/herdrchat/compare/v1.14.0...v1.14.1) (2026-11-14)
 
 
