@@ -14,13 +14,13 @@ const running = new Set();
 after(() => running.forEach((engine) => engine.stop()));
 
 // A core on the fakes, one session "s", started and given `list` as its first snapshot.
-async function setup(list = [], { logError = (...a) => { throw new Error(a.join(' ')); } } = {}) {
+async function setup(list = [], { logError = (...a) => { throw new Error(a.join(' ')); }, asks = {} } = {}) {
   const chat = fakeChat();
   const hc = fakeHc();
   const store = fakeStore();
   const r = fakeReaders();
   const inbox = fs.mkdtempSync(path.join(os.tmpdir(), 'herdrchat-engine-test-'));
-  const engine = createEngine({ cfg: { sessions: ['s'] }, chat, hc, readers: r.readers, store, log: quiet, logWarn: quiet, logError, startedAt: '2026-01-01T00:00:00.000Z', inbox, quick: true });
+  const engine = createEngine({ cfg: { sessions: ['s'] }, chat, hc, readers: r.readers, store, log: quiet, logWarn: quiet, logError, startedAt: '2026-01-01T00:00:00.000Z', inbox, quick: true, asksWaiting: () => Boolean(asks.waiting), askLives: async (s, m, id) => (asks.live ? asks.live(id) : true) });
   running.add(engine);
   running.add(engine);
   const started = engine.start();
@@ -600,5 +600,115 @@ test('/new names the new tab in herdr-app as asked, by the tab id it gave the te
   assert.equal(hc.ran.labels.where, 'proj / daily');
   assert.deepEqual(hc.named, [{ tabId: hc.ran.labels['herdr.tab'], name: 'daily' }]);
   assert.match(chat.of('reply').at(-1).args[1], /Started `claude` as `t99`.*Its room appears/);
+  done();
+});
+
+test('an agent\'s hook asks while it works on (Codex): the card goes at its label, stays while it works, and closes when the label goes', async () => {
+  const t = terminal('t1', { program: 'fake', agent: true, state: 'working' });
+  const { chat, hc, store, engine, r, done } = await setup([t]);
+  const room = store.read().chats['s|t1'].chat;
+  let waiting = { key: '5-9', kind: 'permission', text: '$ curl example.com', options: [{ n: 1, label: 'Yes' }, { n: 2, label: 'No' }, { n: 3, label: 'Answer in the terminal' }], multi: false, free: null };
+  const answers = [];
+  r.reader.dialog = async (s, a) => (hc.getTerminal(s, a).then((rec) => rec.labels['herdrchat.ask']) .then((id) => (id ? waiting : null)));
+  r.reader.answer = async (s, a, shown, reply) => { answers.push(reply); waiting = null; return true; };
+  t.labels = { ...t.labels, 'herdrchat.ask': '5-9' };
+  hc.change('s', 'labels', t);
+  await settle(engine);
+  assert.equal(chat.of('postDialog').length, 1, 'a card though the status says working');
+  hc.change('s', 'status', t); // it goes on working: the card stays
+  await settle(engine);
+  assert.equal(chat.of('closeDialog').length, 0);
+  await engine.onMessage({ room, where: room, message: 'm-in', text: 'and then this', images: [] });
+  assert.equal(hc.sent.length, 0, 'what you send waits for the answer, as with any dialog');
+  const [, , value, message] = chat.of('postDialog')[0].args;
+  const tap = await engine.onAction({ value: { ...value, pick: 1, label: 'Yes' }, message });
+  assert.deepEqual(answers, [{ pick: 1 }]);
+  assert.match(tap.toast.text, /Yes/);
+  t.labels = { ...t.labels, 'herdrchat.ask': '' };
+  hc.change('s', 'labels', t);
+  await settle(engine);
+  assert.equal(hc.sent.length, 1, 'the hook is done: what you sent goes in');
+  done();
+});
+
+test('the hook\'s card closes when its label goes, and a dialog still on the screen gets its own card', async () => {
+  const t = terminal('t1', { program: 'fake', agent: true });
+  const { chat, hc, engine, r, done } = await setup([t]);
+  r.reader.dialog = async (s, a) => ((await hc.getTerminal(s, a)).labels['herdrchat.ask'] ? { key: '6-1', kind: 'permission', text: 'x', options: [{ n: 1, label: 'Yes' }, { n: 2, label: 'No' }], multi: false, free: null } : null);
+  r.reader.answer = async () => true;
+  t.labels = { ...t.labels, 'herdrchat.ask': '6-1' };
+  t.status = { app: 'fake-agent', state: 'blocked', kind: 'permission' };
+  hc.change('s', 'labels', t);
+  hc.change('s', 'status', t);
+  await settle(engine);
+  assert.equal(chat.of('postDialog').length, 1, 'one card for the label and the status');
+  hc.screens.set('s|t1', 'Do you want to proceed?\n❯ 1. Yes\n  2. No\n\nEsc to cancel');
+  t.labels = { ...t.labels, 'herdrchat.ask': '' }; // its time ran out; the prompt is still there
+  hc.change('s', 'labels', t);
+  await settle(engine);
+  assert.equal(chat.of('closeDialog').length, 1);
+  assert.equal(chat.of('postDialog').length, 2, 'the screen\'s dialog, to answer by keys');
+  assert.equal(chat.of('postDialog')[1].args[1].menu.own, undefined);
+  done();
+});
+
+test('without the hook on its machine (dialog says false) the screen is read at once', async () => {
+  const t = terminal('t1', { program: 'fake', agent: true });
+  const { chat, hc, engine, r, done } = await setup([t]);
+  let asked = 0;
+  r.reader.dialog = async () => { asked += 1; return false; };
+  hc.screens.set('s|t1', 'Do you want to proceed?\n❯ 1. Yes\n  2. No\n\nEsc to cancel');
+  t.status = { app: 'fake-agent', state: 'blocked', kind: 'permission' };
+  hc.change('s', 'status', t);
+  await settle(engine);
+  assert.equal(asked, 1, 'asked once, not again and again');
+  assert.equal(chat.of('postDialog').length, 1);
+  done();
+});
+
+test('a request its hook left with no terminal (Codex through its background service): its terminal is found and labelled, its card goes, and the label goes with it', async () => {
+  const t = terminal('t1', { program: 'fake', agent: true, state: 'working' });
+  const asks = { waiting: true, live: () => true };
+  const { chat, hc, engine, r, done } = await setup([t], { asks });
+  r.reader.strayAsk = async () => (asks.waiting ? '8-3' : null);
+  r.reader.dialog = async (s, a) => ((await hc.getTerminal(s, a)).labels['herdrchat.ask'] ? { key: '8-3', kind: 'permission', text: '$ ls', options: [{ n: 1, label: 'Yes' }, { n: 2, label: 'No' }], multi: false, free: null } : null);
+  r.reader.answer = async () => true;
+  await engine.tick.asks();
+  await settle(engine);
+  assert.deepEqual(hc.labelled.map((l) => l.labels), [{ 'herdrchat.ask': '8-3' }]);
+  assert.equal(chat.of('postDialog').length, 1, 'its card, as for a hook that labelled its terminal itself');
+  await engine.tick.asks();
+  assert.equal(hc.labelled.length, 1, 'labelled once');
+  asks.waiting = false;
+  asks.live = () => false; // its hook is done
+  await engine.tick.asks();
+  await settle(engine);
+  assert.deepEqual(hc.labelled.at(-1).labels, { 'herdrchat.ask': '' });
+  assert.equal(chat.of('closeDialog').length, 1, 'its card closes');
+  done();
+});
+
+test('Codex\'s own prompt after its hook (Answer in the terminal) gets one card, whichever of the turn and the label comes first', async () => {
+  const t = terminal('t1', { program: 'fake', agent: true, state: 'working' });
+  const { chat, hc, engine, r, done } = await setup([t]);
+  let answered = false; // as the real reader: an answered request is not asked any more
+  r.reader.dialog = async (s, a) => (!answered && (await hc.getTerminal(s, a)).labels['herdrchat.ask'] ? { key: '9-1', kind: 'permission', text: '$ ls', options: [{ n: 1, label: 'Yes' }, { n: 2, label: 'No' }, { n: 3, label: 'Answer in the terminal' }], multi: false, free: null } : null);
+  r.reader.answer = async () => { answered = true; return true; };
+  t.labels = { ...t.labels, 'herdrchat.ask': '9-1' };
+  hc.change('s', 'labels', t);
+  await settle(engine);
+  const [, , value, message] = chat.of('postDialog')[0].args;
+  await engine.onAction({ value: { ...value, pick: 3, label: 'Answer in the terminal' }, message });
+  // its own prompt comes up: blocked, and a turn; then the label goes
+  hc.screens.set('s|t1', 'Would you like to run the following command?\n\n› 1. Yes, proceed (y)\n  2. No, and tell Codex what to do differently (esc)\n\n  Press enter to confirm or esc to cancel');
+  t.status = { app: 'fake-agent', state: 'blocked', kind: 'permission' };
+  hc.change('s', 'status', t);
+  hc.turn('s', 't1', 'blocked');
+  await settle(engine);
+  t.labels = { ...t.labels, 'herdrchat.ask': '' };
+  hc.change('s', 'labels', t);
+  await settle(engine);
+  assert.equal(chat.of('postDialog').length, 2, 'the hook\'s card, then one for the prompt on the screen');
+  assert.equal(chat.of('postDialog')[1].args[1].menu.own, undefined);
   done();
 });

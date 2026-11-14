@@ -76,6 +76,16 @@ export function fakeHc() {
     screenTail: async (session, address) => screens.get(`${session}|${address}`) || '',
     send: async (session, address, text, opts) => { sent.push({ session, address, text, opts }); },
     keys: async (session, address, names) => { pressed.push({ session, address, names }); },
+    labelled: [],
+    // as hc does: the labels change (an empty value takes one away), and a labels event follows
+    label: async (session, address, labels) => {
+      hc.labelled.push({ session, address, labels });
+      const record = sessions.get(session).view.terminals.get(address);
+      const next = { ...record.labels };
+      for (const [k, v] of Object.entries(labels)) { if (v) next[k] = v; else delete next[k]; }
+      record.labels = next;
+      sessions.get(session).handlers.onChange({ type: 'labels', address, record, data: { labels: next } });
+    },
     put: async (session, address, file) => `/remote/${file.split('/').pop()}`,
     named: [],
     run: async (session, opts) => { hc.ran = opts; return JSON.stringify({ address: 't99' }); },

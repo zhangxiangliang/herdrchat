@@ -160,6 +160,33 @@ A room is a Feishu group or a Telegram topic.
 
 ## Answering a dialog from the chat
 
+### From the agent itself, when it can say
+
+When the agent can tell herdrchat what it asks, that comes first, and no screen is read:
+OpenCode through its own API (`opencode api`: its forms and permission requests), Claude
+Code and Codex through herdrchat's hook in their settings (`herdrchat hooks install`,
+`lib/hooks/ask.sh`, their PermissionRequest hook). The hook leaves the request in
+`~/.local/state/herdrchat/asks/` on the machine the agent runs on and labels its terminal
+`herdrchat.ask=<id>` while it waits; that label (an hc event, from a connected machine
+too) brings the card, with the agent's own words and options. Codex run through its
+shared background service (without `--no-daemon`) runs its hooks there, outside the
+terminal: the request then names no terminal, and herdrchat finds it by Codex's session
+(the one the terminal's log is of) and labels the terminal itself, every 2 seconds on
+this machine and every minute on a connected one. Your tap is written back as
+the hook's decision: Claude Code's permissions (Yes, Yes and don't ask again when it offers
+rules, No), its questions (one card per question, boxes for a multi-select, your own words;
+the answers go back together) and its plan (start, start and accept its edits, keep
+planning); Codex's commands, patches and MCP tools (Yes, No, Answer in the terminal). Esc
+on a card stops Claude, as in its own prompt; for Codex it says no.
+The terminal still works: Claude shows its prompt as usual, and an answer there closes
+the card. Codex shows its prompt only once the hook is done: "Answer in the terminal"
+hands it back, and so does the time running out (10 minutes; 30 for Claude). Once the
+hook is done the card closes, and a dialog still on the screen gets a card of its own.
+A dialog the agent does not name this way (and every dialog without the hook) is read off
+the screen, below.
+
+### From the screen
+
 A button presses that option's number key in the terminal (Esc presses esc). A question
 with previews (a box beside its options) takes no number, so there the button moves with
 the arrows from the cursor to that option and presses Enter. In a multi-select, a box is
@@ -227,6 +254,10 @@ delivered (the terminal has ended) says so plainly.
   text, so an agent like Claude Code opens it; `/screen`, `/answer <text>` (type into the
   dialog it waits on, as is), `/esc`, `/history` (the conversation so far, as a file and
   a folded post). Dialog cards have buttons.
+- On the command line, `herdrchat hooks` says whether herdrchat's hook is in Claude Code's
+  and Codex's settings; `herdrchat hooks install [claude|codex]` puts it in (it shows the
+  files and asks first; `--yes` does not ask), `herdrchat hooks uninstall` takes it out.
+  See "From the agent itself, when it can say".
 
 `herdrchat setup` does the steps below by asking: it checks the token or the Feishu keys
 at once, picks the sessions, starts the bot and pairs you as its owner with a 6-digit
@@ -360,5 +391,9 @@ before it is started again. Tokens and secrets are never logged. The skill's
 - Telegram: a bot cannot mute a topic for you; a topic you mute in Telegram stays fully
   quiet, "needs you" included. Closing a topic is documented for supergroups only, so an
   ended topic is marked by its name.
-- Dialog buttons come from the screen's numbered menu; a dialog drawn some other way gets
-  the screen and `/answer`, `/esc`.
+- Without the agent naming its dialog (its API, or the hook), dialog buttons come from
+  the screen's numbered menu; a dialog drawn some other way gets the screen and
+  `/answer`, `/esc`.
+- The hook (`herdrchat hooks install`) goes in on this machine only; on a connected
+  machine, install herdrchat there and run it there too. Codex has no hook for its own
+  questions (`request_user_input`): those are read off the screen.

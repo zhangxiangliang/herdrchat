@@ -28,8 +28,8 @@ questions, send and receive images, and see all terminals in one overview. A new
 topic starts with the conversation so far, and your phone rings only when an agent needs
 you or is done (on Feishu once you have sent `/auth` to the bot; on Telegram right away).
 
-Claude Code and Codex are mirrored fully, their dialogs answered with buttons. Other
-agents show their screen when you type to them, until herdrchat learns to read their
+Claude Code, Codex and OpenCode are mirrored fully, their dialogs answered with buttons.
+Other agents show their screen when you type to them, until herdrchat learns to read their
 conversations too.
 
 ## You need
@@ -95,8 +95,16 @@ start a terminal, `/kill` to end one.
 | `/herdrchat telegram <task>` | The Telegram bot, from @BotFather to the first topic. |
 
 On the command line: `herdrchat setup`, `pair`, `init`, `start`, `stop`, `status`, `logs`, `install`,
-`uninstall`, `version`; `herdrchat` alone lists them. Add `--profile <name>` to run a
+`uninstall`, `hooks`, `version`; `herdrchat` alone lists them. Add `--profile <name>` to run a
 second chat app beside the first.
+
+Recommended for Claude Code and Codex: `herdrchat hooks install` (it shows what it changes
+and asks first). It adds herdrchat's hook to their own settings, so what they ask you (a
+permission, Claude's questions and plans) comes to the chat in their own words and options,
+and your tap goes straight back to them, with no screen read. Without it, the dialog is
+read off the screen, as before. Codex asks you once to trust the new hook (`/hooks` in
+Codex), and while the hook waits Codex shows no prompt of its own: tap "Answer in the
+terminal" on the card to get it there. `herdrchat hooks uninstall` takes it out.
 
 ## Update
 
@@ -121,10 +129,12 @@ them. `herdrchat status` prints both.
   can drive your terminals.
 - On Feishu, the bot's tags are visible to your whole team (`HERDR_BOT_TAGS=off` turns
   them off).
+- With `herdrchat hooks install`, a tap in the chat can allow what Claude Code or Codex
+  asks to do, as a key in the terminal can.
 
 ## Remove
 
-`herdrchat uninstall` (for each profile), `npm rm -g herdrchat`, delete
+`herdrchat uninstall` (for each profile), `herdrchat hooks uninstall`, `npm rm -g herdrchat`, delete
 `~/.config/herdrchat` and `~/.local/state/herdrchat`, then delete the Feishu app or the
 Telegram bot (@BotFather, `/deletebot`).
 

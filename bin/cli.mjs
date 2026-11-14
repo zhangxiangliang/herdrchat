@@ -12,6 +12,7 @@
 //     status     how it runs, its folders, sessions, its chat app, errors today
 //     logs       today's log (-n <lines>, --errors for ERROR and WARN only, --day <date>)
 //     run        run in the foreground (what start keeps running)
+//     hooks      herdrchat's hook in Claude Code's and Codex's settings: status, install, uninstall
 //     version    which herdrchat this is
 //
 // The profile is --profile or HERDRCHAT_PROFILE (default "default"); where its files are
@@ -37,6 +38,8 @@ herdrchat <command> [--profile <name>]
   install    run it as a service of the system: starts at login, back after a crash
   uninstall  no service any more (it is stopped)
   run        run in the foreground (what start keeps running)
+  hooks      what Claude Code and Codex ask you comes to the chat in their own words, and
+             your answer goes back to them: hooks install (asks first) | uninstall
   version    which herdrchat this is
 
 First time: herdrchat setup. (Or by hand: herdrchat init, fill in the file, herdrchat start.)
@@ -562,6 +565,52 @@ const commands = {
 
   async run() {
     await import('./herdrchat.mjs');
+  },
+
+  // One hook for every profile: it is in the agents' settings, for this machine's user.
+  async hooks() {
+    const { hooksStatus, installHooks, uninstallHooks } = await import('../lib/core/hooks.mjs');
+    const [, sub = 'status', ...only] = argv.filter((a) => !a.startsWith('-'));
+    const status = hooksStatus();
+    if (sub === 'status') {
+      for (const a of status) console.log(`${a.name.padEnd(12)} ${!a.there ? `not here (${a.dir})` : a.in ? `in (${a.file})` : 'not in: herdrchat hooks install'}`);
+      console.log('\nWith the hook, what they ask you (permissions, questions, plans) comes to the chat in their\nown words and options, and your answer goes straight back; without it, the screen is read.');
+      return;
+    }
+    if (sub === 'uninstall') {
+      const done = uninstallHooks();
+      if (!done.length) console.log('The hook was not in; nothing changed.');
+      for (const line of done) ok(`taken out: ${line}`);
+      return;
+    }
+    if (sub !== 'install') fail('herdrchat hooks: status (default), install [claude|codex] or uninstall');
+    const wanted = only.length ? only : ['claude', 'codex'];
+    const unknown = wanted.filter((w) => !['claude', 'codex'].includes(w));
+    if (unknown.length) fail(`herdrchat hooks install: ${unknown.join(', ')}? Name claude, codex or both (or none: both).`);
+    const picked = status.filter((a) => wanted.includes(a.agent) && a.there);
+    if (!picked.length) fail(`Neither of ${wanted.join(', ')} is set up here (no ${status.filter((a) => wanted.includes(a.agent)).map((a) => a.dir).join(', ')}).`);
+    console.log('herdrchat adds its hook to:');
+    for (const a of picked) tell(`${a.name}: ${a.file} (PermissionRequest; a copy of the file is kept first)`);
+    console.log(`
+With it, when ${picked.map((a) => a.name).join(' or ')} asks you something in an hc terminal (a permission,
+a question, a plan), the card in your chat shows its own words and options, and your
+answer goes straight back to it. The terminal still works: answer there and the card closes.
+Claude Code shows its prompt as usual. Codex shows its prompt only once the hook is done: tap
+"Answer in the terminal" on the card, or after 10 minutes it comes back to the terminal by itself.
+Take it out any time: herdrchat hooks uninstall`);
+    if (!argv.includes('--yes')) {
+      if (!process.stdin.isTTY) fail('\nAdd --yes to put it in without being asked.');
+      const p = await prompter();
+      const yes = /^y(es)?$/i.test(await p.ask('\nPut it in? (y/N)', 'N'));
+      p.close();
+      if (!yes) {
+        console.log('Nothing changed.');
+        return;
+      }
+    }
+    for (const line of installHooks(picked.map((a) => a.agent))) ok(`in: ${line}`);
+    if (picked.some((a) => a.agent === 'claude')) tell('Claude Code: sessions started from now on use it (restart one that runs now).');
+    if (picked.some((a) => a.agent === 'codex')) tell('Codex: it asks you once to trust a new hook: in Codex, open /hooks and trust herdrchat\'s.');
   },
 };
 

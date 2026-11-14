@@ -2,14 +2,14 @@
 
 herdrchat has two kinds of plug-ins that grow over time: **chat apps** (Feishu and
 Telegram now, Slack and Discord later) and **agents**, each read by its reader (Claude
-Code and Codex now, then pi). The core between them knows neither. This page says where everything is and
+Code, Codex and OpenCode now, then pi). The core between them knows neither. This page says where everything is and
 how to add one of each.
 
 ## The parts
 
 ```
 bin/
-  cli.mjs                  herdrchat init|start|stop|status|logs|install|uninstall|run|version
+  cli.mjs                  herdrchat setup|pair|init|start|stop|status|logs|install|uninstall|hooks|run|version
   herdrchat.mjs            wires the parts: config, log, the chat app, the core
 lib/
   core/                    the same for every chat app and every agent
@@ -19,9 +19,12 @@ lib/
     views.mjs              which view of a terminal is followed (hc core id + tN)
     cursor.mjs  home.mjs   what was posted already; reading an agent's log files
     menu.mjs               a dialog's options, read from the screen
+    asks.mjs               what an agent asks through herdrchat's hook (its request, your answer)
+    hooks.mjs              herdrchat hooks: the hook in Claude Code's and Codex's settings
     config.mjs  log.mjs    config.env, state.json, the daily log
     service.mjs            herdrchat as a launchd or systemd service
     readers/               one reader per agent (the contract is in index.mjs)
+  hooks/ask.sh             the PermissionRequest hook itself (sh and hc only)
   chats/
     contract.mjs           what a chat app gives the core, and the check for it
     index.mjs              the list of chat apps

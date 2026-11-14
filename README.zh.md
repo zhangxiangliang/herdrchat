@@ -24,7 +24,7 @@ agent 干活时说的话实时可见，它问你的问题点按钮就能回答�
 新开的群或话题会先补上之前的对话；只有 agent 需要你、或者做完的时候手机才会响
 （飞书要先给 bot 发一次 `/auth`；Telegram 直接就是这样）。
 
-目前 Claude Code 和 Codex 是完整同步的，它们的对话框都能点按钮回答。其他 agent 在你给它发消息时会回一次屏幕内容，
+目前 Claude Code、Codex 和 OpenCode 是完整同步的，它们的对话框都能点按钮回答。其他 agent 在你给它发消息时会回一次屏幕内容，
 等 herdrchat 学会读它们的对话记录以后，也会完整同步。
 
 ## 需要什么
@@ -80,8 +80,14 @@ herdrchat setup
 | `/herdrchat feishu <任务>` | 替你在飞书开发者后台完成操作（用 [Ego Lite](https://lite.ego.app/) 浏览器，或者一步步带你点）。 |
 | `/herdrchat telegram <任务>` | Telegram bot：从 @BotFather 一直到第一个话题。 |
 
-命令行：`herdrchat setup`、`pair`、`init`、`start`、`stop`、`status`、`logs`、`install`、`uninstall`、`version`；
+命令行：`herdrchat setup`、`pair`、`init`、`start`、`stop`、`status`、`logs`、`install`、`uninstall`、`hooks`、`version`；
 只输入 `herdrchat` 会列出全部。加上 `--profile <名字>`，可以再开一个聊天软件。
+
+用 Claude Code 和 Codex 的话，推荐运行 `herdrchat hooks install`（它会先列出要改什么，问过你才改）。
+它把 herdrchat 的 hook 加进它们自己的配置里：它们问你的事（权限、Claude 的提问和计划）会用它们自己的原话和选项发到聊天里，
+你点的按钮直接回给它们，不用读屏幕。不装的话，还是和以前一样从屏幕上读对话框。
+Codex 第一次会让你确认信任这个新 hook（在 Codex 里打开 `/hooks`）；而且 hook 在等的时候，Codex 自己不显示提示框：
+想在终端里回答，就点卡片上的「Answer in the terminal」。`herdrchat hooks uninstall` 可以把它去掉。
 
 ## 更新
 
@@ -101,10 +107,11 @@ herdrchat start                  # 每个 profile 都要：在这之前它还跑
 - 只有 `config.env` 里设置的 owner 能往你的终端里输入；其他人发的都会被忽略。
 - 飞书的 App Secret、Telegram 的 bot token 要像密码一样保管：谁拿到了，谁就能操作你的终端。
 - 飞书里 bot 打的标签，你整个团队都看得见（`HERDR_BOT_TAGS=off` 可以关掉）。
+- 装了 `herdrchat hooks install` 之后，在聊天里点一下就能批准 Claude Code 或 Codex 要做的事，和在终端里按键一样。
 
 ## 卸载
 
-每个 profile 运行一次 `herdrchat uninstall`，然后 `npm rm -g herdrchat`，删掉 `~/.config/herdrchat`
+每个 profile 运行一次 `herdrchat uninstall`，再运行 `herdrchat hooks uninstall`，然后 `npm rm -g herdrchat`，删掉 `~/.config/herdrchat`
 和 `~/.local/state/herdrchat`，最后删掉飞书应用或 Telegram bot（在 @BotFather 里用 `/deletebot`）。
 
 工作原理和全部配置：[docs/guide.md](docs/guide.md)（英文）。
