@@ -28,7 +28,8 @@ questions, send and receive images, and see all terminals in one overview. A new
 topic starts with the conversation so far, and your phone rings only when an agent needs
 you or is done (on Feishu once you have sent `/auth` to the bot; on Telegram right away).
 
-Claude Code, Codex and OpenCode are mirrored fully, their dialogs answered with buttons.
+Claude Code, Codex, OpenCode and Pi are mirrored fully, their dialogs answered with buttons
+(Pi asks nothing itself; an extension's dialog is read off the screen).
 Other agents show their screen when you type to them, until herdrchat learns to read their
 conversations too. Under every post a small line says where it came from and how it stands: the
 harness, model and git branch, how full the context is, and the 5-hour and 7-day limits

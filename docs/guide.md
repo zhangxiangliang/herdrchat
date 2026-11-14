@@ -122,6 +122,9 @@ each agent a reader reads the agent's own records. The status hc reports names t
 | `status.app` | reader | reads |
 |---|---|---|
 | `claude-code` | `lib/core/readers/claude.mjs` | its transcript: the terminal's foreground pid names the session in `~/.claude/sessions/<pid>.json` |
+| `codex` | `lib/core/readers/codex.mjs` | its rollout log in `~/.codex/sessions/`: the one written since the terminal's codex started, in its folder |
+| `opencode` | `lib/core/readers/opencode.mjs` | its own API (`opencode api`): the folder's active session |
+| `pi` | `lib/core/readers/pi.mjs` | its session log in `~/.pi/agent/sessions/--<folder>--/`: the newest written since the terminal's pi started (Pi runs in its own process group, so it is found as the shell's child) |
 | anything else | none | nothing by itself; what you type gets its screen in reply |
 
 On another machine, a reader reads the same files through `hc exec --on`. To add an

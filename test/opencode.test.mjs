@@ -87,7 +87,8 @@ test('OpenCode: how full the context is comes with each answer, its window from 
 });
 
 test('Zhipu\'s plan limits: the key is OpenCode\'s own, the reply is read only when it is what is expected', async () => {
-  const { zhipuHost, keyOf, zhipuLimitsIn } = await import('../lib/core/readers/opencode.mjs');
+  const { zhipuHostOf: zhipuHost, keyOf } = await import('../lib/core/readers/opencode.mjs');
+  const { zhipuLimitsIn } = await import('../lib/core/zhipu.mjs');
   assert.equal(zhipuHost('zhipuai-coding-plan'), 'open.bigmodel.cn');
   assert.equal(zhipuHost('zai-coding-plan'), 'api.z.ai');
   assert.equal(zhipuHost('openai'), null, 'another provider: nothing is asked');
