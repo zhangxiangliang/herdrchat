@@ -1,3 +1,10 @@
+# [1.9.0](https://github.com/zhangxiangliang/herdrchat/compare/v1.8.1...v1.9.0) (2026-11-14)
+
+
+### Features
+
+* say under each post which harness and model it came from ([a17f23c](https://github.com/zhangxiangliang/herdrchat/commit/a17f23cc92dace37350aca7c01639a3238452e0f))
+
 ## [1.8.1](https://github.com/zhangxiangliang/herdrchat/compare/v1.8.0...v1.8.1) (2026-11-14)
 
 
