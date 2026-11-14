@@ -5,6 +5,8 @@
 #
 #   scripts/smoke.sh local       the package packed from this checkout, the skill from it
 #   scripts/smoke.sh published   herdrchat@latest from npm, the skill from GitHub
+#   SMOKE_VERSION=1.2.3          (published) that version instead of latest, and it must be
+#                                the one installed: a release just made is what is tried
 #   SMOKE_SKILL=0                skip the skill step (it needs npx skills)
 set -eu
 
@@ -24,7 +26,7 @@ expect() { # expect <what> <pattern> <output>
 
 step "install the command ($MODE)"
 if [ "$MODE" = published ]; then
-  npm install -g herdrchat@latest >/dev/null
+  npm install -g "herdrchat@${SMOKE_VERSION:-latest}" >/dev/null
   SKILL_SOURCE=zhangxiangliang/herdrchat
 else
   (cd "$ROOT" && npm pack --silent --pack-destination "$WORK" >/dev/null)
@@ -37,6 +39,7 @@ step "herdrchat --version"
 out="$(herdrchat --version)"
 expect "version" '^[0-9]+\.[0-9]+\.[0-9]+$' "$out"
 [ "$MODE" = published ] || [ "$out" = "$(node -p "require('$ROOT/package.json').version")" ] || fail "version $out is not package.json's"
+[ "$MODE" = local ] || [ -z "${SMOKE_VERSION:-}" ] || [ "$out" = "$SMOKE_VERSION" ] || fail "version $out is installed, not $SMOKE_VERSION"
 
 step "herdrchat with no command lists the commands"
 expect "usage" 'init.*start.*stop' "$(herdrchat | tr '\n' ' ')"

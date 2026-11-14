@@ -23,9 +23,27 @@ jobs:
         with:
           node-version: 22
 
+      # After a release, npm takes minutes (8 once) before it serves the new version, and
+      # until then latest is still the one before: so the version the release made is
+      # waited for (up to 30 minutes, then this fails), and that very version is tried.
       - name: Wait for a release just made to reach npm
-        if: github.event_name == 'workflow_run'
-        run: sleep 120
+        id: release
+        if: github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version="$(gh release view --repo "$GITHUB_REPOSITORY" --json tagName -q .tagName | sed 's/^v//')"
+          echo "the last release: $version"
+          end=$(( $(date +%s) + 1800 ))
+          until [ "$(npm view herdrchat version 2>/dev/null)" = "$version" ] &&
+            [ "$(curl -s -o /dev/null -w '%{http_code}' "https://registry.npmjs.org/herdrchat/-/herdrchat-$version.tgz")" = 200 ]; do
+            [ "$(date +%s)" -lt "$end" ] || { echo "npm does not serve herdrchat $version after 30 minutes"; exit 1; }
+            sleep 20
+          done
+          echo "npm serves herdrchat $version"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
 
       - name: Install what is published, the way a user does
+        env:
+          SMOKE_VERSION: ${{ steps.release.outputs.version }}
         run: sh scripts/smoke.sh published
