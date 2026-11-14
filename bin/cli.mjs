@@ -102,7 +102,7 @@ const { coreUp, hc, sessionsHere } = await import('../lib/core/hc.mjs');
 const { serviceOf } = await import('../lib/core/service.mjs');
 const places = placesOf();
 
-const shellQuote = (s) => `'${String(s).replace(/'/g, `'\\''`)}'`;
+const { shellQuote } = await import('../lib/core/shell.mjs');
 const again = profile || (places.profile !== 'default' ? places.profile : null) ? ` --profile ${places.profile}` : '';
 // the settings, or a plain word on what to do when there are none yet
 function config() {

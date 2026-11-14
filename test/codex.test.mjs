@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { conversationAfter, pickLog, seconds, titleOf } from '../lib/core/readers/codex.mjs';
+import { conversationAfter, pickLog, titleOf } from '../lib/core/readers/codex.mjs';
+import { seconds } from '../lib/core/shell.mjs';
 import { LISTED, agentOf } from '../lib/core/readers/index.mjs';
 import { startCursor } from '../lib/core/cursor.mjs';
 import { menuOf } from '../lib/core/menu.mjs';
