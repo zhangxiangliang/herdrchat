@@ -110,3 +110,30 @@ test('a post is quoted by its first line with words, not by its footer', () => {
   assert.equal(summaryOf('```\n\n```'), '');
   assert.equal(summaryOf('x'.repeat(100)).length, 80);
 });
+
+test('an ended group in your "ended" label gets no "ended" tag too; without your label it does', async () => {
+  const { createDecor } = await import('../lib/chats/feishu/rooms/decor.mjs');
+  const calls = [];
+  const ok = async () => ({ code: 0 });
+  const client = { im: { v2: {
+    tag: { create: async ({ data }) => ({ code: 0, data: { id: `tag-${data.create_tag.name}` } }) },
+    bizEntityTagRelation: { create: async ({ data }) => { calls.push(['bind', data.tag_ids[0]]); return ok(); }, update: async ({ data }) => { calls.push(['unbind', data.tag_ids[0]]); return ok(); } },
+  } } };
+  let state = { chats: {}, tags: { herdrchat: 'tag-herdrchat' } };
+  const store = { read: () => JSON.parse(JSON.stringify(state)), write: (s) => { state = JSON.parse(JSON.stringify(s)); } };
+  const entryFor = (record) => { let r = record; return { get: () => r, set: (f) => { r = { ...r, ...f }; } }; };
+  const quiet = () => {};
+  let asYou = true;
+  const decor = createDecor({ client, cfg: { botTags: true, userTags: true }, store, log: quiet, logError: (...a) => { throw new Error(a.join(' ')); }, userAuth: {}, asYou: async () => asYou });
+  // acting as you: the label says "ended", and an "ended" tag it had comes off
+  const labelled = entryFor({ chat: 'oc_1', name: 'herdrchat / x', tag: 'tag-herdrchat', ended: true, endedTag: true });
+  await decor.botTags(labelled, 'herdrchat');
+  assert.deepEqual(calls, [['unbind', 'tag-ended']]);
+  assert.equal(labelled.get().endedTag, false);
+  // not acting as you: the tag is the only "ended" there is
+  asYou = false;
+  calls.length = 0;
+  const alone = entryFor({ chat: 'oc_2', name: 'herdrchat / y', tag: 'tag-herdrchat', ended: true, endedTag: false });
+  await decor.botTags(alone, 'herdrchat');
+  assert.deepEqual(calls, [['bind', 'tag-ended']]);
+});
