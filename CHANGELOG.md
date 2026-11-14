@@ -1,3 +1,10 @@
+# [1.8.0](https://github.com/zhangxiangliang/herdrchat/compare/v1.7.0...v1.8.0) (2026-11-14)
+
+
+### Features
+
+* answer Codex's questions from its own log ([024c3a2](https://github.com/zhangxiangliang/herdrchat/commit/024c3a2b7829897029d4071e1e52aa2e1618c626))
+
 # [1.7.0](https://github.com/zhangxiangliang/herdrchat/compare/v1.6.0...v1.7.0) (2026-11-14)
 
 
