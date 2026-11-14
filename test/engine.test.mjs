@@ -925,6 +925,31 @@ test('a message the agent took as its own command, with nothing in its records, 
   done();
 });
 
+test('a message an agent never starts working on (Codex: "Unrecognized command") gets the screen and a ring, not silence', async () => {
+  const t = terminal('t1', { program: 'fake', agent: true });
+  t.status = { app: 'fake-agent', state: 'idle' };
+  const { chat, hc, store, engine, r, done } = await setup([t]);
+  r.reader.leftInput = (screen, sent) => (screen.includes(`› ${sent}`) ? ['ctrl+c'] : null);
+  const room = rooms(store)['s|t1'].chat;
+  const old = Array.from({ length: 10 }, (_, i) => `old line ${i}`).join('\n');
+  hc.screens.set('s|t1', `${old}\n› `);
+  await engine.onMessage({ room, where: room, message: 'm-in', text: '/nosuchcmd', images: [] });
+  hc.screens.set('s|t1', `${old}\n• Unrecognized command '/nosuchcmd'.\n› /nosuchcmd`);
+  await new Promise((ok) => setTimeout(ok, 60));
+  await settle(engine);
+  assert.equal(chat.of('post').at(-1).args[1], "```\n• Unrecognized command '/nosuchcmd'.\n› /nosuchcmd\n```\n\nIt did not take this, so its input box was emptied.");
+  assert.deepEqual(chat.of('ring').map((c) => c.args[2]), ['⚠️ needs you']);
+  assert.deepEqual(hc.pressed.at(-1).names, ['ctrl+c']);
+  // one that starts working is left to its turn's end
+  await engine.onMessage({ room, where: room, message: 'm-2', text: 'hi', images: [] });
+  t.status = { app: 'fake-agent', state: 'working' };
+  hc.change('s', 'status', t);
+  await new Promise((ok) => setTimeout(ok, 60));
+  await settle(engine);
+  assert.equal(chat.of('ring').length, 1);
+  done();
+});
+
 test('a button on a card to the owner goes to whoever made the card, not to a terminal', async () => {
   const got = [];
   const { engine, done } = await setup([], { ownerActions: { update: (v) => { got.push(v); return { toast: { type: 'info', text: 'Updating' } }; } } });

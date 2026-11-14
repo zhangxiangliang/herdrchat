@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { conversationAfter, pickLog, titleOf } from '../lib/core/readers/codex.mjs';
+import { conversationAfter, leftInput, pickLog, titleOf } from '../lib/core/readers/codex.mjs';
 import { seconds } from '../lib/core/shell.mjs';
 import { LISTED, agentOf } from '../lib/core/readers/index.mjs';
 import { startCursor } from '../lib/core/cursor.mjs';
@@ -99,4 +99,12 @@ test('a Codex token_count tells how full the context is and the limits, shortest
   assert.deepEqual(conversationAfter(lines, startCursor(at(0))).items.map(({ role, context, limits }) => ({ role, context, limits })),
     [{ role: 'meta', context: { used: 25871, size: 475000 }, limits: [{ name: '5-hour', used: 3 }, { name: '7-day', used: 65 }] }]);
   assert.deepEqual(conversationAfter([tc({ info: null, rate_limits: null })], startCursor(at(0))).items, [], 'one that tells nothing is nothing');
+});
+
+test('what Codex did not take is emptied from its input box only when your words are there', () => {
+  const left = "• Unrecognized command '/nosuchcmd'.\n› /nosuchcmd now\n\n  GPT-6.1-Sol default · ~/w";
+  assert.deepEqual(leftInput(left, '/nosuchcmd now'), ['ctrl+c']);
+  // an empty box (its placeholder), or your words only in its history: nothing pressed
+  assert.equal(leftInput('› /nosuchcmd now\n• done\n› Ask Codex to do anything\n  GPT-6.1-Sol', '/nosuchcmd now'), null);
+  assert.equal(leftInput(left, ''), null);
 });
