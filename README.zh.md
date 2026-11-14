@@ -88,6 +88,7 @@ herdrchat setup
 你点的按钮直接回给它们，不用读屏幕。不装的话，还是和以前一样从屏幕上读对话框。
 Codex 第一次会让你确认信任这个新 hook（在 Codex 里打开 `/hooks`）；而且 hook 在等的时候，Codex 自己不显示提示框：
 想在终端里回答，就点卡片上的「Answer in the terminal」。`herdrchat hooks uninstall` 可以把它去掉。
+Codex 的提问（Plan 模式里的，以及它不等你回答就继续的那种）不需要 hook：直接从它自己的会话记录里读。
 
 ## 更新
 

@@ -182,6 +182,15 @@ The terminal still works: Claude shows its prompt as usual, and an answer there 
 the card. Codex shows its prompt only once the hook is done: "Answer in the terminal"
 hands it back, and so does the time running out (10 minutes; 30 for Claude). Once the
 hook is done the card closes, and a dialog still on the screen gets a card of its own.
+Codex's questions come from its own log (no hook is needed for them). In Plan mode it
+asks with `request_user_input` and waits: the card has its words (the header, the
+question, each option's note, "question 1 of 2"), one card per question, plus "None of the
+above" with your own words; a tap presses that option's number in its prompt (your own
+words: down to "None of the above", tab, the words, Enter), once the screen shows that
+very question. Its other way, `request_user_input_async`, does not wait: the turn ends,
+and your answer is just your next message. Its card stays while Codex is idle; your taps
+(one per question) go as one message ("Which fruit? Pear", one line each), and anything
+you type in the group answers it too. Once Codex works again the card closes.
 A dialog the agent does not name this way (and every dialog without the hook) is read off
 the screen, below.
 
@@ -395,5 +404,4 @@ before it is started again. Tokens and secrets are never logged. The skill's
   the screen's numbered menu; a dialog drawn some other way gets the screen and
   `/answer`, `/esc`.
 - The hook (`herdrchat hooks install`) goes in on this machine only; on a connected
-  machine, install herdrchat there and run it there too. Codex has no hook for its own
-  questions (`request_user_input`): those are read off the screen.
+  machine, install herdrchat there and run it there too.

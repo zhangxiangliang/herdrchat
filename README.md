@@ -104,7 +104,9 @@ permission, Claude's questions and plans) comes to the chat in their own words a
 and your tap goes straight back to them, with no screen read. Without it, the dialog is
 read off the screen, as before. Codex asks you once to trust the new hook (`/hooks` in
 Codex), and while the hook waits Codex shows no prompt of its own: tap "Answer in the
-terminal" on the card to get it there. `herdrchat hooks uninstall` takes it out.
+terminal" on the card to get it there. `herdrchat hooks uninstall` takes it out. Codex's
+questions (in Plan mode, and the ones it asks without waiting) need no hook: they are read
+from its own log.
 
 ## Update
 

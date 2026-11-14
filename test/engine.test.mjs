@@ -712,3 +712,73 @@ test('Codex\'s own prompt after its hook (Answer in the terminal) gets one card,
   assert.equal(chat.of('postDialog')[1].args[1].menu.own, undefined);
   done();
 });
+
+test('a question that leaves the agent idle (Codex\'s async ones) gets its card at the turn\'s end, keeps it while idle, and the tap answers it', async () => {
+  const t = terminal('t1', { program: 'fake', agent: true, state: 'working' });
+  const { chat, hc, engine, r, done } = await setup([t]);
+  let asked = { key: 'q1#0', kind: 'question', idle: true, text: 'Which fruit?', options: [{ n: 1, label: 'Apple' }, { n: 2, label: 'Pear' }, { n: 3, label: 'Type your own answer' }], multi: false, free: { n: 3 } };
+  const answers = [];
+  r.reader.asksIdle = true;
+  r.reader.dialog = async (s, a) => ((await hc.getTerminal(s, a)).status.state === 'working' ? null : asked);
+  r.reader.answer = async (s, a, shown, reply) => { answers.push(reply); asked = null; return true; };
+  const after = r.reader.after;
+  let reads = 0;
+  r.reader.after = (...a) => { reads += 1; return after(...a); };
+  t.status = { app: 'fake-agent', state: 'done' };
+  hc.change('s', 'status', t);
+  hc.turn('s', 't1', 'done');
+  await settle(engine);
+  assert.equal(chat.of('postDialog').length, 1, 'its card, after the turn');
+  assert.equal(reads, 1, 'no waiting for a last answer that is not coming');
+  t.status = { app: 'fake-agent', state: 'idle' };
+  hc.change('s', 'status', t);
+  await settle(engine);
+  assert.equal(chat.of('closeDialog').length, 0, 'it stays while the agent is idle');
+  engine.tick.sweep();
+  await settle(engine);
+  assert.equal(chat.of('postDialog').length, 1, 'not posted twice');
+  const [, , value, message] = chat.of('postDialog')[0].args;
+  const tap = await engine.onAction({ value: { ...value, pick: 2, label: 'Pear' }, message });
+  assert.deepEqual(answers, [{ pick: 2 }]);
+  assert.match(tap.toast.text, /Pear/);
+  done();
+});
+
+test('a message you send while an idle question waits goes in at once (it is the answer), and its card closes once the agent works', async () => {
+  const t = terminal('t1', { program: 'fake', agent: true, state: 'done' });
+  const { chat, hc, store, engine, r, done } = await setup([t]);
+  const room = store.read().chats['s|t1'].chat;
+  r.reader.asksIdle = true;
+  r.reader.dialog = async (s, a) => ((await hc.getTerminal(s, a)).status.state === 'working' ? null : { key: 'q2#0', kind: 'question', idle: true, text: 'Which size?', options: [{ n: 1, label: 'Small' }, { n: 2, label: 'Type your own answer' }], multi: false, free: { n: 2 } });
+  r.reader.answer = async () => true;
+  hc.turn('s', 't1', 'done');
+  await settle(engine);
+  assert.equal(chat.of('postDialog').length, 1);
+  await engine.onMessage({ room, where: room, message: 'm-in', text: 'Medium, please', images: [] });
+  assert.deepEqual(hc.sent.map((x) => x.text), ['Medium, please'], 'not held: nothing blocks');
+  t.status = { app: 'fake-agent', state: 'working' };
+  hc.change('s', 'status', t);
+  await settle(engine);
+  assert.equal(chat.of('closeDialog').length, 1, 'answered: its card closes');
+  done();
+});
+
+test('an idle question answered while the bot was not looking: the sweep closes its card', async () => {
+  const t = terminal('t1', { program: 'fake', agent: true, state: 'done' });
+  const { chat, hc, engine, r, done } = await setup([t]);
+  let asked = { key: 'q3#0', kind: 'question', idle: true, text: 'Which colour?', options: [{ n: 1, label: 'Red' }, { n: 2, label: 'Type your own answer' }], multi: false, free: { n: 2 } };
+  r.reader.asksIdle = true;
+  r.reader.dialog = async () => asked;
+  r.reader.answer = async () => true;
+  hc.turn('s', 't1', 'done');
+  await settle(engine);
+  assert.equal(chat.of('postDialog').length, 1);
+  engine.tick.sweep();
+  await settle(engine);
+  assert.equal(chat.of('closeDialog').length, 0, 'still asked: it stays');
+  asked = null; // you answered it in the terminal, and no status change was seen
+  engine.tick.sweep();
+  await settle(engine);
+  assert.equal(chat.of('closeDialog').length, 1);
+  done();
+});
