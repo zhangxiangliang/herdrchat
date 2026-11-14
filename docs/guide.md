@@ -154,9 +154,11 @@ A room is a Feishu group or a Telegram topic.
     herdrchat adds it, never the agent, and spends nothing on it: Codex writes all of it
     in its own log; Claude Code's window and limits come from `claude -p /context` and
     `claude -p /usage`, which Claude Code answers itself without asking a model (the
-    limits at most every 5 minutes per machine); OpenCode's window from its model list.
-    What is not known is left out: limits for an API key, or OpenCode's plans, which
-    name none.
+    limits at most every 5 minutes per machine); OpenCode's window from its model list,
+    and on Zhipu's GLM Coding Plan (or Z.ai's) the plan's limits, asked the way Zhipu's own
+    usage plugin asks them, with the key from OpenCode's own credentials (held only for
+    that request, never written or logged, sent only to Zhipu). What is not known is left
+    out: limits for an API key, a provider that names none, or a reading that fails.
 - Anything else (a shell, a tool, an agent that has quit): nothing by itself. A terminal
   counts as an agent only while its foreground process is that agent, so a status left
   over after it quits posts nothing.

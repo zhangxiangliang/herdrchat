@@ -86,6 +86,28 @@ test('OpenCode: how full the context is comes with each answer, its window from 
   assert.equal(windowOf(null, 'glm'), undefined);
 });
 
+test('Zhipu\'s plan limits: the key is OpenCode\'s own, the reply is read only when it is what is expected', async () => {
+  const { zhipuHost, keyOf, zhipuLimitsIn } = await import('../lib/core/readers/opencode.mjs');
+  assert.equal(zhipuHost('zhipuai-coding-plan'), 'open.bigmodel.cn');
+  assert.equal(zhipuHost('zai-coding-plan'), 'api.z.ai');
+  assert.equal(zhipuHost('openai'), null, 'another provider: nothing is asked');
+  assert.equal(zhipuHost(undefined), null);
+  const creds = [{ integrationID: 'openai', active: true, value: { type: 'key', key: 'sk-o' } },
+    { integrationID: 'zhipuai-coding-plan', active: false, value: { type: 'key', key: 'old' } },
+    { integrationID: 'zhipuai-coding-plan', active: true, value: { type: 'key', key: 'k-z' } }];
+  assert.equal(keyOf(creds, 'zhipuai-coding-plan'), 'k-z', 'the active one');
+  assert.equal(keyOf([{ integrationID: 'zai', active: true, value: { type: 'oauth', access: 'x' } }], 'zai'), null, 'not a key: none');
+  assert.equal(keyOf(null, 'zhipuai'), null, 'no credential.list (an older OpenCode): none');
+  assert.deepEqual(zhipuLimitsIn({ success: true, data: { level: 'max', limits: [{ type: 'TIME_LIMIT', unit: 5, number: 1, percentage: 1 }, { type: 'TOKENS_LIMIT', unit: 3, number: 5, percentage: 44 }] } }),
+    [{ name: '5-hour', used: 44 }], 'the month\'s web tools left out');
+  assert.deepEqual(zhipuLimitsIn({ success: true, data: { limits: [{ type: 'TOKENS_LIMIT', unit: 6, number: 1, percentage: 40 }, { type: 'TOKENS_LIMIT', unit: 3, number: 5, percentage: 12 }] } }),
+    [{ name: '5-hour', used: 12 }, { name: '7-day', used: 40 }], 'shortest first');
+  assert.equal(zhipuLimitsIn({ success: false, msg: 'token expired' }), undefined);
+  assert.equal(zhipuLimitsIn({ code: 1302, msg: '频率过高' }), undefined, 'a refusal in its own envelope');
+  assert.equal(zhipuLimitsIn({ success: true, data: { limits: [{ type: 'TOKENS_LIMIT', unit: 9, number: 1, percentage: 5 }] } }), undefined, 'a window not known: left out');
+  assert.equal(zhipuLimitsIn(null), undefined);
+});
+
 test('an OpenCode answer read before its text is there is read again once it is: nothing is lost', () => {
   const thinking = [{ id: 'u', type: 'user', text: 'hi', time: { created: ms(1) } },
     { id: 'a', type: 'assistant', time: { created: ms(2) }, model: { id: 'glm', providerID: 'zhipu' }, tokens: { input: 10, cache: { read: 0, write: 0 } }, content: [{ type: 'reasoning', text: 'thinking' }] }];
