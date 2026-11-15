@@ -533,7 +533,7 @@ const commands = {
     }
     // what its chat app needs, without printing a secret
     const set = (value, missing) => (value ? 'set' : missing);
-    const owner = 'not set: message the bot, it says what to put in config.env';
+    const owner = `not set: \`herdrchat pair${again}\`, then send the bot the code it shows`;
     console.log(`chat      ${cfg.chat}`);
     if (cfg.chat === 'feishu') {
       let token = null;
