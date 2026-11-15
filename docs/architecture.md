@@ -15,7 +15,8 @@ lib/
   core/                    the same for every chat app and every agent
     engine.mjs             follows hc, keeps one room per herdr-app tab, posts what agents
                            say, dialogs and clicks, what you type, the overview
-    words.mjs              every word the bot says in the chat (titles, notes, replies, notices)
+    words.mjs              every word the bot says in the chat (titles, notes, replies, buttons,
+                           notices), each chat app's own too
     hc.mjs  events.mjs     hc: commands, its live event stream, the sessions on a machine
     views.mjs              which view of a terminal is followed (hc core id + tN)
     cursor.mjs  home.mjs   what was posted already; reading an agent's log files
@@ -40,7 +41,8 @@ test/
 The rules that keep it this way:
 
 - The core never imports from `lib/chats/`, and a chat app never imports from the
-  core's engine. They meet only through the contract in `lib/chats/contract.mjs`.
+  core's engine. They meet only through the contract in `lib/chats/contract.mjs`; a chat
+  app takes its words from `lib/core/words.mjs`, so what the bot says is in one place.
 - Everything a chat app does is in its own folder, including what only it has (Feishu's
   tags, avatars and acting as you).
 - The core gets hc, the readers and state.json passed in, so the tests swap them for
