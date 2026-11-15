@@ -137,18 +137,26 @@ A room is a Feishu group or a Telegram topic.
 - A program with a reader:
   - while it works: one "⌛️ Working…" card per turn (then "✅ Worked"), edited every 5
     seconds with what is new: what it says, your prompts (typed in the terminal or sent
-    mid-turn) as **You:**, and each tool it calls as one line (`▸ Bash: Run the tests`).
+    mid-turn) as **You:**, and each tool it calls as one line (`▸ Bash: Run the tests`),
+    as it is (the `*`, `_` and `/` of a command are no marks).
     It shows the program is alive, as herdr-app does, and since an edit is not a new
     message, the phone does not ring every few seconds;
   - when the turn ends: its last answer, as a new message. In a space of
     `HERDR_MUTED_SPACES` (all, by default) only "needs you" and "done" ring: in Feishu
     the groups are muted (after `/auth`) and an @ under the answer rings; in Telegram
     the posts go silently and a short reply rings. `HERDR_SILENT_SPACES` rings nothing.
+    The ringing reply quotes the post's first line (a dialog card's question), not all
+    of it with its footer.
   - A message another terminal sent with `hc send` shows as **From t7 review**, not as
     yours (hc wraps it in `<hc from="…">`, for any agent).
   - Images too: ones it looked at (a screenshot, an image file it read) and ones you
     pasted in the terminal, shown in the card.
   - What you sent from the group is not repeated.
+  - What the agent writes is its markdown: bold, italics (`*a*` or `_a_`), code, links,
+    quotes, code blocks. Your words, what a dialog asks and a screen are shown as they
+    are: their `*`, `_`, `<` and backticks are never read as marks. In Telegram a path
+    (`/tmp/a.txt`, `~/notes`) is sent as code, so it is not a command to tap; the bot's
+    own commands (`/ls`, `/new`, …) stay tappable.
   - Under each post and card, one small line says where it came from and how it stands:
     the harness hc names, the model the agent's own records name (or `screen` when it was
     read off the screen), the git branch of its folder, how full its context is, and the
@@ -253,11 +261,16 @@ up, and says so when the terminal ended instead.
   written late are still posted, and nothing is posted twice.
 - A post that fails is retried (2, 4, 8, 16 s); if it still fails the cursor stays, and the
   content goes out with the next post. A repeat is acceptable, a loss is not.
-- The "⌛️ Working…" card holds everything, not a status line. A full card (20 KB) is closed
-  and the next one goes on; a card that cannot be edited is sent again as a new one. Which
+- The "⌛️ Working…" card holds everything, not a status line. A full card (20 KB in Feishu,
+  one message in Telegram, as the app measures it) is closed and the next one goes on; a
+  card the app will not edit is sent again as a new one. Which
   card is open is kept in `state.json`, so a restart goes on editing it. While it
   works, the turn's last answer is left for the turn's end, so it always arrives as its
   own message.
+- What does not get through (the network, a timeout, the service's own error) is never
+  taken for a refusal: a live card is edited again with what came meanwhile, not sent a
+  second time; closing it is tried again; the overview is shown again 30 seconds later;
+  a pin whose unpin did not get through is taken off at the next minute's look.
 - After a turn ends the bot waits for the agent's last answer (for Claude,
   `stop_reason: end_turn`); hc reports the end before the agent writes it.
 - Idle terminals with a reader are checked again at start, after every event snapshot and
@@ -443,12 +456,12 @@ before it is started again. Tokens and secrets are never logged. The skill's
 ## Limits
 
 - Narration blocks are a condensed version of the text Claude showed, not the exact words.
-- Claude Code and Codex have readers so far. pi and the rest post nothing by themselves
-  until each has a reader; what you type to them gets their screen in reply.
+- Claude Code, Codex, OpenCode and Pi have readers. Any other program posts nothing by
+  itself; what you type to it gets its screen in reply.
 - Codex: its log is found as the one written in its folder since it started (Codex names
   no pid outside its database), so two Codex sessions started in the same folder at the
-  same moment could be told apart wrongly. Its questions with choices come as text: answer
-  by typing. A group is named after Codex's thread name once it has one.
+  same moment could be told apart wrongly. It has no multi-select. A group is named after
+  Codex's thread name once it has one.
 - Only text, images and rich text are passed on; files, stickers and the rest are not.
 - An image that fails to upload three times is not sent; the group says so and why.
 - Feishu only, not Lark (the international version) yet: the bot talks to open.feishu.cn.
