@@ -45,8 +45,8 @@ test('Telegram: an image it will not take as a photo goes as a file, not lost', 
   try {
     const quiet = () => {};
     const chat = telegram.create({ cfg, store, log: quiet, logWarn: quiet, logError: quiet, stateDir: os.tmpdir(), lane: () => {}, scopeOf: () => 'a' });
-    const mark = await chat.image(Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0, 0, 0, 0, 0, 0]));
-    await chat.post('11', `a long screenshot\n\n${mark}`);
+    const ref = await chat.image(Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0, 0, 0, 0, 0, 0]));
+    await chat.post('11', [{ kind: 'text', markdown: 'a long screenshot' }, { kind: 'image', ref }]);
   } finally {
     globalThis.fetch = realFetch;
   }
@@ -141,4 +141,17 @@ test('a Telegram call that got no answer is marked unreached; one Telegram refus
   } finally {
     globalThis.fetch = real;
   }
+});
+
+test('an image block is a photo after the text, not text: under "You:" when you pasted it; cut, it goes with the last part', () => {
+  const { messages, found } = messagesOf([{ kind: 'text', markdown: 'look' }, { kind: 'image', ref: '7' }, { kind: 'image', ref: '8', fromYou: true }]);
+  assert.deepEqual(found, ['7', '8']);
+  assert.deepEqual(messages.map((m) => m.html), ['look\n\n<b>You:</b>']);
+  const bodies = splitBody([{ kind: 'screen', text: Array.from({ length: 800 }, (_, i) => `row ${i}`).join('\n') }, { kind: 'image', ref: '9' }]);
+  assert.ok(bodies.length > 1);
+  assert.deepEqual(bodies.slice(0, -1).flat().filter((b) => b.kind === 'image'), []);
+  assert.deepEqual(bodies.at(-1).filter((b) => b.kind === 'image'), [{ kind: 'image', ref: '9' }]);
+  assert.deepEqual(messagesOf(bodies.at(-1)).found, ['9']);
+  // a live card kept from before image blocks: its old mark goes
+  assert.deepEqual(messagesOf([{ kind: 'text', markdown: 'before\n\n\u2063img3\u2063' }]).messages.map((m) => m.html), ['before']);
 });

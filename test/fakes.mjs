@@ -44,7 +44,7 @@ export function fakeChat() {
     ring: async (...a) => record('ring', ...a),
     markWorking: async (message) => { record('markWorking', message); return `r-${message}`; },
     markDone: async (...a) => record('markDone', ...a),
-    image: async () => '![image](img)',
+    image: async () => 'img',
     postFile: async (room, file) => { record('postFile', room, file); return id('m'); },
     postFolded: async (room, look) => { record('postFolded', room, look); return id('m'); },
     foldedBytes: 3500,

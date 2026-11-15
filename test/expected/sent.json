@@ -866,8 +866,8 @@
             "text": "▸ bash: ls\n▸ read: a.txt"
           },
           {
-            "kind": "text",
-            "markdown": "![image](img)"
+            "kind": "image",
+            "ref": "img"
           },
           {
             "kind": "you",
@@ -904,8 +904,8 @@
             "text": "▸ bash: ls\n▸ read: a.txt"
           },
           {
-            "kind": "text",
-            "markdown": "![image](img)"
+            "kind": "image",
+            "ref": "img"
           },
           {
             "kind": "you",
