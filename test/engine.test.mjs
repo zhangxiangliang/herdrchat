@@ -1171,7 +1171,7 @@ test('an agent stopped at its dialog (Esc) goes from asking to waiting without w
 });
 
 test('a live card kept from before blocks (its text) goes on with what comes, its text kept; a full one is the chat app\'s to say', async () => {
-  const { chat, hc, store, engine, r, done } = await setup([terminal('t1', { program: 'fake', agent: true, state: 'working' })]);
+  const { chat, store, engine, r, done } = await setup([terminal('t1', { program: 'fake', agent: true, state: 'working' })]);
   const state = store.read();
   state.cursors = { ...state.cursors, 's|t1': { at: '2026-01-01T00:00:00.000Z', seen: [], reader: 'fake-agent', file: 'log', live: { message: 'm-live', text: '**You:** hi', footer: {} } } };
   store.write(state);
