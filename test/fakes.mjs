@@ -146,5 +146,5 @@ export function fakeReaders() {
 }
 
 // A post's body (lib/chats/blocks.mjs) in the core's markdown, as a test reads it: a
-// screen in a code block.
-export const said = (body) => blocksOf(body).map((b) => (b.kind === 'screen' ? `\`\`\`\n${b.text}\n\`\`\`` : b.markdown)).join('\n\n');
+// screen in a code block, plain words as they are.
+export const said = (body) => blocksOf(body).map((b) => (b.kind === 'screen' ? `\`\`\`\n${b.text}\n\`\`\`` : b.kind === 'plain' ? b.text : b.markdown)).join('\n\n');

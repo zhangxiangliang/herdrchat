@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { tagName } from '../lib/chats/feishu/client.mjs';
-import { chunk, markdownOf, messageParts, summaryOf } from '../lib/chats/feishu/render.mjs';
+import { chunk, dialogMarkdown, markdownOf, messageParts, summaryOf } from '../lib/chats/feishu/render.mjs';
 
 test('chunk keeps short text whole', () => {
   assert.deepEqual(chunk('hello\nworld'), ['hello\nworld']);
@@ -142,4 +142,9 @@ test('an ended group in your "ended" label gets no "ended" tag too; without your
 test('a post\'s blocks as a Feishu card\'s markdown: a screen in a code block', () => {
   assert.equal(markdownOf([{ kind: 'text', markdown: 'Esc pressed.' }, { kind: 'screen', text: '$ ls\nREADME.md' }]), 'Esc pressed.\n\n```\n$ ls\nREADME.md\n```');
   assert.equal(markdownOf('as it is'), 'as it is');
+});
+
+test('a dialog\'s words in a Feishu card: their marks as entities, so they show as they are; a card kept from before (markdown) as it was', () => {
+  assert.equal(dialogMarkdown({ body: [{ kind: 'plain', text: 'Run `rm *.tmp` <x>?' }] }), 'Run &#96;rm &#42;.tmp&#96; &#60;x&#62;?');
+  assert.equal(dialogMarkdown({ markdown: 'Run it\\?' }), 'Run it\\?');
 });

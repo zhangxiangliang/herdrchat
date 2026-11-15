@@ -941,7 +941,12 @@
           "free": null
         },
         "title": "⚠️ Needs you (permission)",
-        "markdown": "╭──────╮\nAllow ls?",
+        "body": [
+          {
+            "kind": "plain",
+            "text": "╭──────╮\nAllow ls?"
+          }
+        ],
         "doneTitle": "✅ Done",
         "footer": {
           "app": "fake-agent",
@@ -1004,7 +1009,12 @@
           "free": null
         },
         "title": "⚠️ Needs you (permission)",
-        "markdown": "╭──────╮\nAllow ls?",
+        "body": [
+          {
+            "kind": "plain",
+            "text": "╭──────╮\nAllow ls?"
+          }
+        ],
         "doneTitle": "✅ Done",
         "footer": {
           "app": "fake-agent",

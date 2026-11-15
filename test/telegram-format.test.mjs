@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { messagesOf, split, toHtml } from '../lib/chats/telegram/render.mjs';
+import { dialogHtml, messagesOf, split, toHtml } from '../lib/chats/telegram/render.mjs';
 
 test('markdown becomes Telegram HTML, with everything else escaped', () => {
   assert.equal(toHtml('**You:**\n> a < b & c\n> two'), '<b>You:</b>\n<blockquote>a &lt; b &amp; c\ntwo</blockquote>');
@@ -62,4 +62,10 @@ test('a post\'s blocks: a screen is shown as it is, whatever it holds, and a lon
   assert.ok(cut.every((m) => m.html.length <= 3800 && m.html.startsWith('<pre>') && m.html.endsWith('</pre>')));
   assert.equal(cut.map((m) => m.plain).join('\n'), long, 'nothing lost, nothing added');
   assert.deepEqual(messagesOf('plain **markdown**').messages, [{ html: 'plain <b>markdown</b>', plain: 'plain **markdown**' }], 'a string is one text block');
+});
+
+test('a dialog\'s words are shown as they are: its marks are not read, and a card kept from before (markdown) still shows', () => {
+  const dialog = { title: '⚠️ Needs you', body: [{ kind: 'plain', text: 'Run `rm *.tmp` <here> & now?\n**sure**' }], menu: null };
+  assert.equal(dialogHtml(dialog), '<b>⚠️ Needs you</b>\n\nRun `rm *.tmp` &lt;here&gt; &amp; now?\n**sure**');
+  assert.equal(dialogHtml({ title: 'T', markdown: 'Run \\*.tmp' }), '<b>T</b>\n\nRun *.tmp');
 });

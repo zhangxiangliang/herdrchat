@@ -1063,7 +1063,7 @@ test('an agent that asks before it starts (trust this folder) gets a card; a tap
   const [, dialog, value, message] = chat.of('postDialog')[0].args;
   assert.equal(dialog.title, '⚠️ Needs you (to start)');
   assert.deepEqual(dialog.menu.options.map((o) => o.label), ['No, exit', 'Yes, I trust this folder']);
-  assert.match(dialog.markdown, /Quick safety check/);
+  assert.match(said(dialog.body), /Quick safety check/);
   assert.equal(chat.of('ring').at(-1).args[2], '⚠️ needs you');
   const out = await engine.onAction({ value: { ...value, pick: 2, label: 'Yes, I trust this folder' }, message });
   assert.deepEqual(hc.pressed.at(-1).names, ['down', 'enter']);
