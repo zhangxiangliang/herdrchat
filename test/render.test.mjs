@@ -143,6 +143,10 @@ test('the core: what it hands the chat app for a turn, a dialog, a screen and an
   t.status = { app: 'fake-agent', state: 'working' };
   hc.change('s', 'status', t);
   await settle(engine);
+  // its screen, asked for: a block the app shows as it is
+  hc.screens.set('s|t1', '$ ls <a> `b`\n```\nok');
+  await engine.onMessage({ room, where: room, message: 'm-screen', text: '/screen', images: [] });
+  await settle(engine);
   // the end
   hc.change('s', 'finished', { ...t, state: 'finished', foreground: null }, { reason: 'exit 0' });
   await settle(engine);

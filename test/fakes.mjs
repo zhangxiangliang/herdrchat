@@ -2,6 +2,7 @@
 // agent: a chat app that records every call, an hc whose events a test sends, a reader
 // whose items a test queues, and state.json in memory.
 import { CHAT_MEMBERS } from '../lib/chats/contract.mjs';
+import { blocksOf } from '../lib/chats/blocks.mjs';
 
 export function fakeStore() {
   let state = { chats: {} };
@@ -143,3 +144,7 @@ export function fakeReaders() {
     },
   };
 }
+
+// A post's body (lib/chats/blocks.mjs) in the core's markdown, as a test reads it: a
+// screen in a code block.
+export const said = (body) => blocksOf(body).map((b) => (b.kind === 'screen' ? `\`\`\`\n${b.text}\n\`\`\`` : b.markdown)).join('\n\n');

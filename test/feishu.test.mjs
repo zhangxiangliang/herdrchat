@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { tagName } from '../lib/chats/feishu/client.mjs';
-import { chunk, messageParts, summaryOf } from '../lib/chats/feishu/render.mjs';
+import { chunk, markdownOf, messageParts, summaryOf } from '../lib/chats/feishu/render.mjs';
 
 test('chunk keeps short text whole', () => {
   assert.deepEqual(chunk('hello\nworld'), ['hello\nworld']);
@@ -137,4 +137,9 @@ test('an ended group in your "ended" label gets no "ended" tag too; without your
   const alone = entryFor({ chat: 'oc_2', name: 'herdrchat / y', tag: 'tag-herdrchat', ended: true, endedTag: false });
   await decor.botTags(alone, 'herdrchat');
   assert.deepEqual(calls, [['bind', 'tag-ended']]);
+});
+
+test('a post\'s blocks as a Feishu card\'s markdown: a screen in a code block', () => {
+  assert.equal(markdownOf([{ kind: 'text', markdown: 'Esc pressed.' }, { kind: 'screen', text: '$ ls\nREADME.md' }]), 'Esc pressed.\n\n```\n$ ls\nREADME.md\n```');
+  assert.equal(markdownOf('as it is'), 'as it is');
 });

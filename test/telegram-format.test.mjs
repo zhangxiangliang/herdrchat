@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { split, toHtml } from '../lib/chats/telegram/render.mjs';
+import { messagesOf, split, toHtml } from '../lib/chats/telegram/render.mjs';
 
 test('markdown becomes Telegram HTML, with everything else escaped', () => {
   assert.equal(toHtml('**You:**\n> a < b & c\n> two'), '<b>You:</b>\n<blockquote>a &lt; b &amp; c\ntwo</blockquote>');
@@ -51,4 +51,15 @@ test('Telegram: an image it will not take as a photo goes as a file, not lost', 
     globalThis.fetch = realFetch;
   }
   assert.deepEqual(sent.filter((m) => m !== 'sendMessage'), ['sendPhoto', 'sendDocument']);
+});
+
+test('a post\'s blocks: a screen is shown as it is, whatever it holds, and a long one is cut on its lines', () => {
+  const { messages } = messagesOf([{ kind: 'text', markdown: 'It **stopped**.' }, { kind: 'screen', text: '$ ls <a> & `b`\n```\n**ok**' }]);
+  assert.deepEqual(messages, [{ html: 'It <b>stopped</b>.\n\n<pre>$ ls &lt;a&gt; &amp; `b`\n```\n**ok**</pre>', plain: 'It **stopped**.\n\n$ ls <a> & `b`\n```\n**ok**' }]);
+  const long = Array.from({ length: 400 }, (_, i) => `line ${i} <${'x'.repeat(20)}>`).join('\n');
+  const cut = messagesOf([{ kind: 'screen', text: long }]).messages;
+  assert.ok(cut.length > 1);
+  assert.ok(cut.every((m) => m.html.length <= 3800 && m.html.startsWith('<pre>') && m.html.endsWith('</pre>')));
+  assert.equal(cut.map((m) => m.plain).join('\n'), long, 'nothing lost, nothing added');
+  assert.deepEqual(messagesOf('plain **markdown**').messages, [{ html: 'plain <b>markdown</b>', plain: 'plain **markdown**' }], 'a string is one text block');
 });

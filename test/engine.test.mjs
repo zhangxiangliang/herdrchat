@@ -6,7 +6,7 @@ import test, { after } from 'node:test';
 import { createEngine } from '../lib/core/engine.mjs';
 import { checkChat } from '../lib/chats/contract.mjs';
 import { footer } from '../lib/core/words.mjs';
-import { fakeChat, fakeHc, fakeReaders, fakeStore, terminal } from './fakes.mjs';
+import { fakeChat, fakeHc, fakeReaders, fakeStore, said, terminal } from './fakes.mjs';
 
 const quiet = () => {};
 
@@ -116,7 +116,7 @@ test('a terminal with no agent posts nothing by itself and answers what you type
   hc.screens.set('s|t1', '\n\n$ ls\nREADME.md\n\n\n\n$ \n\n');
   await engine.onMessage({ room, where: room, message: 'm-in', text: 'ls', images: [] });
   assert.equal(hc.sent[0].text, 'ls');
-  assert.equal(chat.of('reply').at(-1).args[1], '```\n$ ls\nREADME.md\n\n$\n```');
+  assert.equal(said(chat.of('reply').at(-1).args[1]), '```\n$ ls\nREADME.md\n\n$\n```');
   assert.deepEqual(chat.of('markDone').map((c) => c.args), [['m-in', 'r-m-in']]);
   done();
 });
@@ -955,18 +955,18 @@ test('a message the agent took as its own command, with nothing in its records, 
   hc.screens.set('s|t1', `${old}\n⏺ Unknown command: /update\n❯ `);
   hc.turn('s', 't1', 'done');
   await settle(engine);
-  assert.equal(chat.of('post').at(-1).args[1], '```\n⏺ Unknown command: /update\n❯\n```');
+  assert.equal(said(chat.of('post').at(-1).args[1]), '```\n⏺ Unknown command: /update\n❯\n```');
   // a message its records answer posts the answer only
   await engine.onMessage({ room, where: room, message: 'm-2', text: 'hi', images: [] });
   r.queue('t1', [{ role: 'you', text: 'hi', at: '2026-01-02T00:00:00.000Z', id: 'a' }, { role: 'ai', text: 'Hello.', at: '2026-01-02T00:00:01.000Z', id: 'b', end: true }]);
   hc.turn('s', 't1', 'done');
   await settle(engine);
   assert.equal(chat.of('post').at(-1).args[1], 'Hello.');
-  const screens = chat.of('post').filter((c) => /Unknown command/.test(c.args[1])).length;
+  const screens = chat.of('post').filter((c) => /Unknown command/.test(said(c.args[1]))).length;
   // and a turn nobody sent anything for posts nothing more
   hc.turn('s', 't1', 'done');
   await settle(engine);
-  assert.equal(chat.of('post').filter((c) => /Unknown command/.test(c.args[1])).length, screens);
+  assert.equal(chat.of('post').filter((c) => /Unknown command/.test(said(c.args[1]))).length, screens);
   done();
 });
 
@@ -982,7 +982,7 @@ test('a message an agent never starts working on (Codex: "Unrecognized command")
   hc.screens.set('s|t1', `${old}\n• Unrecognized command '/nosuchcmd'.\n› /nosuchcmd`);
   await new Promise((ok) => setTimeout(ok, 60));
   await settle(engine);
-  assert.equal(chat.of('post').at(-1).args[1], "```\n• Unrecognized command '/nosuchcmd'.\n› /nosuchcmd\n```\n\nIt did not take this, so its input box was emptied.");
+  assert.equal(said(chat.of('post').at(-1).args[1]), "```\n• Unrecognized command '/nosuchcmd'.\n› /nosuchcmd\n```\n\nIt did not take this, so its input box was emptied.");
   assert.deepEqual(chat.of('ring').map((c) => c.args[2]), ['⚠️ needs you']);
   assert.deepEqual(hc.pressed.at(-1).names, ['ctrl+c']);
   // one that starts working is left to its turn's end

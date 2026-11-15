@@ -1022,6 +1022,16 @@
       }
     ],
     [
+      "reply",
+      "room1",
+      [
+        {
+          "kind": "screen",
+          "text": "$ ls <a> `b`\n```\nok"
+        }
+      ]
+    ],
+    [
       "post",
       "room1",
       "🔚 **Terminal ended** (exit 0)",
