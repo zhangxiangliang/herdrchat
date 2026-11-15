@@ -1,3 +1,13 @@
+## [1.14.3](https://github.com/zhangxiangliang/herdrchat/compare/v1.14.2...v1.14.3) (2026-11-15)
+
+
+### Bug Fixes
+
+* a pin whose unpin failed is taken off later, not left for good ([b20e583](https://github.com/zhangxiangliang/herdrchat/commit/b20e58395b3ce2eb354260174cae78766c680d98))
+* an agent that asks before it starts, or that you stopped, is not silent ([82a10db](https://github.com/zhangxiangliang/herdrchat/commit/82a10db9fe199e75951c4690504d49ac1dfe65ff))
+* an OpenCode terminal reads its own folder's session ([5072582](https://github.com/zhangxiangliang/herdrchat/commit/5072582cf10291cb99a5404ab1c0aabee8ba5de6))
+* Telegram shows *italics*, paths as code, and marks in a folded post ([c1e1010](https://github.com/zhangxiangliang/herdrchat/commit/c1e1010a2e6c88cfdb923205a8ee6d104888b81a))
+
 ## [1.14.2](https://github.com/zhangxiangliang/herdrchat/compare/v1.14.1...v1.14.2) (2026-11-14)
 
 
