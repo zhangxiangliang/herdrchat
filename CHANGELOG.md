@@ -1,3 +1,11 @@
+## [1.14.4](https://github.com/zhangxiangliang/herdrchat/compare/v1.14.3...v1.14.4) (2026-11-15)
+
+
+### Bug Fixes
+
+* drops, marks and rings: what the bot shows holds up ([1dbc53c](https://github.com/zhangxiangliang/herdrchat/commit/1dbc53c68a069425abe69a1c402edb4a82a90055))
+* Feishu dialog cards keep their question as the ring's quote ([1e99256](https://github.com/zhangxiangliang/herdrchat/commit/1e9925641801aa7db7bb96b2dc48afe25b573d76))
+
 ## [1.14.3](https://github.com/zhangxiangliang/herdrchat/compare/v1.14.2...v1.14.3) (2026-11-15)
 
 
