@@ -26,6 +26,22 @@ test('the OpenCode reader keeps what you typed, what it said, its tools as one l
   ]);
 });
 
+test('an OpenCode turn you stopped by declining its tool ends there and says so, read once more after its tool line went out', () => {
+  // as OpenCode 2.3 writes it: no "idle" after; the step's finish is "error"
+  const asking = { id: 'r2', type: 'assistant', time: { created: ms(2) }, content: [{ type: 'reasoning', text: 'run it' }, { type: 'tool', name: 'shell', state: { status: 'running', input: { command: 'echo hi' } } }] };
+  const declined = { ...asking, finish: 'error', error: { type: 'aborted', message: 'Step interrupted' }, content: [asking.content[0], { type: 'tool', name: 'shell', state: { status: 'error', input: { command: 'echo hi' }, error: { type: 'aborted', message: 'The user declined this tool call' } } }] };
+  const you = { id: 'r1', type: 'user', text: 'run echo hi', time: { created: ms(1) } };
+  const first = conversationAfter(linesOf([you, asking]), startCursor('2026-01-01T00:00:00.000Z'));
+  assert.deepEqual(first.items.map((it) => [it.role, it.text, Boolean(it.end)]), [['you', 'run echo hi', false], ['tool', '▸ shell: echo hi', false]]);
+  const { items } = conversationAfter(linesOf([you, declined]), advance(startCursor('2026-01-01T00:00:00.000Z'), first.items));
+  assert.deepEqual(items.map((it) => [it.role, it.text, Boolean(it.end)]), [['ai', '_(It stopped: The user declined this tool call)_', true]]);
+  // its request failing says the step's own words; text it wrote first is the end
+  const failed = { id: 'r3', type: 'assistant', finish: 'error', error: { type: 'api', message: 'rate limited' }, time: { created: ms(3) }, content: [] };
+  assert.deepEqual(conversationAfter(linesOf([failed]), startCursor('2026-01-01T00:00:00.000Z')).items.map((it) => it.text), ['_(It stopped: rate limited)_']);
+  const said = { ...failed, content: [{ type: 'text', text: 'Half done.' }] };
+  assert.deepEqual(conversationAfter(linesOf([said]), startCursor('2026-01-01T00:00:00.000Z')).items.map((it) => [it.text, Boolean(it.end)]), [['Half done.', true]]);
+});
+
 test('an OpenCode terminal is read by its reader, and its session is its folder\'s active one', () => {
   assert.ok(LISTED.some((r) => r.app === 'opencode'));
   assert.equal(agentOf({ status: { app: 'opencode' }, foreground: { name: 'opencode', argv: ['opencode'] } })?.app, 'opencode');

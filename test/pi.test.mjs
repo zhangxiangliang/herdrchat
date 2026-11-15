@@ -31,7 +31,7 @@ test('the Pi reader keeps what you typed, what it said, its tools and your ! com
     ['ai', 'One file.', true],
     ['tool', '▸ you ran: git status', false],
     ['tool', '▸ todo: Two left', false],
-    ['ai', '_(rate limited)_', true],
+    ['ai', '_(It stopped: rate limited)_', true],
   ]);
   const one = items.find((it) => it.text === 'One file.');
   assert.deepEqual([one.model, one.provider, one.context], ['glm', 'zai', { used: 1015 }], 'for the footer: input, cache read and write');

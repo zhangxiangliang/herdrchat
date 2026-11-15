@@ -173,6 +173,9 @@ A room is a Feishu group or a Telegram topic.
   Without a menu the card shows the last lines of the screen and how to answer by typing.
   Once the dialog is gone the card turns to "✅ Done". A card is posted only for a dialog
   that still waits: one answered while its screen was read gets none.
+- A turn that stops on an error with no answer (you declined OpenCode's tool, with Reject
+  or Esc; Pi's request failed): a line saying it stopped and why, in the agent's words
+  ("It stopped: The user declined this tool call"), and "done" rings.
 
 ## Answering a dialog from the chat
 
@@ -229,6 +232,19 @@ buttons go and the card says so. The screen is read the moment `blocked` arrives
 dialog answered in the terminal at once still gets its card; and since hc sends a turn
 event only when a program leaves `working`, status events catch a program that goes
 from one dialog straight to the next. One dialog gets one card.
+
+### Before an agent starts
+
+What an agent shows before it starts waits on you too: Claude Code asks to trust a folder
+it never ran in; Codex offers its update, then asks to trust the folder. hc has no status
+for an agent until it is up, and nothing of the agent's own runs before that (no hook, no
+session), so this is read off the screen: only while the agent's process runs with no
+status, and only a menu, numbered or not. Its card ("⚠️ Needs you (to start)") comes a few
+seconds after the terminal starts, or at the next minute's look; a tap moves with the
+arrows to the option and presses Enter, and the card turns into what it asks next. What
+you type meanwhile waits and goes in once it has started: typed in, its Enter would pick
+the option under the cursor (Claude's is "No, exit"). The card closes as the agent comes
+up, and says so when the terminal ended instead.
 
 ## Nothing is lost
 

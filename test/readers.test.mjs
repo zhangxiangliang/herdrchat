@@ -40,6 +40,20 @@ test('conversationAfter keeps your prompts, mid-turn messages and answers, in or
   assert.equal(complete, true);
 });
 
+test('Claude stopped by you (Esc, at a dialog or while it works): the turn ends there, saying so in its own words', () => {
+  const lines = [
+    entry({ type: 'assistant', uuid: 'b1', timestamp: at(10), message: { stop_reason: 'tool_use', content: [{ type: 'tool_use', name: 'Bash', input: { command: 'touch a' } }] } }),
+    entry({ type: 'user', uuid: 'r1', timestamp: at(11), message: { content: [{ type: 'tool_result', tool_use_id: 'x', is_error: true, content: 'The user doesn\'t want to proceed with this tool use.' }] } }),
+    entry({ type: 'user', uuid: 'i1', timestamp: at(12), message: { content: [{ type: 'text', text: '[Request interrupted by user for tool use]' }] } }),
+    entry({ type: 'user', uuid: 'i2', timestamp: at(13), message: { content: [{ type: 'text', text: '[Request interrupted by user]\n' }] } }),
+  ];
+  assert.deepEqual(conversationAfter(lines, startCursor(at(0))).items.map((x) => [x.role, x.text, Boolean(x.end)]), [
+    ['tool', '▸ Bash: touch a', false],
+    ['ai', '_(It stopped: Request interrupted by user for tool use)_', true],
+    ['ai', '_(It stopped: Request interrupted by user)_', true],
+  ]);
+});
+
 test('narration blocks count as answers, plain thinking does not', () => {
   const sig = (word) => Buffer.from(`\u0008\u0004${word}\u0012xyz`).toString('base64');
   const lines = [

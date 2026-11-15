@@ -139,6 +139,7 @@ export function fakeReaders() {
     readers: {
       readerFor: (app) => (app === reader.app ? reader : null),
       agentOf: (record) => (record?.status?.app === reader.app && reader.processes.includes(record.foreground?.name) ? reader : null),
+      startingOf: (record) => (record?.state === 'live' && !record.status?.state && reader.processes.includes(record.foreground?.name) ? reader : null),
     },
   };
 }

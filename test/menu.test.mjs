@@ -117,3 +117,21 @@ test('the same dialog keeps its key when the terminal is resized and it wraps el
   assert.equal(menuOf(wide.replace('─'.repeat(40), '─'.repeat(20))).key, menuOf(narrow).key);
   assert.notEqual(menuOf(narrow).key, menuOf(narrow.replace('build', 'cache')).key, 'other words are another dialog');
 });
+
+test('before an agent starts: a menu with no numbers, read only when asked for, picked with the arrows', () => {
+  const trust = ['─'.repeat(40), ' Accessing workspace:', '', ' /work/new-project', '', ' ❯ No, exit', '   Yes, I trust this folder', '', ' Enter to confirm · Esc to cancel'].join('\n');
+  assert.equal(menuOf(trust), null, 'not asked for: no menu');
+  const m = menuOf(trust, { arrows: true });
+  assert.deepEqual(m.options.map((o) => [o.n, o.label]), [[1, 'No, exit'], [2, 'Yes, I trust this folder']]);
+  assert.equal(m.cursor, 1);
+  assert.equal(m.arrows, true);
+  assert.equal(m.text, 'Accessing workspace:\n/work/new-project');
+  const moved = trust.replace(' ❯ No, exit', '   No, exit').replace('   Yes, I trust', ' ❯ Yes, I trust');
+  assert.equal(menuOf(moved, { arrows: true }).cursor, 2);
+  assert.equal(menuOf(moved, { arrows: true }).key, m.key, 'the cursor moving keeps the key');
+  // Claude's own input box has a ❯ too, alone between its rules: no menu
+  assert.equal(menuOf(['─'.repeat(40), '❯ fix the build', '─'.repeat(40)].join('\n'), { arrows: true }), null);
+  // a numbered one (Codex's update offer) is still read, and takes the arrows too
+  const update = menuOf('  Update available\n\n› 1. Update now\n  2. Skip\n  3. Skip until next version', { arrows: true });
+  assert.deepEqual([update.arrows, update.cursor, update.options.length], [true, 1, 3]);
+});

@@ -1046,3 +1046,105 @@ test('a terminal that ends gets its last words and the ended notice in its room'
   assert.equal(chat.of('openRoom').length, 1, 'no new room for it');
   done();
 });
+
+// What Claude Code shows in a folder it was never trusted in, before it starts (made up
+// path): no numbers, a cursor; hc has no status for it yet.
+const TRUST = ['─'.repeat(40), ' Accessing workspace:', '', ' /work/new-project', '', ' Quick safety check: Is this a project you created or one you trust?', '', ' ❯ No, exit', '   Yes, I trust this folder', '', ' Enter to confirm · Esc to cancel'].join('\n');
+const pause = (ms) => new Promise((ok) => setTimeout(ok, ms));
+
+test('an agent that asks before it starts (trust this folder) gets a card; a tap moves with the arrows and presses Enter', async () => {
+  const t = terminal('t1', { program: 'fake' }); // its process runs, with no status yet
+  const { chat, hc, engine, done } = await setup([]);
+  hc.screens.set('s|t1', TRUST);
+  hc.change('s', 'created', t);
+  await pause(900);
+  await settle(engine);
+  assert.equal(chat.of('postDialog').length, 1);
+  const [, dialog, value, message] = chat.of('postDialog')[0].args;
+  assert.equal(dialog.title, '⚠️ Needs you (to start)');
+  assert.deepEqual(dialog.menu.options.map((o) => o.label), ['No, exit', 'Yes, I trust this folder']);
+  assert.match(dialog.markdown, /Quick safety check/);
+  assert.equal(chat.of('ring').at(-1).args[2], '⚠️ needs you');
+  const out = await engine.onAction({ value: { ...value, pick: 2, label: 'Yes, I trust this folder' }, message });
+  assert.deepEqual(hc.pressed.at(-1).names, ['down', 'enter']);
+  assert.match(out.toast.text, /Yes, I trust this folder/);
+  done();
+});
+
+test('a message sent while it asks before it starts is held, never typed (Enter would pick "No, exit"), and goes in once it has started', async () => {
+  const t = terminal('t1', { program: 'fake' });
+  const { chat, hc, store, engine, done } = await setup([]);
+  hc.screens.set('s|t1', TRUST);
+  hc.change('s', 'created', t);
+  await settle(engine);
+  const room = rooms(store)['s|t1'].chat;
+  await engine.onMessage({ room, where: room, message: 'm-in', text: 'fix the build', images: [] });
+  assert.equal(hc.sent.length, 0, 'not typed into what it asks');
+  assert.match(chat.of('reply').at(-1).args[1], /goes in once that is answered/);
+  assert.equal(chat.of('postDialog').length, 1, 'the card it refers to is there');
+  hc.screens.set('s|t1', '❯ ');
+  t.status = { app: 'fake-agent', state: 'idle' };
+  hc.change('s', 'status', t);
+  await settle(engine);
+  assert.equal(hc.sent.at(-1)?.text, 'fix the build');
+  assert.equal(chat.of('closeDialog').length, 1, 'its card closes as it starts');
+  done();
+});
+
+test('an agent that ends while it asks before it starts ("No, exit"): its card closes', async () => {
+  const t = terminal('t1', { program: 'fake' });
+  const { chat, hc, engine, done } = await setup([]);
+  hc.screens.set('s|t1', TRUST);
+  hc.change('s', 'created', t);
+  await pause(900);
+  await settle(engine);
+  assert.equal(chat.of('postDialog').length, 1);
+  hc.change('s', 'finished', { ...t, state: 'finished', foreground: null }, { reason: 'exit 0' });
+  await settle(engine);
+  assert.equal(chat.of('closeDialog').length, 1);
+  assert.equal(chat.of('closeDialog')[0].args[2], 'The terminal has ended.');
+  done();
+});
+
+test('a shell with a ❯ menu on its screen is not taken for an agent asking before it starts', async () => {
+  const t = terminal('t1', { program: 'zsh' });
+  const { chat, hc, engine, done } = await setup([]);
+  hc.screens.set('s|t1', TRUST);
+  hc.change('s', 'created', t);
+  await pause(900);
+  await settle(engine);
+  assert.equal(chat.of('postDialog').length, 0);
+  done();
+});
+
+test('an agent that asks before it starts gets its card when herdr-app labels its tab only after it was made', async () => {
+  const t = terminal('t1', { program: 'fake' });
+  const labels = t.labels;
+  t.labels = {}; // made by hc run (/new): herdr-app gives it its tab a moment later
+  const { chat, hc, engine, done } = await setup([]);
+  hc.screens.set('s|t1', TRUST);
+  hc.change('s', 'created', t);
+  await settle(engine);
+  t.labels = labels;
+  hc.change('s', 'labels', t);
+  await pause(900);
+  await settle(engine);
+  assert.equal(chat.of('postDialog').length, 1);
+  done();
+});
+
+test('an agent stopped at its dialog (Esc) goes from asking to waiting without working: its turn\'s end is posted at once', async () => {
+  const t = terminal('t1', { program: 'fake', agent: true });
+  const { chat, hc, engine, r, done } = await setup([t]);
+  hc.screens.set('s|t1', '──────────\nRun it?\n❯ 1. Yes\n  2. No');
+  t.status = { app: 'fake-agent', state: 'blocked', kind: 'permission' };
+  hc.change('s', 'status', t);
+  await settle(engine);
+  r.queue('t1', [{ role: 'ai', text: '_(It stopped: Request interrupted by user for tool use)_', at: '2026-01-02T00:00:01.000Z', id: 'i', end: true }]);
+  t.status = { app: 'fake-agent', state: 'idle' };
+  hc.change('s', 'status', t); // no turn event: it never worked again
+  await settle(engine);
+  assert.equal(chat.of('post').at(-1).args[1], '_(It stopped: Request interrupted by user for tool use)_');
+  assert.equal(chat.of('ring').at(-1).args[2], '✅ done');
+  done();
+});
