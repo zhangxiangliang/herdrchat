@@ -244,7 +244,13 @@ test('end to end: what Feishu is sent', async () => {
   const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), 'herdrchat-render-e2e-feishu-'));
   try {
     const cfg = { appId: 'cli_test', appSecret: 'secret', ownerOpenId: 'ou_owner', sessions: ['s'], muted: { all: true, spaces: [] }, silent: { all: false, spaces: [] }, botTags: true, userTags: true };
-    await playEndToEnd(({ store, lane, scopeOf }) => feishu.create({ cfg, store, log: quiet, logWarn: quiet, logError: quiet, stateDir, lane, scopeOf }));
+    await playEndToEnd(({ store, lane, scopeOf }) => {
+      // the space's avatar made already: drawing one takes macOS's sips, which CI has not
+      const state = store.read();
+      state.spaces = { proj: { color: '#3f9e8f', image: 'img_proj' } };
+      store.write(state);
+      return feishu.create({ cfg, store, log: quiet, logWarn: quiet, logError: quiet, stateDir, lane, scopeOf });
+    });
   } finally {
     http.defaults.adapter = realAdapter;
     fs.rmSync(stateDir, { recursive: true, force: true });

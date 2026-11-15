@@ -1049,29 +1049,11 @@
       }
     },
     {
-      "method": "post",
-      "path": "/open-apis/im/v1/messages",
-      "params": {
-        "receive_id_type": "open_id"
-      },
-      "data": {
-        "receive_id": "ou_owner",
-        "msg_type": "interactive",
-        "content": "{\"schema\":\"2.0\",\"config\":{\"update_multi\":true},\"header\":{\"title\":{\"tag\":\"plain_text\",\"content\":\"herdrchat · 1 terminals\"},\"template\":\"green\",\"icon\":{\"tag\":\"standard_icon\",\"token\":\"done_outlined\",\"color\":\"green\"}},\"body\":{\"elements\":[{\"tag\":\"markdown\",\"content\":\"<text_tag color='neutral'>idle</text_tag> **[proj / master](https://applink.feishu.cn/client/chat/open?openChatId=oc_2)** · `t1`\"},{\"tag\":\"markdown\",\"content\":\"Updated <time>\",\"text_size\":\"notation\"}]}}"
-      }
-    },
-    {
-      "method": "post",
-      "path": "/open-apis/im/v1/images",
-      "params": {},
-      "data": "(form)"
-    },
-    {
       "method": "put",
       "path": "/open-apis/im/v1/chats/oc_2",
       "params": {},
       "data": {
-        "avatar": "img_4"
+        "avatar": "img_proj"
       }
     },
     {
@@ -1093,8 +1075,20 @@
         "tag_biz_type": "chat",
         "biz_entity_id": "oc_2",
         "tag_ids": [
-          "tag_6"
+          "tag_4"
         ]
+      }
+    },
+    {
+      "method": "post",
+      "path": "/open-apis/im/v1/messages",
+      "params": {
+        "receive_id_type": "open_id"
+      },
+      "data": {
+        "receive_id": "ou_owner",
+        "msg_type": "interactive",
+        "content": "{\"schema\":\"2.0\",\"config\":{\"update_multi\":true},\"header\":{\"title\":{\"tag\":\"plain_text\",\"content\":\"herdrchat · 1 terminals\"},\"template\":\"green\",\"icon\":{\"tag\":\"standard_icon\",\"token\":\"done_outlined\",\"color\":\"green\"}},\"body\":{\"elements\":[{\"tag\":\"markdown\",\"content\":\"<text_tag color='neutral'>idle</text_tag> **[proj / master](https://applink.feishu.cn/client/chat/open?openChatId=oc_2)** · `t1`\"},{\"tag\":\"markdown\",\"content\":\"Updated <time>\",\"text_size\":\"notation\"}]}}"
       }
     },
     {
@@ -1144,15 +1138,15 @@
       "data": {
         "receive_id": "oc_2",
         "msg_type": "interactive",
-        "content": "{\"schema\":\"2.0\",\"config\":{\"update_multi\":true},\"header\":{\"title\":{\"tag\":\"plain_text\",\"content\":\"Working…\"},\"template\":\"blue\",\"icon\":{\"tag\":\"standard_icon\",\"token\":\"loading_outlined\",\"color\":\"blue\"}},\"body\":{\"elements\":[{\"tag\":\"markdown\",\"content\":\"**You:**\\n> typed in the terminal too\\n\\n▸ bash: ls *.md\\n▸ read: a_b.txt\\n\\n![image](img_11)\\n\\n**From t7 review** _(answer: t1)_\\n> look at this\"},{\"tag\":\"markdown\",\"content\":\"fake-agent · model-a · main · context 25% (50k)\",\"text_size\":\"notation\"}]}}"
+        "content": "{\"schema\":\"2.0\",\"config\":{\"update_multi\":true},\"header\":{\"title\":{\"tag\":\"plain_text\",\"content\":\"Working…\"},\"template\":\"blue\",\"icon\":{\"tag\":\"standard_icon\",\"token\":\"loading_outlined\",\"color\":\"blue\"}},\"body\":{\"elements\":[{\"tag\":\"markdown\",\"content\":\"**You:**\\n> typed in the terminal too\\n\\n▸ bash: ls *.md\\n▸ read: a_b.txt\\n\\n![image](img_10)\\n\\n**From t7 review** _(answer: t1)_\\n> look at this\"},{\"tag\":\"markdown\",\"content\":\"fake-agent · model-a · main · context 25% (50k)\",\"text_size\":\"notation\"}]}}"
       }
     },
     {
       "method": "patch",
-      "path": "/open-apis/im/v1/messages/om_12",
+      "path": "/open-apis/im/v1/messages/om_11",
       "params": {},
       "data": {
-        "content": "{\"schema\":\"2.0\",\"config\":{\"update_multi\":true},\"header\":{\"title\":{\"tag\":\"plain_text\",\"content\":\"Worked\"},\"template\":\"grey\",\"icon\":{\"tag\":\"standard_icon\",\"token\":\"done_outlined\",\"color\":\"grey\"}},\"body\":{\"elements\":[{\"tag\":\"markdown\",\"content\":\"**You:**\\n> typed in the terminal too\\n\\n▸ bash: ls *.md\\n▸ read: a_b.txt\\n\\n![image](img_11)\\n\\n**From t7 review** _(answer: t1)_\\n> look at this\"},{\"tag\":\"markdown\",\"content\":\"fake-agent · model-a · main · context 25% (50k)\",\"text_size\":\"notation\"}]}}"
+        "content": "{\"schema\":\"2.0\",\"config\":{\"update_multi\":true},\"header\":{\"title\":{\"tag\":\"plain_text\",\"content\":\"Worked\"},\"template\":\"grey\",\"icon\":{\"tag\":\"standard_icon\",\"token\":\"done_outlined\",\"color\":\"grey\"}},\"body\":{\"elements\":[{\"tag\":\"markdown\",\"content\":\"**You:**\\n> typed in the terminal too\\n\\n▸ bash: ls *.md\\n▸ read: a_b.txt\\n\\n![image](img_10)\\n\\n**From t7 review** _(answer: t1)_\\n> look at this\"},{\"tag\":\"markdown\",\"content\":\"fake-agent · model-a · main · context 25% (50k)\",\"text_size\":\"notation\"}]}}"
       }
     },
     {
@@ -1169,7 +1163,7 @@
     },
     {
       "method": "patch",
-      "path": "/open-apis/im/v1/messages/om_3",
+      "path": "/open-apis/im/v1/messages/om_6",
       "params": {},
       "data": {
         "content": "{\"schema\":\"2.0\",\"config\":{\"update_multi\":true},\"header\":{\"title\":{\"tag\":\"plain_text\",\"content\":\"1 needs you · herdrchat · 1 terminals\"},\"template\":\"orange\",\"icon\":{\"tag\":\"standard_icon\",\"token\":\"warning_outlined\",\"color\":\"orange\"}},\"body\":{\"elements\":[{\"tag\":\"markdown\",\"content\":\"<text_tag color='orange'>needs you (permission)</text_tag> **[proj / master](https://applink.feishu.cn/client/chat/open?openChatId=oc_2)** · since <time> · `t1`\"},{\"tag\":\"markdown\",\"content\":\"Updated <time>\",\"text_size\":\"notation\"}]}}"
@@ -1189,7 +1183,7 @@
     },
     {
       "method": "patch",
-      "path": "/open-apis/im/v1/messages/om_16",
+      "path": "/open-apis/im/v1/messages/om_15",
       "params": {},
       "data": {
         "content": "{\"schema\":\"2.0\",\"config\":{\"update_multi\":true},\"header\":{\"title\":{\"tag\":\"plain_text\",\"content\":\"Done\"},\"template\":\"grey\",\"icon\":{\"tag\":\"standard_icon\",\"token\":\"done_outlined\",\"color\":\"grey\"}},\"body\":{\"elements\":[{\"tag\":\"markdown\",\"content\":\"╭──────╮\\nAllow ls?\"},{\"tag\":\"markdown\",\"content\":\"Answered.\",\"text_size\":\"notation\",\"icon\":{\"tag\":\"standard_icon\",\"token\":\"done_outlined\",\"color\":\"grey\"}},{\"tag\":\"markdown\",\"content\":\"fake-agent · screen · main\",\"text_size\":\"notation\"}]}}"
@@ -1197,7 +1191,7 @@
     },
     {
       "method": "patch",
-      "path": "/open-apis/im/v1/messages/om_3",
+      "path": "/open-apis/im/v1/messages/om_6",
       "params": {},
       "data": {
         "content": "{\"schema\":\"2.0\",\"config\":{\"update_multi\":true},\"header\":{\"title\":{\"tag\":\"plain_text\",\"content\":\"herdrchat · 1 terminals\"},\"template\":\"blue\",\"icon\":{\"tag\":\"standard_icon\",\"token\":\"loading_outlined\",\"color\":\"blue\"}},\"body\":{\"elements\":[{\"tag\":\"markdown\",\"content\":\"<text_tag color='blue'>working</text_tag> **[proj / master](https://applink.feishu.cn/client/chat/open?openChatId=oc_2)** · since <time> · `t1`\"},{\"tag\":\"markdown\",\"content\":\"Updated <time>\",\"text_size\":\"notation\"}]}}"
@@ -1246,13 +1240,13 @@
         "tag_biz_type": "chat",
         "biz_entity_id": "oc_2",
         "tag_ids": [
-          "tag_21"
+          "tag_20"
         ]
       }
     },
     {
       "method": "patch",
-      "path": "/open-apis/im/v1/messages/om_3",
+      "path": "/open-apis/im/v1/messages/om_6",
       "params": {},
       "data": {
         "content": "{\"schema\":\"2.0\",\"config\":{\"update_multi\":true},\"header\":{\"title\":{\"tag\":\"plain_text\",\"content\":\"herdrchat · 0 terminals\"},\"template\":\"green\",\"icon\":{\"tag\":\"standard_icon\",\"token\":\"done_outlined\",\"color\":\"green\"}},\"body\":{\"elements\":[{\"tag\":\"markdown\",\"content\":\"No terminal is shown in herdr-app.\"},{\"tag\":\"markdown\",\"content\":\"Updated <time>\",\"text_size\":\"notation\"}]}}"
