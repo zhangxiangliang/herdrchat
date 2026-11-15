@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { dialogHtml, messagesOf, split, toHtml } from '../lib/chats/telegram/render.mjs';
+import { bytesOf, dialogHtml, lookOf, messagesOf, split, splitBody, toHtml } from '../lib/chats/telegram/render.mjs';
 
 test('markdown becomes Telegram HTML, with everything else escaped', () => {
   assert.equal(toHtml('**You:**\n> a < b & c\n> two'), '<b>You:</b>\n<blockquote>a &lt; b &amp; c\ntwo</blockquote>');
@@ -68,4 +68,24 @@ test('a dialog\'s words are shown as they are: its marks are not read, and a car
   const dialog = { title: '⚠️ Needs you', body: [{ kind: 'plain', text: 'Run `rm *.tmp` <here> & now?\n**sure**' }], menu: null };
   assert.equal(dialogHtml(dialog), '<b>⚠️ Needs you</b>\n\nRun `rm *.tmp` &lt;here&gt; &amp; now?\n**sure**');
   assert.equal(dialogHtml({ title: 'T', markdown: 'Run \\*.tmp' }), '<b>T</b>\n\nRun *.tmp');
+});
+
+test('your words: who in bold, then a quote of them as they are; another terminal\'s with whom to answer', () => {
+  assert.deepEqual(messagesOf([{ kind: 'you', text: 'fix *it* <now>\n\nthanks' }]).messages, [{ html: '<b>You:</b>\n<blockquote>fix *it* &lt;now&gt;\n\nthanks</blockquote>', plain: 'You:\nfix *it* <now>\n\nthanks' }]);
+  assert.equal(messagesOf([{ kind: 'you', text: 'look', from: 't7 <review>', answerTo: 't1' }]).messages[0].html, '<b>From t7 &lt;review&gt;</b> <i>(answer: t1)</i>\n<blockquote>look</blockquote>');
+  // a long one: each message a whole quote, who said it only on the first
+  const long = messagesOf([{ kind: 'you', text: Array.from({ length: 300 }, (_, i) => `line ${i} of what you said`).join('\n') }]).messages;
+  assert.ok(long.length > 1 && long.every((m) => m.html.length <= 3800 && m.html.endsWith('</blockquote>')));
+  assert.ok(long[0].html.startsWith('<b>You:</b>\n<blockquote>') && long[1].html.startsWith('<blockquote>'));
+});
+
+test('a live card\'s body: measured as it is sent, cut into bodies that each fit a message, sent as they were cut', () => {
+  const body = [{ kind: 'you', text: 'go' }, { kind: 'text', markdown: 'done **now**' }];
+  assert.equal(bytesOf(body), '<b>You:</b>\n<blockquote>go</blockquote>\n\ndone <b>now</b>'.length);
+  const big = [{ kind: 'screen', text: Array.from({ length: 800 }, (_, i) => `row ${i}`).join('\n') }, { kind: 'text', markdown: 'after' }];
+  const bodies = splitBody(big);
+  assert.ok(bodies.length > 1 && bodies.every((b) => bytesOf(b) <= 3800));
+  const look = lookOf({ title: 'T', body: bodies.at(-1), footer: {} });
+  assert.ok(look.html.startsWith('<b>T</b>\n\n') && look.html.endsWith('after'));
+  assert.equal(lookOf({ title: 'Bot', markdown: 'a **notice**' }).html, '<b>Bot</b>\n\na <b>notice</b>', 'a notice of the bot\'s own is markdown');
 });

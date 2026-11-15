@@ -846,7 +846,26 @@
       {
         "title": "⌛️ Working…",
         "tone": "working",
-        "markdown": "**You:**\n> typed in the terminal too\n\n▸ bash: ls\n▸ read: a.txt\n\n![image](img)\n\n**From t7 review** _(answer: t1)_\n> look at this",
+        "body": [
+          {
+            "kind": "you",
+            "text": "typed in the terminal too"
+          },
+          {
+            "kind": "text",
+            "markdown": "▸ bash: ls\n▸ read: a.txt"
+          },
+          {
+            "kind": "text",
+            "markdown": "![image](img)"
+          },
+          {
+            "kind": "you",
+            "text": "look at this",
+            "from": "t7 review",
+            "answerTo": "t1"
+          }
+        ],
         "footer": {
           "app": "fake-agent",
           "model": "model-a",
@@ -865,7 +884,26 @@
       {
         "title": "✅ Worked",
         "tone": "closed",
-        "markdown": "**You:**\n> typed in the terminal too\n\n▸ bash: ls\n▸ read: a.txt\n\n![image](img)\n\n**From t7 review** _(answer: t1)_\n> look at this",
+        "body": [
+          {
+            "kind": "you",
+            "text": "typed in the terminal too"
+          },
+          {
+            "kind": "text",
+            "markdown": "▸ bash: ls\n▸ read: a.txt"
+          },
+          {
+            "kind": "text",
+            "markdown": "![image](img)"
+          },
+          {
+            "kind": "you",
+            "text": "look at this",
+            "from": "t7 review",
+            "answerTo": "t1"
+          }
+        ],
         "footer": {
           "app": "fake-agent",
           "model": "model-a",
@@ -888,7 +926,12 @@
     [
       "post",
       "room1",
-      "Fixed it.",
+      [
+        {
+          "kind": "text",
+          "markdown": "Fixed it."
+        }
+      ],
       {
         "footer": {
           "app": "fake-agent",

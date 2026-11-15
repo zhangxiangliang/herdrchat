@@ -23,7 +23,8 @@ export function fakeChat() {
     help: [],
     roomWord: 'room',
     liveBytes: 20000,
-    split: (text) => [text],
+    bytes: (body) => JSON.stringify(body).length,
+    split: (body) => [body],
     start: (handlers) => { chat.handlers = handlers; record('start'); },
     command: async () => false,
     openRoom: async (look) => { const room = id('room'); record('openRoom', look, room); return room; },
@@ -146,5 +147,10 @@ export function fakeReaders() {
 }
 
 // A post's body (lib/chats/blocks.mjs) in the core's markdown, as a test reads it: a
-// screen in a code block, plain words as they are.
-export const said = (body) => blocksOf(body).map((b) => (b.kind === 'screen' ? `\`\`\`\n${b.text}\n\`\`\`` : b.kind === 'plain' ? b.text : b.markdown)).join('\n\n');
+// screen in a code block, plain words as they are, your words quoted.
+export const said = (body) => blocksOf(body).map((b) => {
+  if (b.kind === 'screen') return `\`\`\`\n${b.text}\n\`\`\``;
+  if (b.kind === 'plain') return b.text;
+  if (b.kind === 'you') return `**${b.from ? `From ${b.from}` : 'You:'}**${b.answerTo ? ` _(answer: ${b.answerTo})_` : ''}\n${b.text.split('\n').map((l) => `> ${l}`).join('\n')}`;
+  return b.markdown;
+}).join('\n\n');

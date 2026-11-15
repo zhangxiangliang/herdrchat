@@ -148,3 +148,8 @@ test('a dialog\'s words in a Feishu card: their marks as entities, so they show 
   assert.equal(dialogMarkdown({ body: [{ kind: 'plain', text: 'Run `rm *.tmp` <x>?' }] }), 'Run &#96;rm &#42;.tmp&#96; &#60;x&#62;?');
   assert.equal(dialogMarkdown({ markdown: 'Run it\\?' }), 'Run it\\?');
 });
+
+test('your words in a Feishu card: who in bold, then a quote of them as they are', () => {
+  assert.equal(markdownOf([{ kind: 'you', text: 'fix *it*\n<b>' }]), '**You:**\n> fix &#42;it&#42;\n> &#60;b&#62;');
+  assert.equal(markdownOf([{ kind: 'you', text: 'look', from: 't7 review', answerTo: 't1' }]), '**From t7 review** _(answer: t1)_\n> look');
+});

@@ -66,7 +66,7 @@ test('a new terminal in the same tab takes over the tab\'s room after the old on
   assert.equal(chat.of('openRoom').length, 1, 'no second room');
   assert.equal(rooms(store)['s|t2'].chat, room);
   assert.equal(rooms(store)['s|t1'], undefined);
-  assert.ok(chat.of('post').some((c) => c.args[0] === room && /new terminal now \(t2\)/.test(c.args[1])));
+  assert.ok(chat.of('post').some((c) => c.args[0] === room && /new terminal now \(t2\)/.test(said(c.args[1]))));
   assert.ok(chat.of('reviveRoom').length >= 1);
   done();
 });
@@ -131,7 +131,7 @@ test('an agent\'s turn is posted from its reader, and what you sent is not repea
   ]);
   hc.turn('s', 't1', 'done');
   await settle(engine);
-  const posts = chat.of('post').map((c) => c.args[1]);
+  const posts = chat.of('post').map((c) => said(c.args[1]));
   assert.deepEqual(posts, ['Fixed.']);
   assert.ok(chat.of('ring').some((c) => c.args[2] === '✅ done'));
   assert.deepEqual(chat.of('markDone').map((c) => c.args[0]), ['m-in']);
@@ -308,7 +308,7 @@ test('what an agent says before asking, first thing in a turn, rings no "done": 
   hc.change('s', 'status', t);
   hc.turn('s', 't1', 'blocked');
   await settle(engine);
-  assert.ok(chat.of('post').some((c) => /AskUserQuestion/.test(c.args[1])), 'what it said is posted');
+  assert.ok(chat.of('post').some((c) => /AskUserQuestion/.test(said(c.args[1]))), 'what it said is posted');
   assert.deepEqual(chat.of('ring').map((c) => c.args[2]), ['⚠️ needs you']);
   done();
 });
@@ -416,8 +416,8 @@ test('a new room gets the conversation before it: all of it as a file, the newes
   assert.match(folded.markdown, /old 39 /);
   engine.tick.sweep();
   await settle(engine);
-  assert.ok(chat.of('post').some((c) => c.args[1] === 'after the start'));
-  assert.ok(!chat.of('post').some((c) => /old \d+ /.test(c.args[1])), 'nothing from before posted twice');
+  assert.ok(chat.of('post').some((c) => said(c.args[1]) === 'after the start'));
+  assert.ok(!chat.of('post').some((c) => /old \d+ /.test(said(c.args[1]))), 'nothing from before posted twice');
   engine.tick.sweep();
   await settle(engine);
   assert.equal(chat.of('postFile').length, 1, 'only when the room is made');
@@ -525,7 +525,7 @@ test('a dialog answered while its screen was read gets no card', async () => {
   setTimeout(() => { t.status = { app: 'fake-agent', state: 'working' }; }, 2); // answered in the terminal
   await settle(engine);
   assert.equal(chat.of('postDialog').length, 0);
-  assert.ok(!chat.of('post').some((c) => /Needs you/.test(c.args[1])), 'no "needs you" with a screen that waits on nothing');
+  assert.ok(!chat.of('post').some((c) => /Needs you/.test(said(c.args[1]))), 'no "needs you" with a screen that waits on nothing');
   done();
 });
 
@@ -539,7 +539,7 @@ test('a message another terminal sent with hc send shows who sent it, not "You"'
   hc.turn('s', 't1', 'done');
   await settle(engine);
   // what came before the answer is in the turn's live card, the answer a post
-  const text = [...chat.of('postCard').map((c) => c.args[1].markdown), ...chat.of('editCard').map((c) => c.args[1].markdown), ...chat.of('post').map((c) => c.args[1])].join('\n');
+  const text = [...chat.of('postCard').map((c) => said(c.args[1].body)), ...chat.of('editCard').map((c) => said(c.args[1].body)), ...chat.of('post').map((c) => said(c.args[1]))].join('\n');
   assert.match(text, /\*\*From t2g master\*\* _\(answer: hc send t2g when done or stuck\)_\n> Review x\.rs/);
   assert.match(text, /\*\*You:\*\*\n> and also this\n\n\*\*From t7 review\*\*\n> Two bugs/);
   assert.doesNotMatch(text, /<hc /);
@@ -837,7 +837,7 @@ test('under each post: the harness and the model, as its records name them, not 
   ]);
   hc.turn('s', 't1', 'done');
   await settle(engine);
-  assert.deepEqual(chat.of('post').map((c) => [c.args[1], footer(c.args[2].footer)]), [['Done.', 'fake-agent · model-a']], 'the model item itself is not shown');
+  assert.deepEqual(chat.of('post').map((c) => [said(c.args[1]), footer(c.args[2].footer)]), [['Done.', 'fake-agent · model-a']], 'the model item itself is not shown');
   assert.equal(footer(chat.of('postCard')[0].args[1].footer), 'fake-agent · model-a', 'the live card too');
   assert.equal(footer(chat.of('editCard').at(-1).args[1].footer), 'fake-agent · model-a', 'and once it is closed');
   done();
@@ -961,7 +961,7 @@ test('a message the agent took as its own command, with nothing in its records, 
   r.queue('t1', [{ role: 'you', text: 'hi', at: '2026-01-02T00:00:00.000Z', id: 'a' }, { role: 'ai', text: 'Hello.', at: '2026-01-02T00:00:01.000Z', id: 'b', end: true }]);
   hc.turn('s', 't1', 'done');
   await settle(engine);
-  assert.equal(chat.of('post').at(-1).args[1], 'Hello.');
+  assert.equal(said(chat.of('post').at(-1).args[1]), 'Hello.');
   const screens = chat.of('post').filter((c) => /Unknown command/.test(said(c.args[1]))).length;
   // and a turn nobody sent anything for posts nothing more
   hc.turn('s', 't1', 'done');
@@ -1039,7 +1039,7 @@ test('a terminal that ends gets its last words and the ended notice in its room'
   r.reader.rest = async () => [{ role: 'ai', text: 'One more thing.', at: '2026-01-02T00:00:02.000Z', id: 'b', end: true }];
   hc.change('s', 'finished', { ...t, state: 'finished', foreground: null }, { reason: 'exit 0' });
   await settle(engine);
-  const posts = chat.of('post').map((c) => c.args[1]);
+  const posts = chat.of('post').map((c) => said(c.args[1]));
   assert.ok(posts.includes('One more thing.'), 'what its log still held');
   assert.equal(posts.at(-1), '🔚 **Terminal ended** (exit 0)');
   assert.deepEqual(chat.of('endRoom').map((c) => c.args[0]), ['s|t1']);
@@ -1144,7 +1144,26 @@ test('an agent stopped at its dialog (Esc) goes from asking to waiting without w
   t.status = { app: 'fake-agent', state: 'idle' };
   hc.change('s', 'status', t); // no turn event: it never worked again
   await settle(engine);
-  assert.equal(chat.of('post').at(-1).args[1], '_(It stopped: Request interrupted by user for tool use)_');
+  assert.equal(said(chat.of('post').at(-1).args[1]), '_(It stopped: Request interrupted by user for tool use)_');
   assert.equal(chat.of('ring').at(-1).args[2], '✅ done');
+  done();
+});
+
+test('a live card kept from before blocks (its text) goes on with what comes, its text kept; a full one is the chat app\'s to say', async () => {
+  const { chat, hc, store, engine, r, done } = await setup([terminal('t1', { program: 'fake', agent: true, state: 'working' })]);
+  const state = store.read();
+  state.cursors = { ...state.cursors, 's|t1': { at: '2026-01-01T00:00:00.000Z', seen: [], reader: 'fake-agent', file: 'log', live: { message: 'm-live', text: '**You:** hi', footer: {} } } };
+  store.write(state);
+  r.queue('t1', [{ role: 'tool', text: '▸ bash: ls', at: '2026-01-02T00:00:01.000Z', id: 'a' }]);
+  engine.tick.live();
+  await settle(engine);
+  assert.deepEqual(chat.of('editCard').at(-1).args, ['m-live', { title: '⌛️ Working…', tone: 'working', body: [{ kind: 'text', markdown: '**You:** hi' }, { kind: 'text', markdown: '▸ bash: ls' }], footer: { app: 'fake-agent', model: undefined, screen: false, branch: '', context: undefined, limits: undefined } }]);
+  // the app says it is full: the card is closed and the next one goes on
+  chat.bytes = () => chat.liveBytes + 1;
+  r.queue('t1', [{ role: 'tool', text: '▸ read: a.txt', at: '2026-01-02T00:00:02.000Z', id: 'b' }]);
+  engine.tick.live();
+  await settle(engine);
+  assert.equal(chat.of('editCard').at(-1).args[1].title, '⌛️ Working… (continued below)');
+  assert.deepEqual(chat.of('postCard').at(-1).args[1].body, [{ kind: 'text', markdown: '▸ read: a.txt' }]);
   done();
 });
