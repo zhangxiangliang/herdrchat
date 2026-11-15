@@ -991,6 +991,20 @@ test('a message the agent took as its own command, with nothing in its records, 
   done();
 });
 
+test('a message sent while the last turn\'s end is still being read is the next turn\'s: no screen for it', async () => {
+  const t1 = terminal('t1', { program: 'fake', agent: true });
+  const { chat, hc, store, engine, done } = await setup([t1]);
+  const room = rooms(store)['s|t1'].chat;
+  hc.screens.set('s|t1', 'some screen\n❯ ');
+  hc.turn('s', 't1', 'done'); // its end is read for a while (nothing new in its records)
+  await engine.onMessage({ room, where: room, message: 'm-next', text: 'next', images: [] });
+  t1.status = { ...t1.status, state: 'working' }; // it took it at once
+  hc.change('s', 'status', t1);
+  await settle(engine);
+  assert.equal(chat.of('post').filter((c) => /some screen/.test(said(c.args[1]))).length, 0);
+  done();
+});
+
 test('a message an agent never starts working on (Codex: "Unrecognized command") gets the screen and a ring, not silence', async () => {
   const t = terminal('t1', { program: 'fake', agent: true });
   t.status = { app: 'fake-agent', state: 'idle' };
