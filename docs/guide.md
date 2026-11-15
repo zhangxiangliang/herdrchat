@@ -402,17 +402,21 @@ browser, or tells you what to click without it; or follow the steps here yoursel
 4. `herdrchat start`. The bot must be running for the next step: the console checks for
    a live connection.
 5. Events and callbacks (事件与回调): for events, choose the long connection mode (长连接)
-   and add `im.message.receive_v1`; for callbacks (回调配置), choose the long connection
-   mode too and add `card.action.trigger` (the dialog buttons).
-6. Publish a version. If the page does not say 本次发布免审核, your team's admin must
-   approve it first.
-7. `herdrchat pair`: it shows a 6-digit code. In Feishu, search the app's name, open the
+   and add `im.message.receive_v1` and `application.bot.menu_v6` (the bot menu's
+   clicks); for callbacks (回调配置), choose the long connection mode too and add
+   `card.action.trigger` (the dialog buttons).
+6. The bot menu (机器人 -> 机器人自定义菜单): four buttons in the direct chat, Overview,
+   Usage, Help and Act as me, so you tap instead of typing `/ls`, `/usage`, help or
+   `/auth`. Feishu has no `/` list, so this is how you find the commands; it can only
+   be set here. The steps: `skills/herdrchat/references/feishu.md`, "The bot menu".
+7. Publish a version (one for all of the above). If the page does not say 本次发布免审核,
+   your team's admin must approve it first.
+8. `herdrchat pair`: it shows a 6-digit code. In Feishu, search the app's name, open the
    bot and send it the code; the bot makes you its owner and starts again. One group per
-   tab appears. When the code gets no answer, step 5 or 6 is not done.
-8. Optional: send `/auth` to the bot so it can mute its groups for you ("Optional: let
-   the bot act as you"), and add the bot menu (`skills/herdrchat/references/feishu.md`,
-   "The bot menu").
-9. Once it works: `herdrchat install` (see "Running as a service").
+   tab appears. When the code gets no answer, step 5 or 7 is not done.
+9. Optional: send `/auth` (or tap Act as me) so the bot can mute its groups for you
+   ("Optional: let the bot act as you").
+10. Once it works: `herdrchat install` (see "Running as a service").
 
 ## Running as a service
 

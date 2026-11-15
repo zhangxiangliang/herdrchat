@@ -64,8 +64,9 @@ that applies or publishes something, and read it.
 Developer console home -> create a custom app (企业自建应用) with a name, a description
 and an icon -> Add capabilities -> Bot. Then import the scopes, have the user fill
 `config.env` (`herdrchat init`), start the bot (`herdrchat start`: the long-connection
-check below needs it running), set events and callbacks, and publish. "Set up: Feishu"
-in `docs/guide.md` lists the same steps from the user's side.
+check below needs it running), set events and callbacks, set the bot menu, and publish
+once for all of it. "Set up: Feishu" in `docs/guide.md` lists the same steps from the
+user's side.
 
 ### Import scopes
 
@@ -89,7 +90,8 @@ below (only the ones still missing is fine; the dialog skips what is there).
 
 Both must use the long connection (长连接), which needs the bot running.
 
-- Events (事件配置): subscription mode -> long connection; add `im.message.receive_v1`.
+- Events (事件配置): subscription mode -> long connection; add `im.message.receive_v1`
+  and `application.bot.menu_v6` (机器人自定义菜单事件, the bot menu's clicks; no scope).
 - Callbacks (回调配置): edit the subscription mode -> 使用长连接接收回调 -> 验证 (it must
   answer 连接成功; if not, the bot is not running) -> 保存 -> 添加回调 -> card ->
   `card.action.trigger` (not the old `card.action.trigger_v1`, which cannot use the long
@@ -117,25 +119,32 @@ Deactivate it first in the tenant admin console,
 `https://<tenant>.feishu.cn/admin/appCenter/manage/<APP_ID>` (needs a tenant admin),
 then delete it in the developer console. Ask before each of the two steps.
 
-### The bot menu (optional)
+### The bot menu
 
-A menu at the bottom of the direct chat with the bot, so the commands are a tap away as
-Telegram's "/" list is. Feishu sets it only in the developer console (no API), shows it
-in the direct chat only (not in groups), and needs a published version (then about five
-minutes, and a client of 5.27 or later).
+Four buttons in the direct chat with the bot, so the commands are a tap away (Feishu has
+no `/` list as Telegram does). Set it at first setup, with the events, so one version
+publishes both. Feishu sets it only in the developer console (no API, so each user's
+app needs its own), shows it in the direct chat only (not in groups), and it works
+about five minutes after the version is published, on a client of 5.27 or later. The
+bot needs no restart: it always listens for the menu's event.
 
-1. 应用能力 -> 机器人 -> 机器人自定义菜单: edit, turn it on (开启), pick a style.
-2. Add items whose action is 推送事件 (push an event), with these keys; the bot treats a
-   click as that command in the direct chat:
-   | Item | Event key |
-   |---|---|
-   | Overview | `ls` |
-   | Usage | `usage` |
-   | Help | `help` |
-   | Act as me | `auth` |
-3. 事件与回调 -> 事件配置 (long connection mode, as for messages) -> 添加事件:
-   机器人自定义菜单事件 (`application.bot.menu_v6`).
-4. Publish a version. Ask before publishing.
+1. 应用能力 -> 机器人 -> 机器人自定义菜单: the edit pen -> 菜单状态 开启 -> 展示形式
+   悬浮菜单 (the menu floats above the input box, so typing is not in the way).
+2. Under 菜单配置, one main item each (the + next to the last; no sub-menus), with
+   响应动作 推送事件 and these event keys; the bot treats a click as that command in the
+   direct chat:
+   | Item | Event key | What it does |
+   |---|---|---|
+   | Overview | `ls` | a new overview of every terminal at the bottom of the chat (`/ls`) |
+   | Usage | `usage` | every account's limits on every machine (`/usage`) |
+   | Help | `help` | every command, for the direct chat and for a terminal's group |
+   | Act as me | `auth` | lets the bot mute, label and pin its groups in your chat list (`/auth`) |
+3. Read each item back before 保存: click it in the phone preview and check its name,
+   that 推送事件 is checked, and its key. On a new item the radio can show 推送事件 while
+   the link fields are still there; click 跳转至指定链接, then 推送事件 again, and the
+   event key field comes. 保存.
+4. Events: `application.bot.menu_v6` ("Events and card callbacks" above).
+5. Publish a version. Ask before publishing.
 
 Commands that take words (`/new`, `/kill`) stay typed.
 
