@@ -614,7 +614,7 @@
         "link_preview_options": {
           "is_disabled": true
         },
-        "text": "<b>You:</b>\n<blockquote>fix <code>it</code> &lt;now&gt;</blockquote>\n\nDone &amp; *dusted*.\n\n<i>claude · m · main</i>",
+        "text": "<b>You:</b>\n<blockquote>fix <code>it</code> &lt;now&gt;</blockquote>\n\nDone &amp; <i>dusted</i>.\n\n<i>claude · m · main</i>",
         "parse_mode": "HTML"
       }
     },
@@ -778,7 +778,7 @@
         "link_preview_options": {
           "is_disabled": true
         },
-        "text": "<b>📜 Before this room</b>\n<blockquote expandable>**You:**\n&gt; hi\n\nHello.</blockquote>",
+        "text": "<b>📜 Before this room</b>\n<blockquote expandable><b>You:</b>\nhi\n\nHello.</blockquote>",
         "parse_mode": "HTML"
       }
     },

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { bytesOf, dialogHtml, lookOf, messagesOf, split, splitBody, toHtml } from '../lib/chats/telegram/render.mjs';
+import { bytesOf, dialogHtml, foldedHtml, lookOf, messagesOf, split, splitBody, toHtml } from '../lib/chats/telegram/render.mjs';
 
 test('markdown becomes Telegram HTML, with everything else escaped', () => {
   assert.equal(toHtml('**You:**\n> a < b & c\n> two'), '<b>You:</b>\n<blockquote>a &lt; b &amp; c\ntwo</blockquote>');
@@ -88,4 +88,26 @@ test('a live card\'s body: measured as it is sent, cut into bodies that each fit
   const look = lookOf({ title: 'T', body: bodies.at(-1), footer: {} });
   assert.ok(look.html.startsWith('<b>T</b>\n\n') && look.html.endsWith('after'));
   assert.equal(lookOf({ title: 'Bot', markdown: 'a **notice**' }).html, '<b>Bot</b>\n\na <b>notice</b>', 'a notice of the bot\'s own is markdown');
+});
+
+test('*italic* as well as _italic_; a lone star, stars with spaces round them and an escaped one are just stars', () => {
+  assert.equal(toHtml('it is *done* now'), 'it is <i>done</i> now');
+  assert.equal(toHtml('---\n*model: claude-opus-5-5*'), '---\n<i>model: claude-opus-5-5</i>');
+  assert.equal(toHtml('run ls *.md here'), 'run ls *.md here');
+  assert.equal(toHtml('2 * 3 * 4'), '2 * 3 * 4');
+  assert.equal(toHtml('a \\*literal\\* star'), 'a *literal* star');
+  assert.equal(toHtml('**bold** and *it*'), '<b>bold</b> and <i>it</i>');
+});
+
+test('a path is sent as code, so Telegram makes no command of it; the bot\'s own commands stay tappable', () => {
+  assert.equal(toHtml('wrote /tmp/a.txt and ~/notes/x.md'), 'wrote <code>/tmp/a.txt</code> and <code>~/notes/x.md</code>');
+  assert.equal(toHtml('in /tmp, then (/var/log)'), 'in <code>/tmp</code>, then (<code>/var/log</code>)');
+  assert.equal(toHtml('here, /ls shows them all, /new starts one'), 'here, /ls shows them all, /new starts one');
+  assert.equal(toHtml('and/or, see [docs](https://x.dev/a/b)'), 'and/or, see <a href="https://x.dev/a/b">docs</a>');
+  assert.equal(dialogHtml({ title: 'T', body: [{ kind: 'plain', text: '$ touch /tmp/x' }] }), '<b>T</b>\n\n$ touch <code>/tmp/x</code>');
+  assert.equal(messagesOf([{ kind: 'screen', text: '$ ls /tmp' }]).messages[0].html, '<pre>$ ls /tmp</pre>', 'a screen is no link already');
+});
+
+test('a folded post shows inline marks: who said it in bold, a quote\'s and a code block\'s lines as they are', () => {
+  assert.equal(foldedHtml('Before', '**You:** 2026-01-01 10:00\n> fix *it* <now>\n\n```\nnpm test\n```\nDone.'), '<b>Before</b>\n<blockquote expandable><b>You:</b> 2026-01-01 10:00\nfix <i>it</i> &lt;now&gt;\n\n<code>npm test</code>\nDone.</blockquote>');
 });
