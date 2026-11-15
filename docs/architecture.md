@@ -13,8 +13,12 @@ bin/
   herdrchat.mjs            wires the parts: config, log, the chat app, the core
 lib/
   core/                    the same for every chat app and every agent
-    engine.mjs             follows hc, keeps one room per herdr-app tab, posts what agents
-                           say, dialogs and clicks, what you type, the overview
+    engine.mjs             makes the core's parts, with what they share: which terminals are
+                           this bot's, the lane each one's work runs in
+    engine/                the parts: rooms.mjs (one room per herdr-app tab), turns.mjs (what
+                           agents say), dialogs.mjs (what they wait on, your taps), follow.mjs
+                           (hc's events, the sweep), yours.mjs (what you type, the overview,
+                           the direct chat); limits.mjs (its waits), late.mjs
     words.mjs              every word the bot says in the chat (titles, notes, replies, buttons,
                            notices), each chat app's own too
     hc.mjs  events.mjs     hc: commands, its live event stream, the sessions on a machine
