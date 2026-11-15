@@ -1,3 +1,10 @@
+# [1.15.0](https://github.com/zhangxiangliang/herdrchat/compare/v1.14.4...v1.15.0) (2026-11-15)
+
+
+### Features
+
+* /usage shows every account's limits, on every machine ([24fe266](https://github.com/zhangxiangliang/herdrchat/commit/24fe266eeaa2aea10e4cd81a34f88d3cd0ae289e))
+
 ## [1.14.4](https://github.com/zhangxiangliang/herdrchat/compare/v1.14.3...v1.14.4) (2026-11-15)
 
 
