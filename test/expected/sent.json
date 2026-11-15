@@ -107,7 +107,10 @@
   "feishu.menuCard": {
     "schema": "2.0",
     "config": {
-      "update_multi": true
+      "update_multi": true,
+      "summary": {
+        "content": "Run ls?"
+      }
     },
     "header": {
       "title": {
@@ -254,7 +257,10 @@
   "feishu.menuCard.multi": {
     "schema": "2.0",
     "config": {
-      "update_multi": true
+      "update_multi": true,
+      "summary": {
+        "content": "Which colors?"
+      }
     },
     "header": {
       "title": {
@@ -412,7 +418,10 @@
   "feishu.doneCard": {
     "schema": "2.0",
     "config": {
-      "update_multi": true
+      "update_multi": true,
+      "summary": {
+        "content": "Run ls?"
+      }
     },
     "header": {
       "title": {
@@ -1242,7 +1251,7 @@
       "data": {
         "receive_id": "oc_2",
         "msg_type": "interactive",
-        "content": "{\"schema\":\"2.0\",\"config\":{\"update_multi\":true},\"header\":{\"title\":{\"tag\":\"plain_text\",\"content\":\"Needs you (permission)\"},\"template\":\"orange\",\"icon\":{\"tag\":\"standard_icon\",\"token\":\"warning_outlined\",\"color\":\"orange\"}},\"body\":{\"elements\":[{\"tag\":\"markdown\",\"content\":\"╭──────╮\\nAllow ls?\"},{\"tag\":\"column_set\",\"flex_mode\":\"flow\",\"horizontal_spacing\":\"small\",\"columns\":[{\"tag\":\"column\",\"width\":\"auto\",\"elements\":[{\"tag\":\"button\",\"type\":\"primary_filled\",\"width\":\"default\",\"size\":\"medium\",\"text\":{\"tag\":\"plain_text\",\"content\":\"1. Yes\"},\"hover_tips\":{\"tag\":\"plain_text\",\"content\":\"1. Yes\"},\"behaviors\":[{\"type\":\"callback\",\"value\":{\"s\":\"s\",\"a\":\"t1\",\"k\":\"3edc02f48551\",\"pick\":1,\"label\":\"Yes\"}}]}]},{\"tag\":\"column\",\"width\":\"auto\",\"elements\":[{\"tag\":\"button\",\"type\":\"default\",\"width\":\"default\",\"size\":\"medium\",\"text\":{\"tag\":\"plain_text\",\"content\":\"2. No\"},\"hover_tips\":{\"tag\":\"plain_text\",\"content\":\"2. No\"},\"behaviors\":[{\"type\":\"callback\",\"value\":{\"s\":\"s\",\"a\":\"t1\",\"k\":\"3edc02f48551\",\"pick\":2,\"label\":\"No\"}}]}]}]},{\"tag\":\"column_set\",\"flex_mode\":\"flow\",\"horizontal_spacing\":\"small\",\"columns\":[{\"tag\":\"column\",\"width\":\"auto\",\"elements\":[{\"tag\":\"button\",\"type\":\"danger_text\",\"width\":\"default\",\"size\":\"medium\",\"text\":{\"tag\":\"plain_text\",\"content\":\"Esc (cancel)\"},\"hover_tips\":{\"tag\":\"plain_text\",\"content\":\"Esc (cancel)\"},\"behaviors\":[{\"type\":\"callback\",\"value\":{\"s\":\"s\",\"a\":\"t1\",\"k\":\"3edc02f48551\",\"pick\":\"esc\"}}]}]}]},{\"tag\":\"markdown\",\"content\":\"fake-agent · screen · main\",\"text_size\":\"notation\"}]}}"
+        "content": "{\"schema\":\"2.0\",\"config\":{\"update_multi\":true,\"summary\":{\"content\":\"Allow ls?\"}},\"header\":{\"title\":{\"tag\":\"plain_text\",\"content\":\"Needs you (permission)\"},\"template\":\"orange\",\"icon\":{\"tag\":\"standard_icon\",\"token\":\"warning_outlined\",\"color\":\"orange\"}},\"body\":{\"elements\":[{\"tag\":\"markdown\",\"content\":\"╭──────╮\\nAllow ls?\"},{\"tag\":\"column_set\",\"flex_mode\":\"flow\",\"horizontal_spacing\":\"small\",\"columns\":[{\"tag\":\"column\",\"width\":\"auto\",\"elements\":[{\"tag\":\"button\",\"type\":\"primary_filled\",\"width\":\"default\",\"size\":\"medium\",\"text\":{\"tag\":\"plain_text\",\"content\":\"1. Yes\"},\"hover_tips\":{\"tag\":\"plain_text\",\"content\":\"1. Yes\"},\"behaviors\":[{\"type\":\"callback\",\"value\":{\"s\":\"s\",\"a\":\"t1\",\"k\":\"3edc02f48551\",\"pick\":1,\"label\":\"Yes\"}}]}]},{\"tag\":\"column\",\"width\":\"auto\",\"elements\":[{\"tag\":\"button\",\"type\":\"default\",\"width\":\"default\",\"size\":\"medium\",\"text\":{\"tag\":\"plain_text\",\"content\":\"2. No\"},\"hover_tips\":{\"tag\":\"plain_text\",\"content\":\"2. No\"},\"behaviors\":[{\"type\":\"callback\",\"value\":{\"s\":\"s\",\"a\":\"t1\",\"k\":\"3edc02f48551\",\"pick\":2,\"label\":\"No\"}}]}]}]},{\"tag\":\"column_set\",\"flex_mode\":\"flow\",\"horizontal_spacing\":\"small\",\"columns\":[{\"tag\":\"column\",\"width\":\"auto\",\"elements\":[{\"tag\":\"button\",\"type\":\"danger_text\",\"width\":\"default\",\"size\":\"medium\",\"text\":{\"tag\":\"plain_text\",\"content\":\"Esc (cancel)\"},\"hover_tips\":{\"tag\":\"plain_text\",\"content\":\"Esc (cancel)\"},\"behaviors\":[{\"type\":\"callback\",\"value\":{\"s\":\"s\",\"a\":\"t1\",\"k\":\"3edc02f48551\",\"pick\":\"esc\"}}]}]}]},{\"tag\":\"markdown\",\"content\":\"fake-agent · screen · main\",\"text_size\":\"notation\"}]}}"
       }
     },
     {
@@ -1250,7 +1259,7 @@
       "path": "/open-apis/im/v1/messages/om_15",
       "params": {},
       "data": {
-        "content": "{\"schema\":\"2.0\",\"config\":{\"update_multi\":true},\"header\":{\"title\":{\"tag\":\"plain_text\",\"content\":\"Done\"},\"template\":\"grey\",\"icon\":{\"tag\":\"standard_icon\",\"token\":\"done_outlined\",\"color\":\"grey\"}},\"body\":{\"elements\":[{\"tag\":\"markdown\",\"content\":\"╭──────╮\\nAllow ls?\"},{\"tag\":\"markdown\",\"content\":\"Answered.\",\"text_size\":\"notation\",\"icon\":{\"tag\":\"standard_icon\",\"token\":\"done_outlined\",\"color\":\"grey\"}},{\"tag\":\"markdown\",\"content\":\"fake-agent · screen · main\",\"text_size\":\"notation\"}]}}"
+        "content": "{\"schema\":\"2.0\",\"config\":{\"update_multi\":true,\"summary\":{\"content\":\"Allow ls?\"}},\"header\":{\"title\":{\"tag\":\"plain_text\",\"content\":\"Done\"},\"template\":\"grey\",\"icon\":{\"tag\":\"standard_icon\",\"token\":\"done_outlined\",\"color\":\"grey\"}},\"body\":{\"elements\":[{\"tag\":\"markdown\",\"content\":\"╭──────╮\\nAllow ls?\"},{\"tag\":\"markdown\",\"content\":\"Answered.\",\"text_size\":\"notation\",\"icon\":{\"tag\":\"standard_icon\",\"token\":\"done_outlined\",\"color\":\"grey\"}},{\"tag\":\"markdown\",\"content\":\"fake-agent · screen · main\",\"text_size\":\"notation\"}]}}"
       }
     },
     {

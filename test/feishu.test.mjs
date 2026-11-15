@@ -183,3 +183,12 @@ test('a Feishu dialog card once answered shows what was picked as it is, your ow
   const card = doneCard('✅ Done', 'Which city?', '✔ Kyoto <old> *capital*');
   assert.equal(card.body.elements[1].content, 'Kyoto &#60;old&#62; &#42;capital&#42;');
 });
+
+test('a Feishu summary keeps the stars of code, and a screen\'s own ``` line stays inside its code block', () => {
+  assert.equal(summaryOf('You answered `Kyoto <old> *capital*`, *noted*.'), 'You answered Kyoto <old> *capital*, noted.');
+  assert.equal(summaryOf('```\n● Bash(echo \'rm *foo* /tmp/x\')\n```'), "● Bash(echo 'rm *foo* /tmp/x')", 'a screen\'s stars are its own');
+  const md = markdownOf([{ kind: 'screen', text: '$ cat a.md\n```js\nok\n```' }]);
+  assert.equal(md, '```\n$ cat a.md\n​```js\nok\n​```\n```');
+  assert.equal(md.split('\n').filter((l) => /^\s*```/.test(l)).length, 2, 'only its own fences open and close it');
+  assert.deepEqual(chunk(md, 6000), [md], 'cut, it is cut as one code block');
+});
