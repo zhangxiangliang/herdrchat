@@ -1167,3 +1167,14 @@ test('a live card kept from before blocks (its text) goes on with what comes, it
   assert.deepEqual(chat.of('postCard').at(-1).args[1].body, [{ kind: 'text', markdown: '▸ read: a.txt' }]);
   done();
 });
+
+test('a pin left on a room that waits on nothing (an unpin that failed, kept by the app) is taken off at the sweep; a waiting one stays', async () => {
+  const t1 = terminal('t1', { program: 'fake', agent: true });
+  const t2 = terminal('t2', { program: 'fake', agent: true, tab: 'other', tabId: 'tb2', state: 'blocked' });
+  const { chat, engine, done } = await setup([t1, t2]);
+  chat.pinned = () => ['s|t1', 's|t2'];
+  await engine.tick.unpinStale();
+  await settle(engine);
+  assert.deepEqual(chat.of('unpin').map((c) => c.args[0]), ['s|t1']);
+  done();
+});
