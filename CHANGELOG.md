@@ -1,3 +1,11 @@
+## [1.15.1](https://github.com/zhangxiangliang/herdrchat/compare/v1.15.0...v1.15.1) (2026-11-15)
+
+
+### Bug Fixes
+
+* a message sent as a turn ends is the next turn's, not this one's ([e0d3e4f](https://github.com/zhangxiangliang/herdrchat/commit/e0d3e4f0ad09c004cbb72f7461d99c004fffc1f9))
+* an overview too old to remove says it is old ([422b1c0](https://github.com/zhangxiangliang/herdrchat/commit/422b1c0419f19c6025cd8cb933eebface251f502))
+
 # [1.15.0](https://github.com/zhangxiangliang/herdrchat/compare/v1.14.4...v1.15.0) (2026-11-15)
 
 
