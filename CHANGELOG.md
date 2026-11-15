@@ -1,3 +1,10 @@
+## [1.15.2](https://github.com/zhangxiangliang/herdrchat/compare/v1.15.1...v1.15.2) (2026-11-15)
+
+
+### Bug Fixes
+
+* every hint on how to own the bot says herdrchat pair ([692d11d](https://github.com/zhangxiangliang/herdrchat/commit/692d11d7bf8404196ed94797bec2a86e615e2de0))
+
 ## [1.15.1](https://github.com/zhangxiangliang/herdrchat/compare/v1.15.0...v1.15.1) (2026-11-15)
 
 
