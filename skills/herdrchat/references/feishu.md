@@ -130,6 +130,7 @@ minutes, and a client of 5.27 or later).
    | Item | Event key |
    |---|---|
    | Overview | `ls` |
+   | Usage | `usage` |
    | Help | `help` |
    | Act as me | `auth` |
 3. 事件与回调 -> 事件配置 (long connection mode, as for messages) -> 添加事件:

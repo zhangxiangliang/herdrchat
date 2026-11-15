@@ -135,10 +135,13 @@ export function fakeReaders() {
     after: async (session, address, cursor) => ({ items: (logs.get(address) || []).filter((it) => it.at > cursor.at && !cursor.seen.some(([id]) => id === it.id)), file: 'log' }),
     rest: async () => [],
   };
+  const accounts = new Map(); // a machine's name ('' here) -> the accounts /usage finds there
   return {
     reader, // a test may give it `dialog` and `answer`, as an agent with its own API
     queue: (address, items) => logs.set(address, [...(logs.get(address) || []), ...items]),
+    accounts,
     readers: {
+      usageOn: async (session, machine) => accounts.get(machine || '') || [],
       readerFor: (app) => (app === reader.app ? reader : null),
       agentOf: (record) => (record?.status?.app === reader.app && reader.processes.includes(record.foreground?.name) ? reader : null),
       startingOf: (record) => (record?.state === 'live' && !record.status?.state && reader.processes.includes(record.foreground?.name) ? reader : null),

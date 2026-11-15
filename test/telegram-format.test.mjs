@@ -103,6 +103,7 @@ test('a path is sent as code, so Telegram makes no command of it; the bot\'s own
   assert.equal(toHtml('wrote /tmp/a.txt and ~/notes/x.md'), 'wrote <code>/tmp/a.txt</code> and <code>~/notes/x.md</code>');
   assert.equal(toHtml('in /tmp, then (/var/log)'), 'in <code>/tmp</code>, then (<code>/var/log</code>)');
   assert.equal(toHtml('here, /ls shows them all, /new starts one'), 'here, /ls shows them all, /new starts one');
+  assert.equal(toHtml('the direct chat takes /kill and /usage. It wrote /tmp/a.txt.'), 'the direct chat takes /kill and /usage. It wrote <code>/tmp/a.txt</code>.', 'a sentence\'s last period');
   assert.equal(toHtml('and/or, see [docs](https://x.dev/a/b)'), 'and/or, see <a href="https://x.dev/a/b">docs</a>');
   assert.equal(dialogHtml({ title: 'T', body: [{ kind: 'plain', text: '$ touch /tmp/x' }] }), '<b>T</b>\n\n$ touch <code>/tmp/x</code>');
   assert.equal(messagesOf([{ kind: 'screen', text: '$ ls /tmp' }]).messages[0].html, '<pre>$ ls /tmp</pre>', 'a screen is no link already');

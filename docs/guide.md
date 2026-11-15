@@ -31,7 +31,7 @@ herdr-app, moved into one Feishu bot:
 | a space | one avatar for all of its groups: the space's first letter on a color of its own |
 | a terminal on another machine | a group named `<space> / <tab>`, tagged with the machine, made once |
 | a terminal that is gone | its group stays, with its history, tagged `ended` (untagged if it comes back) |
-| the sidebar | the direct chat with the bot: an overview card (every terminal's state, what waits for you first, each a link to its group), kept up to date in place; `/ls`, `/new`, `/kill` |
+| the sidebar | the direct chat with the bot: an overview card (every terminal's state, what waits for you first, each a link to its group), kept up to date in place; `/ls`, `/new`, `/kill`, `/usage` |
 
 A tab herdr-app only numbered (`2`) is named after the terminal's title instead (what the
 program sets; Claude Code sets its session name or topic), else its hc name.
@@ -50,7 +50,7 @@ the bot, Threaded Mode):
 | a tab | a topic named `<space> / <tab>` in the bot's private chat; type there to talk to it |
 | a space | one topic icon color for all of its topics (Telegram offers six) |
 | a terminal that is gone | its topic stays, its name starting with 🔚 (taken off if it comes back) |
-| the sidebar | the chat's main thread: the overview message, edited in place; `/ls`, `/new`, `/kill`; `/` shows the commands |
+| the sidebar | the chat's main thread: the overview message, edited in place; `/ls`, `/new`, `/kill`, `/usage`; `/` shows the commands |
 
 What differs is in "Feishu and Telegram side by side" below. Telegram takes about one
 message a second in a chat, so the bot queues and waits as Telegram asks. Setting it up:
@@ -65,7 +65,7 @@ Both do the same things; where an app cannot, something stands in.
 | a tab | a group | a topic in the bot's private chat |
 | a space | an avatar (its letter, its color) | a topic icon color |
 | an ended terminal | the `ended` tag | 🔚 before the topic's name |
-| the direct chat | the overview card, commands typed or from the bot menu (set in the console) | the main thread: the overview, commands with the `/` list |
+| the direct chat | the overview card, commands typed or from the bot menu (set in the console) | the main thread: the overview, commands with the `/` list (sent outside a topic, Telegram may make a new topic of a command; it is answered there, as in the main thread) |
 | what it says while working | one live card per turn, edited | one live message per turn, edited |
 | a dialog | a card with buttons, a text box for its own words | a message with buttons; its own words are typed in the topic |
 | needs you | the group pinned (after `/auth`), an @ that rings | the dialog card pinned in its topic, a reply that rings |
@@ -170,6 +170,29 @@ A room is a Feishu group or a Telegram topic.
     usage plugin asks them, with the key from OpenCode's own credentials (held only for
     that request, never written or logged, sent only to Zhipu). What is not known is left
     out: limits for an API key, a provider that names none, or a reading that fails.
+  - `/usage` in the direct chat says every account at once, on this machine and every
+    machine a session is connected to: Claude Code's (`claude auth status` and
+    `claude -p /usage`), Codex's (its app server's `account/read` and
+    `account/rateLimits/read`, live from OpenAI, as its own TUI asks them) and each GLM
+    Coding Plan (or Z.ai) key in OpenCode's credentials or Pi's `auth.json`, with each
+    limit's share used and when it resets:
+
+    ```
+    **Claude Code** (max) · me@example.com · on m1
+    5-hour 2% · resets in 3h 24m
+    7-day 67% · resets in 24m
+
+    **Codex** (pro) · me@example.com · on m1
+    7-day 70% · resets in 2d 2h
+
+    **GLM Coding Plan** (max) · in OpenCode, Pi · on m1
+    5-hour 17% · resets in 4h
+    ```
+
+    An account found on several machines (one login, or one key in two agents) is said
+    once. Another hc core on this machine (the same host and home) is not asked again; a
+    machine that is not connected is named under "Not reached". A sign-in whose agent
+    names no limits (an API key, Claude Code's setup token) says so. Nothing asks a model.
 - Anything else (a shell, a tool, an agent that has quit): nothing by itself. A terminal
   counts as an agent only while its foreground process is that agent, so a status left
   over after it quits posts nothing.
@@ -319,10 +342,10 @@ is never updated from here: pull it, and the running bots follow the version in 
 
 - Direct chat: `/ls` (the overview again at the bottom of the chat; the old one is
   recalled), `/new <session> <space>/<tab> [command]` (start one; default `claude`;
-  `--cwd <dir>` first to pick its folder), `/kill <session> <address>`, `/auth` (Feishu;
-  see below). Telegram lists them when you type `/`; Feishu can have a bot menu for
-  `/ls`, help and `/auth` (set in the developer console:
-  `skills/herdrchat/references/feishu.md`, "The bot menu").
+  `--cwd <dir>` first to pick its folder), `/kill <session> <address>`, `/usage` (every
+  account's limits, above), `/auth` (Feishu; see below). Telegram lists them when you
+  type `/`; Feishu can have a bot menu for `/ls`, `/usage`, help and `/auth` (set in the
+  developer console: `skills/herdrchat/references/feishu.md`, "The bot menu").
 - In a terminal's room: any text goes to it (marked once typed in, and again when the
   turn that took it is over); an image (alone or in a rich text message) is sent
   beside the terminal with `hc put`, on its machine, and its path is typed in with your

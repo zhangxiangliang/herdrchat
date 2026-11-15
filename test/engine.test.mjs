@@ -610,10 +610,15 @@ test('a held message survives a restart and goes in when the new bot finds it no
   engine.stop();
 });
 
-test('a message in a room no terminal has says so', async () => {
+test('a message in a room no terminal has says so; a command there is the direct chat\'s', async () => {
   const { chat, engine, done } = await setup([terminal('t1')]);
   await engine.onMessage({ room: 'room-made-by-hand', where: 'room-made-by-hand', message: 'm-in', text: 'hello?', images: [] });
   assert.match(chat.of('reply').at(-1).args[1], /^Not delivered: this room is not a terminal's/);
+  // a command there is the direct chat's (Telegram makes a topic of a command sent outside one)
+  await engine.onMessage({ room: 'topic-made-by-telegram', where: 'chat:9', message: 'm-2', text: '/usage', images: [] });
+  const [where, said] = chat.of('reply').at(-1).args;
+  assert.equal(where, 'chat:9');
+  assert.match(said, /^No agent is signed in here/);
   done();
 });
 
@@ -645,6 +650,22 @@ test('/new names the new tab in herdr-app as asked, by the tab id it gave the te
   assert.equal(hc.ran.labels.where, 'proj / daily');
   assert.deepEqual(hc.named, [{ tabId: hc.ran.labels['herdr.tab'], name: 'daily' }]);
   assert.match(chat.of('reply').at(-1).args[1], /Started `claude` as `t99`.*Its room appears/);
+  done();
+});
+
+test('/usage in the direct chat: the accounts on every machine', async () => {
+  const shell = async (s, m, script) => (m === 'box' && /hostname/.test(script) ? 'box\n/home/me' : '');
+  const { chat, hc, engine, r, done } = await setup([terminal('t1')], { shell });
+  hc.machines = async () => [{ name: 'box', state: 'connected' }, { name: 'gone', state: 'connecting' }];
+  r.accounts.set('', [{ id: 'c', app: 'Claude Code', account: 'me@x', limits: [{ name: '5-hour', used: 3 }] }]);
+  r.accounts.set('box', [{ id: 'x', app: 'Codex', limits: [], note: 'No limits are named for this sign-in.' }]);
+  await engine.onMessage({ room: null, where: 'dm', message: 'm-in', text: '/usage', images: [] });
+  await settle(engine);
+  assert.equal(chat.of('reply').at(-1).args[1], [
+    `**Claude Code** · me@x · on ${os.hostname().split('.')[0]}\n5-hour 3%`,
+    '**Codex** · on box\nNo limits are named for this sign-in.',
+    'Not reached: gone.',
+  ].join('\n\n'));
   done();
 });
 
