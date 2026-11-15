@@ -53,6 +53,15 @@ test('an OpenCode terminal is read by its reader, and its session is its folder\
   assert.equal(pickSession(list, {}, '/w'), 'a', 'none active: the one updated last');
   assert.equal(pickSession(list, { b: { type: 'running' } }, '/w'), 'b', 'the active one first');
   assert.equal(pickSession(list, {}, '/none'), null);
+  // as OpenCode 2.3 gives them: another folder's session, busy and newer, is never this one
+  const now = [
+    { id: 'here', location: { directory: '/w' }, time: { updated: 10 } },
+    { id: 'there', location: { directory: '/other' }, time: { updated: 50 } },
+    { id: 'here-new', location: { directory: '/w' }, time: { updated: 20 } },
+  ];
+  assert.equal(pickSession(now, { there: { type: 'busy' } }, '/w'), 'here-new');
+  assert.equal(pickSession(now, { here: { type: 'busy' } }, '/w'), 'here');
+  assert.equal(pickSession([{ id: 'x', updated: 1 }, { id: 'y', updated: 2 }], {}, '/w'), 'y', 'no folder named anywhere: any');
   assert.equal(titleOf('OC | Greeting'), 'Greeting');
 });
 
