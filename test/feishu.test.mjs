@@ -108,6 +108,7 @@ test('a post is quoted by its first line with words, not by its footer', () => {
   assert.equal(summaryOf('```\n⏺ Unknown command: /nosuchcmd\n\n❯\n```'), '⏺ Unknown command: /nosuchcmd');
   // a label goes with what follows it; marks and entities are not shown
   assert.equal(summaryOf('**You:**\n> fix &#42;it&#42;\n\nFixed.'), 'You: fix *it*');
+  assert.equal(summaryOf('You picked Pear, *done*. Or _so_ it seems: ls *.md'), 'You picked Pear, done. Or so it seems: ls *.md');
   assert.equal(summaryOf('```\n\n```'), '');
   assert.equal(summaryOf('x'.repeat(100)).length, 80);
 });
@@ -152,4 +153,33 @@ test('a dialog\'s words in a Feishu card: their marks as entities, so they show 
 test('your words in a Feishu card: who in bold, then a quote of them as they are', () => {
   assert.equal(markdownOf([{ kind: 'you', text: 'fix *it*\n<b>' }]), '**You:**\n> fix &#42;it&#42;\n> &#60;b&#62;');
   assert.equal(markdownOf([{ kind: 'you', text: 'look', from: 't7 review', answerTo: 't1' }]), '**From t7 review** _(answer: t1)_\n> look');
+});
+
+test('a Feishu call that got no answer is marked unreached; one Feishu refused is not', async () => {
+  const Lark = await import('@larksuiteoapi/node-sdk');
+  const { createClient, updateCard } = await import('../lib/chats/feishu/client.mjs');
+  const http = Lark.defaultHttpInstance;
+  const real = http.defaults.adapter;
+  let answer = null;
+  http.defaults.adapter = async (config) => {
+    if (config.url.includes('tenant_access_token')) return { data: { code: 0, tenant_access_token: 't', expire: 7200 }, status: 200, headers: {}, config };
+    return answer(config);
+  };
+  try {
+    const client = createClient({ appId: 'cli_test', appSecret: 'x' });
+    answer = () => { throw Object.assign(new Error('getaddrinfo ENOTFOUND open.feishu.cn'), { code: 'ENOTFOUND', isAxiosError: true }); };
+    await assert.rejects(updateCard(client, 'om_1', {}), (err) => err.unreached === true);
+    answer = (config) => { throw Object.assign(new Error('Request failed with status code 400'), { isAxiosError: true, response: { status: 400, data: { code: 230001 }, config } }); };
+    await assert.rejects(updateCard(client, 'om_1', {}), (err) => !err.unreached);
+    answer = (config) => ({ data: { code: 230002, msg: 'no such message' }, status: 200, headers: {}, config });
+    await assert.rejects(updateCard(client, 'om_1', {}), (err) => /230002/.test(err.message) && !err.unreached);
+  } finally {
+    http.defaults.adapter = real;
+  }
+});
+
+test('a Feishu dialog card once answered shows what was picked as it is, your own words too', async () => {
+  const { doneCard } = await import('../lib/chats/feishu/render.mjs');
+  const card = doneCard('✅ Done', 'Which city?', '✔ Kyoto <old> *capital*');
+  assert.equal(card.body.elements[1].content, 'Kyoto &#60;old&#62; &#42;capital&#42;');
 });

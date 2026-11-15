@@ -751,7 +751,8 @@
         },
         "reply_parameters": {
           "message_id": 1,
-          "allow_sending_without_reply": true
+          "allow_sending_without_reply": true,
+          "quote": "fix it <now>"
         },
         "text": "✅ done",
         "parse_mode": "HTML"
@@ -852,8 +853,8 @@
             "text": "typed in the terminal too"
           },
           {
-            "kind": "text",
-            "markdown": "▸ bash: ls\n▸ read: a.txt"
+            "kind": "plain",
+            "text": "▸ bash: ls\n▸ read: a.txt"
           },
           {
             "kind": "text",
@@ -890,8 +891,8 @@
             "text": "typed in the terminal too"
           },
           {
-            "kind": "text",
-            "markdown": "▸ bash: ls\n▸ read: a.txt"
+            "kind": "plain",
+            "text": "▸ bash: ls\n▸ read: a.txt"
           },
           {
             "kind": "text",
@@ -1201,7 +1202,7 @@
       "data": {
         "receive_id": "oc_2",
         "msg_type": "interactive",
-        "content": "{\"schema\":\"2.0\",\"config\":{\"update_multi\":true},\"header\":{\"title\":{\"tag\":\"plain_text\",\"content\":\"Working…\"},\"template\":\"blue\",\"icon\":{\"tag\":\"standard_icon\",\"token\":\"loading_outlined\",\"color\":\"blue\"}},\"body\":{\"elements\":[{\"tag\":\"markdown\",\"content\":\"**You:**\\n> typed in the terminal too\\n\\n▸ bash: ls *.md\\n▸ read: a_b.txt\\n\\n![image](img_10)\\n\\n**From t7 review** _(answer: t1)_\\n> look at this\"},{\"tag\":\"markdown\",\"content\":\"fake-agent · model-a · main · context 25% (50k)\",\"text_size\":\"notation\"}]}}"
+        "content": "{\"schema\":\"2.0\",\"config\":{\"update_multi\":true},\"header\":{\"title\":{\"tag\":\"plain_text\",\"content\":\"Working…\"},\"template\":\"blue\",\"icon\":{\"tag\":\"standard_icon\",\"token\":\"loading_outlined\",\"color\":\"blue\"}},\"body\":{\"elements\":[{\"tag\":\"markdown\",\"content\":\"**You:**\\n> typed in the terminal too\\n\\n▸ bash: ls &#42;.md\\n▸ read: a&#95;b.txt\\n\\n![image](img_10)\\n\\n**From t7 review** _(answer: t1)_\\n> look at this\"},{\"tag\":\"markdown\",\"content\":\"fake-agent · model-a · main · context 25% (50k)\",\"text_size\":\"notation\"}]}}"
       }
     },
     {
@@ -1209,7 +1210,7 @@
       "path": "/open-apis/im/v1/messages/om_11",
       "params": {},
       "data": {
-        "content": "{\"schema\":\"2.0\",\"config\":{\"update_multi\":true},\"header\":{\"title\":{\"tag\":\"plain_text\",\"content\":\"Worked\"},\"template\":\"grey\",\"icon\":{\"tag\":\"standard_icon\",\"token\":\"done_outlined\",\"color\":\"grey\"}},\"body\":{\"elements\":[{\"tag\":\"markdown\",\"content\":\"**You:**\\n> typed in the terminal too\\n\\n▸ bash: ls *.md\\n▸ read: a_b.txt\\n\\n![image](img_10)\\n\\n**From t7 review** _(answer: t1)_\\n> look at this\"},{\"tag\":\"markdown\",\"content\":\"fake-agent · model-a · main · context 25% (50k)\",\"text_size\":\"notation\"}]}}"
+        "content": "{\"schema\":\"2.0\",\"config\":{\"update_multi\":true},\"header\":{\"title\":{\"tag\":\"plain_text\",\"content\":\"Worked\"},\"template\":\"grey\",\"icon\":{\"tag\":\"standard_icon\",\"token\":\"done_outlined\",\"color\":\"grey\"}},\"body\":{\"elements\":[{\"tag\":\"markdown\",\"content\":\"**You:**\\n> typed in the terminal too\\n\\n▸ bash: ls &#42;.md\\n▸ read: a&#95;b.txt\\n\\n![image](img_10)\\n\\n**From t7 review** _(answer: t1)_\\n> look at this\"},{\"tag\":\"markdown\",\"content\":\"fake-agent · model-a · main · context 25% (50k)\",\"text_size\":\"notation\"}]}}"
       }
     },
     {
@@ -1386,7 +1387,8 @@
         },
         "reply_parameters": {
           "message_id": 4,
-          "allow_sending_without_reply": true
+          "allow_sending_without_reply": true,
+          "quote": "(blank)"
         },
         "text": "⚠️ needs you",
         "parse_mode": "HTML"
@@ -1463,7 +1465,8 @@
         },
         "reply_parameters": {
           "message_id": 10,
-          "allow_sending_without_reply": true
+          "allow_sending_without_reply": true,
+          "quote": "Fixed it: T1_ABC <now> &"
         },
         "text": "✅ done",
         "parse_mode": "HTML"
@@ -1535,7 +1538,8 @@
         },
         "reply_parameters": {
           "message_id": 13,
-          "allow_sending_without_reply": true
+          "allow_sending_without_reply": true,
+          "quote": "Allow ls?"
         },
         "text": "⚠️ needs you",
         "parse_mode": "HTML"

@@ -1157,14 +1157,14 @@ test('a live card kept from before blocks (its text) goes on with what comes, it
   r.queue('t1', [{ role: 'tool', text: '▸ bash: ls', at: '2026-01-02T00:00:01.000Z', id: 'a' }]);
   engine.tick.live();
   await settle(engine);
-  assert.deepEqual(chat.of('editCard').at(-1).args, ['m-live', { title: '⌛️ Working…', tone: 'working', body: [{ kind: 'text', markdown: '**You:** hi' }, { kind: 'text', markdown: '▸ bash: ls' }], footer: { app: 'fake-agent', model: undefined, screen: false, branch: '', context: undefined, limits: undefined } }]);
+  assert.deepEqual(chat.of('editCard').at(-1).args, ['m-live', { title: '⌛️ Working…', tone: 'working', body: [{ kind: 'text', markdown: '**You:** hi' }, { kind: 'plain', text: '▸ bash: ls' }], footer: { app: 'fake-agent', model: undefined, screen: false, branch: '', context: undefined, limits: undefined } }]);
   // the app says it is full: the card is closed and the next one goes on
   chat.bytes = () => chat.liveBytes + 1;
   r.queue('t1', [{ role: 'tool', text: '▸ read: a.txt', at: '2026-01-02T00:00:02.000Z', id: 'b' }]);
   engine.tick.live();
   await settle(engine);
   assert.equal(chat.of('editCard').at(-1).args[1].title, '⌛️ Working… (continued below)');
-  assert.deepEqual(chat.of('postCard').at(-1).args[1].body, [{ kind: 'text', markdown: '▸ read: a.txt' }]);
+  assert.deepEqual(chat.of('postCard').at(-1).args[1].body, [{ kind: 'plain', text: '▸ read: a.txt' }]);
   done();
 });
 
@@ -1176,5 +1176,59 @@ test('a pin left on a room that waits on nothing (an unpin that failed, kept by 
   await engine.tick.unpinStale();
   await settle(engine);
   assert.deepEqual(chat.of('unpin').map((c) => c.args[0]), ['s|t1']);
+  done();
+});
+
+test('a call that fails for a terminal on a machine that is not connected waits for the machine, logged once, no error', async () => {
+  const errors = [];
+  const t = terminal('box/t1', { program: 'fake', agent: true });
+  const { hc, engine, r, done } = await setup([t], { logError: (...a) => errors.push(a.join(' ')) });
+  hc.machines = async () => [{ name: 'box', state: 'connecting' }];
+  r.reader.after = async () => { throw new Error('hc get box/t1 --json: Command failed: hc get box/t1 --json'); };
+  engine.tick.sweep();
+  await settle(engine);
+  assert.deepEqual(errors, []);
+  // connected, it is an error again
+  hc.machines = async () => [{ name: 'box', state: 'connected' }];
+  engine.laneOf('@box|box/t1', 'sweep', async () => { throw new Error('boom'); });
+  await settle(engine);
+  assert.match(errors.at(-1), /sweep box\/t1: .*boom/);
+  done();
+});
+
+test('a live card edit that did not get through (the network) sends no second card: the next edit has it all, and closing it is tried again', async () => {
+  const { chat, hc, store, engine, r, done } = await setup([terminal('t1', { program: 'fake', agent: true, state: 'working' })], { logError: () => {} });
+  r.queue('t1', [{ role: 'tool', text: '▸ one', at: '2026-01-02T00:00:01.000Z', id: 'a' }]);
+  engine.tick.live();
+  await settle(engine);
+  assert.equal(chat.of('postCard').length, 1);
+  const edit = chat.editCard;
+  let down = 2;
+  chat.editCard = async (...a) => { if (down > 0) { down -= 1; throw Object.assign(new Error('fetch failed'), { unreached: true }); } return edit(...a); };
+  r.queue('t1', [{ role: 'tool', text: '▸ two', at: '2026-01-02T00:00:02.000Z', id: 'b' }]);
+  engine.tick.live();
+  await settle(engine);
+  assert.equal(chat.of('postCard').length, 1, 'no second card');
+  assert.deepEqual(store.read().cursors['s|t1'].live.body, [{ kind: 'plain', text: '▸ one' }, { kind: 'plain', text: '▸ two' }], 'what was added is kept');
+  // the turn ends while the line is still down once: closing it is tried again
+  r.queue('t1', [{ role: 'ai', text: 'Done.', at: '2026-01-02T00:00:03.000Z', id: 'c', end: true }]);
+  hc.turn('s', 't1', 'done');
+  await settle(engine);
+  assert.equal(chat.of('postCard').length, 1);
+  const closed = chat.of('editCard').at(-1).args[1];
+  assert.equal(closed.title, '✅ Worked');
+  assert.deepEqual(closed.body, [{ kind: 'plain', text: '▸ one' }, { kind: 'plain', text: '▸ two' }]);
+  done();
+});
+
+test('an overview that did not get through is shown again later, not left behind', async () => {
+  const { chat, hc, engine, done } = await setup([terminal('t1')], { logError: () => {} });
+  let down = 1;
+  const shown = [];
+  chat.showOverview = async (rows) => { if (down > 0) { down -= 1; throw Object.assign(new Error('fetch failed'), { unreached: true }); } shown.push(rows.length); };
+  hc.change('s', 'title', { ...terminal('t1'), title: 'x' });
+  await pause(200);
+  await settle(engine);
+  assert.deepEqual(shown, [1], 'shown once the line is back');
   done();
 });

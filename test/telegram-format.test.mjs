@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { bytesOf, dialogHtml, foldedHtml, lookOf, messagesOf, split, splitBody, toHtml } from '../lib/chats/telegram/render.mjs';
+import { bytesOf, dialogHtml, foldedHtml, lookOf, messagesOf, quoteOf, split, splitBody, toHtml } from '../lib/chats/telegram/render.mjs';
 
 test('markdown becomes Telegram HTML, with everything else escaped', () => {
   assert.equal(toHtml('**You:**\n> a < b & c\n> two'), '<b>You:</b>\n<blockquote>a &lt; b &amp; c\ntwo</blockquote>');
@@ -110,4 +110,35 @@ test('a path is sent as code, so Telegram makes no command of it; the bot\'s own
 
 test('a folded post shows inline marks: who said it in bold, a quote\'s and a code block\'s lines as they are', () => {
   assert.equal(foldedHtml('Before', '**You:** 2026-01-01 10:00\n> fix *it* <now>\n\n```\nnpm test\n```\nDone.'), '<b>Before</b>\n<blockquote expandable><b>You:</b> 2026-01-01 10:00\nfix <i>it</i> &lt;now&gt;\n\n<code>npm test</code>\nDone.</blockquote>');
+});
+
+test('a ring quotes the start of the first line with words: no bold title, no footer, as Telegram shows it', () => {
+  const q = (html) => quoteOf(html);
+  assert.deepEqual(q('Fixed it: <code>T1_ABC</code> &lt;now&gt; &amp; <b>done</b>.\n\n<pre>ok</pre>\n\n<i>claude · m</i>'), { text: 'Fixed it: T1_ABC <now> &', entities: [] });
+  assert.deepEqual(q('<b>⚠️ Needs you (permission)</b>\n\n╭──────╮\nAllow ls?\n\n<i>claude · screen</i>'), { text: 'Allow ls?', entities: [] });
+  assert.deepEqual(q('<b>You:</b>\n<blockquote>typed in the terminal</blockquote>'), { text: 'typed in the terminal', entities: [] });
+  assert.equal(Array.from(q('x'.repeat(200)).text).length, 80);
+  assert.equal(q('<i>  </i>'), null);
+});
+
+test('a message with no unmarked words (an italic note alone) is quoted with its marks, where they are', () => {
+  assert.deepEqual(quoteOf('<i>(It stopped: The user declined this tool call)</i>'), { text: '(It stopped: The user declined this tool call)', entities: [{ type: 'italic', offset: 0, length: 46 }] });
+  assert.deepEqual(quoteOf('<b>Done</b> with <i>it</i> &amp; more'), { text: 'Done with it & more', entities: [{ type: 'bold', offset: 0, length: 4 }, { type: 'italic', offset: 10, length: 2 }] });
+  const long = quoteOf(`<i>${'y'.repeat(100)}</i>`);
+  assert.deepEqual([long.text.length, long.entities], [80, [{ type: 'italic', offset: 0, length: 80 }]]);
+});
+
+test('a Telegram call that got no answer is marked unreached; one Telegram refused is not', async () => {
+  const { createClient } = await import('../lib/chats/telegram/client.mjs');
+  const real = globalThis.fetch;
+  try {
+    globalThis.fetch = async () => { throw new TypeError('fetch failed'); };
+    await assert.rejects(createClient('t').call('editMessageText', {}), (err) => err.unreached === true);
+    globalThis.fetch = async () => ({ json: async () => ({ ok: false, error_code: 400, description: 'Bad Request: message to edit not found' }) });
+    await assert.rejects(createClient('t').call('editMessageText', {}), (err) => err.code === 400 && !err.unreached);
+    globalThis.fetch = async () => ({ json: async () => ({ ok: false, error_code: 502, description: 'Bad Gateway' }) });
+    await assert.rejects(createClient('t').call('editMessageText', {}), (err) => err.unreached === true);
+  } finally {
+    globalThis.fetch = real;
+  }
 });
