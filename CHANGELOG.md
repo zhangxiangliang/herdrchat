@@ -1,3 +1,10 @@
+# [1.20.0](https://github.com/zhangxiangliang/herdrchat/compare/v1.19.0...v1.20.0) (2026-11-16)
+
+
+### Features
+
+* a new 📋 herdr topic asks you to pin it ([f0f9f14](https://github.com/zhangxiangliang/herdrchat/commit/f0f9f14ed3917e9d56c84153c4ea4146cd174860))
+
 # [1.19.0](https://github.com/zhangxiangliang/herdrchat/compare/v1.18.0...v1.19.0) (2026-11-16)
 
 
