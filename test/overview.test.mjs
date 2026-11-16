@@ -1,31 +1,85 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { overviewCard, overviewText } from '../lib/chats/feishu/overview.mjs';
+import { groupsOf } from '../lib/chats/overview.mjs';
+import { overviewCard, overviewElements } from '../lib/chats/feishu/overview.mjs';
 
-test('the overview puts what waits for you first and links every group', () => {
-  const rows = [
-    { name: 'alpha / docs', address: 't1', state: 'done', room: 'oc_a' },
-    { name: 'beta / 1', address: 'box/t2', state: 'blocked', kind: 'permission', room: 'oc_b' },
-    { name: 'alpha / build', address: 't3', state: 'working' },
-    { name: 'alpha / shell', address: 't4', program: 'zsh' },
-  ];
-  const lines = overviewText(rows).split('\n');
-  assert.match(lines[0], /^<text_tag color='orange'>needs you \(permission\)<\/text_tag> \*\*\[beta \/ 1\]\(https:\/\/applink\.feishu\.cn\/client\/chat\/open\?openChatId=oc_b\)\*\* · `box\/t2`$/);
-  assert.match(lines[1], /^<text_tag color='blue'>working<\/text_tag> \*\*alpha \/ build\*\* · `t3`$/);
-  assert.match(lines[2], /^<text_tag color='green'>done/);
-  assert.match(lines[3], /^<text_tag color='neutral'>zsh<\/text_tag> \*\*alpha \/ shell\*\* · `t4`$/);
-  const card = overviewCard(rows, Date.UTC(2026, 0, 1));
+const ROWS = [
+  { name: 'alpha / docs', address: 't1', state: 'done', room: 'oc_a' },
+  { name: 'beta / 1', address: 'box/t2', state: 'blocked', kind: 'permission', room: 'oc_b' },
+  { name: 'alpha / build', address: 't3', state: 'working' },
+  { name: 'alpha / shell', address: 't4', program: 'zsh' },
+  { name: 'gamma / master', address: 'gamma t1', state: 'idle', room: 'oc_g', note: { kind: 'done', line: 'Fixed it.', at: 1 } },
+];
+
+test('the overview\'s shape: what waits for you first, then by machine (this computer first), space and tab', () => {
+  const { waiting, machines } = groupsOf(ROWS);
+  assert.deepEqual(waiting.map((r) => r.name), ['gamma / master']);
+  assert.deepEqual(machines.map((m) => [m.machine, m.spaces.map((s) => [s.space, s.tabs.map((t) => t.tab)])]), [
+    [null, [['alpha', ['build', 'docs', 'shell']], ['gamma', ['master']]]],
+    ['box', [['beta', ['1']]]],
+  ]);
+});
+
+test('the Feishu overview: what waits for you, then a heading and a table per machine, every table Room / State / Latest', () => {
+  const at = Date.UTC(2026, 0, 1, 9, 30);
+  const rows = ROWS.map((r) => (r.name === 'alpha / build' ? { ...r, latest: 'Building it now', latestAt: at } : r));
+  const clock = new Date(at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+  const elements = overviewElements(rows);
+  assert.deepEqual(elements.map((e) => e.tag), ['markdown', 'table', 'markdown', 'table', 'markdown', 'table']);
+  assert.equal(elements[0].content, '### Waiting for you');
+  for (const table of elements.filter((e) => e.tag === 'table')) {
+    assert.deepEqual(table.columns.map((c) => [c.name, c.display_name, c.data_type]), [['room', 'Room', 'lark_md'], ['state', 'State', 'options'], ['latest', 'Latest', 'text']]);
+    assert.equal(table.page_size, 10);
+  }
+  const noteClock = new Date(1).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+  assert.deepEqual(elements[1].rows, [{ room: '[gamma / master](https://applink.feishu.cn/client/chat/open?openChatId=oc_g)', state: [{ text: 'done', color: 'green' }], latest: `${noteClock}: Fixed it.` }]);
+  assert.equal(elements[2].content, '### This computer');
+  assert.deepEqual(elements[3].rows, [
+    { room: 'alpha / build', state: [{ text: 'working', color: 'blue' }], latest: `${clock}: Building it now` },
+    { room: '[alpha / docs](https://applink.feishu.cn/client/chat/open?openChatId=oc_a)', state: [{ text: 'done', color: 'green' }], latest: '' },
+    { room: 'alpha / shell', state: [{ text: 'zsh', color: 'neutral' }], latest: '' },
+    { room: '[gamma / master](https://applink.feishu.cn/client/chat/open?openChatId=oc_g)', state: [{ text: 'idle', color: 'neutral' }], latest: '' },
+  ]);
+  assert.equal(elements[4].content, '### box');
+  assert.deepEqual(elements[5].rows, [{ room: '[beta / 1](https://applink.feishu.cn/client/chat/open?openChatId=oc_b)', state: [{ text: 'needs you', color: 'orange' }], latest: '' }]);
+  const card = overviewCard(ROWS, Date.UTC(2026, 0, 1));
   assert.equal(card.header.template, 'orange');
-  assert.equal(card.header.title.content, '1 needs you · herdrchat · 4 terminals');
+  assert.equal(card.header.title.content, '1 needs you · herdrchat · 5 terminals');
   assert.equal(card.header.icon.token, 'warning_outlined', 'an icon says what it is, not an emoji');
 });
 
-test('marks in a name are entities, which Feishu reads in link text; a tag shows its words as they are', () => {
-  const lines = overviewText([
+test('a card holds five tables at most, "waiting for you" first: a machine past them is a list', () => {
+  const rows = ['a', 'b', 'c', 'd', 'e', 'f'].map((m) => ({ name: `s${m} / t`, address: `${m}/t1`, state: 'idle', room: `oc_${m}` }));
+  let elements = overviewElements(rows);
+  assert.equal(elements.filter((e) => e.tag === 'table').length, 5);
+  assert.equal(elements.at(-1).content, '- **sf**\n    - [t](https://applink.feishu.cn/client/chat/open?openChatId=oc_f)');
+  rows[0].note = { kind: 'done', line: 'x', at: 1 };
+  elements = overviewElements(rows);
+  assert.equal(elements.filter((e) => e.tag === 'table').length, 5);
+  assert.equal(elements.at(-3).content, '- **se**\n    - [t](https://applink.feishu.cn/client/chat/open?openChatId=oc_e)');
+});
+
+test('an old overview\'s record is the history, in full: a few lines a note, how and when each was handled; with nothing, it says it is old', async () => {
+  const { recordCard } = await import('../lib/chats/feishu/overview.mjs');
+  const card = recordCard([{ kind: 'needs', name: 'a / b', room: 'oc_a', line: 'Allow?', at: 1, handled: { how: 'answered', at: 2 } }, { kind: 'done', name: 'c / d', room: null, line: 'Done.', at: 1 }]);
+  const [md] = card.body.elements;
+  assert.equal(md.tag, 'markdown', 'not a table: a record is read for its details');
+  const lines = md.content.split('\n').map((l) => l.replace(/\d\d:\d\d/g, 'HH:MM'));
+  assert.deepEqual(lines, [
+    "<text_tag color='neutral'>handled</text_tag> **[a / b](https://applink.feishu.cn/client/chat/open?openChatId=oc_a)** · HH:MM",
+    "<font color='grey'>Allow?</font>",
+    "<font color='grey'>answered · HH:MM</font>",
+    "<text_tag color='green'>done</text_tag> **c / d** · HH:MM",
+    "<font color='grey'>Done.</font>",
+  ]);
+  assert.equal(card.config.summary.content, '✓ handled · a / b: Allow?');
+  assert.deepEqual(recordCard([]).body.elements, [{ tag: 'markdown', content: 'An old overview. The new one is further down.' }]);
+});
+
+test('a name in a table cell or a link keeps its own marks; only what would break a link goes', () => {
+  const [, table] = overviewElements([
     { name: 'worker / T1_ABC-2', address: 't6j', state: 'done', room: 'oc_a' },
-    { name: 'a*b', address: 't7', program: 'my_prog <x>' },
-  ]).split('\n');
-  assert.ok(lines[0].includes('[worker / T1&#95;ABC-2]('), lines[0]);
-  assert.ok(!lines.join('\n').includes('\\'), 'no backslash: Feishu shows it in link text and in tags');
-  assert.ok(lines[1].startsWith("<text_tag color='neutral'>my_prog x</text_tag> **a&#42;b**"), lines[1]);
+    { name: 'a*b / [x]', address: 't7', program: 'my_prog <x>' },
+  ]);
+  assert.deepEqual(table.rows.map((r) => r.room), ['a*b / x', '[worker / T1_ABC-2](https://applink.feishu.cn/client/chat/open?openChatId=oc_a)']);
 });

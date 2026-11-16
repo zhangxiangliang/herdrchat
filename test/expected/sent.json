@@ -548,11 +548,14 @@
     }
   },
   "feishu.overview": {
-    "text": "<text_tag color='orange'>needs you (permission)</text_tag> **[beta / T1&#95;ABC-2](https://applink.feishu.cn/client/chat/open?openChatId=oc_b)** · `box/t2`\n<text_tag color='green'>done</text_tag> **[alpha / docs](https://applink.feishu.cn/client/chat/open?openChatId=oc_a)** · since 09:30 · `t1`\n<text_tag color='neutral'>zsh</text_tag> **alpha / shell** · `t4`",
+    "text": "[{\"tag\":\"markdown\",\"content\":\"### This computer\"},{\"tag\":\"table\",\"page_size\":10,\"row_height\":\"low\",\"header_style\":{\"background_style\":\"grey\",\"text_color\":\"grey\",\"bold\":true},\"columns\":[{\"name\":\"room\",\"display_name\":\"Room\",\"data_type\":\"lark_md\",\"width\":\"auto\"},{\"name\":\"state\",\"display_name\":\"State\",\"data_type\":\"options\",\"width\":\"auto\"},{\"name\":\"latest\",\"display_name\":\"Latest\",\"data_type\":\"text\",\"width\":\"auto\"}],\"rows\":[{\"room\":\"[alpha / docs](https://applink.feishu.cn/client/chat/open?openChatId=oc_a)\",\"state\":[{\"text\":\"done\",\"color\":\"green\"}],\"latest\":\"\"},{\"room\":\"alpha / shell\",\"state\":[{\"text\":\"zsh\",\"color\":\"neutral\"}],\"latest\":\"\"}]},{\"tag\":\"markdown\",\"content\":\"### box\"},{\"tag\":\"table\",\"page_size\":10,\"row_height\":\"low\",\"header_style\":{\"background_style\":\"grey\",\"text_color\":\"grey\",\"bold\":true},\"columns\":[{\"name\":\"room\",\"display_name\":\"Room\",\"data_type\":\"lark_md\",\"width\":\"auto\"},{\"name\":\"state\",\"display_name\":\"State\",\"data_type\":\"options\",\"width\":\"auto\"},{\"name\":\"latest\",\"display_name\":\"Latest\",\"data_type\":\"text\",\"width\":\"auto\"}],\"rows\":[{\"room\":\"[beta / T1_ABC-2](https://applink.feishu.cn/client/chat/open?openChatId=oc_b)\",\"state\":[{\"text\":\"needs you\",\"color\":\"orange\"}],\"latest\":\"\"}]}]",
     "card": {
       "schema": "2.0",
       "config": {
-        "update_multi": true
+        "update_multi": true,
+        "summary": {
+          "content": "1 needs you · herdrchat · 3 terminals"
+        }
       },
       "header": {
         "title": {
@@ -570,7 +573,105 @@
         "elements": [
           {
             "tag": "markdown",
-            "content": "<text_tag color='orange'>needs you (permission)</text_tag> **[beta / T1&#95;ABC-2](https://applink.feishu.cn/client/chat/open?openChatId=oc_b)** · `box/t2`\n<text_tag color='green'>done</text_tag> **[alpha / docs](https://applink.feishu.cn/client/chat/open?openChatId=oc_a)** · since 09:30 · `t1`\n<text_tag color='neutral'>zsh</text_tag> **alpha / shell** · `t4`"
+            "content": "### This computer"
+          },
+          {
+            "tag": "table",
+            "page_size": 10,
+            "row_height": "low",
+            "header_style": {
+              "background_style": "grey",
+              "text_color": "grey",
+              "bold": true
+            },
+            "columns": [
+              {
+                "name": "room",
+                "display_name": "Room",
+                "data_type": "lark_md",
+                "width": "auto"
+              },
+              {
+                "name": "state",
+                "display_name": "State",
+                "data_type": "options",
+                "width": "auto"
+              },
+              {
+                "name": "latest",
+                "display_name": "Latest",
+                "data_type": "text",
+                "width": "auto"
+              }
+            ],
+            "rows": [
+              {
+                "room": "[alpha / docs](https://applink.feishu.cn/client/chat/open?openChatId=oc_a)",
+                "state": [
+                  {
+                    "text": "done",
+                    "color": "green"
+                  }
+                ],
+                "latest": ""
+              },
+              {
+                "room": "alpha / shell",
+                "state": [
+                  {
+                    "text": "zsh",
+                    "color": "neutral"
+                  }
+                ],
+                "latest": ""
+              }
+            ]
+          },
+          {
+            "tag": "markdown",
+            "content": "### box"
+          },
+          {
+            "tag": "table",
+            "page_size": 10,
+            "row_height": "low",
+            "header_style": {
+              "background_style": "grey",
+              "text_color": "grey",
+              "bold": true
+            },
+            "columns": [
+              {
+                "name": "room",
+                "display_name": "Room",
+                "data_type": "lark_md",
+                "width": "auto"
+              },
+              {
+                "name": "state",
+                "display_name": "State",
+                "data_type": "options",
+                "width": "auto"
+              },
+              {
+                "name": "latest",
+                "display_name": "Latest",
+                "data_type": "text",
+                "width": "auto"
+              }
+            ],
+            "rows": [
+              {
+                "room": "[beta / T1_ABC-2](https://applink.feishu.cn/client/chat/open?openChatId=oc_b)",
+                "state": [
+                  {
+                    "text": "needs you",
+                    "color": "orange"
+                  }
+                ],
+                "latest": ""
+              }
+            ]
           },
           {
             "tag": "markdown",
@@ -752,24 +853,6 @@
     {
       "method": "sendMessage",
       "body": {
-        "chat_id": "42",
-        "message_thread_id": 11,
-        "disable_notification": false,
-        "link_preview_options": {
-          "is_disabled": true
-        },
-        "reply_parameters": {
-          "message_id": 1,
-          "allow_sending_without_reply": true,
-          "quote": "fix it <now>"
-        },
-        "text": "✅ done",
-        "parse_mode": "HTML"
-      }
-    },
-    {
-      "method": "sendMessage",
-      "body": {
         "chat_id": "11",
         "disable_notification": true,
         "link_preview_options": {
@@ -793,9 +876,18 @@
       }
     },
     {
+      "method": "createForumTopic",
+      "body": {
+        "chat_id": "42",
+        "name": "📋 herdr",
+        "icon_color": 7322096
+      }
+    },
+    {
       "method": "sendMessage",
       "body": {
         "chat_id": "42",
+        "message_thread_id": 77,
         "disable_notification": false,
         "link_preview_options": {
           "is_disabled": true
@@ -818,12 +910,50 @@
       "method": "sendMessage",
       "body": {
         "chat_id": "42",
+        "message_thread_id": 77,
         "disable_notification": true,
         "link_preview_options": {
           "is_disabled": true
         },
-        "text": "<b>⚠️ 1 needs you · herdrchat · 3 terminals</b>\n\n⚠️ <b>beta / T1_ABC-2</b> · needs you (permission) · <code>box/t2</code>\n✅ <b>alpha / docs</b> · done · since 09:30 · <code>t1</code>\n❓ <b>alpha / shell</b> · zsh · <code>t4</code>",
+        "text": "<b>⚠️ 1 needs you · herdrchat · 3 terminals</b>\n\n<b>This computer</b>\n• <b>alpha</b>\n      ◦ docs · ✅ done\n      ◦ shell · zsh\n\n<b>box</b>\n• <b>beta</b>\n      ◦ T1_ABC-2 · ⚠️ needs you",
         "parse_mode": "HTML"
+      }
+    },
+    {
+      "method": "sendMessage",
+      "body": {
+        "chat_id": "42",
+        "message_thread_id": 77,
+        "disable_notification": false,
+        "link_preview_options": {
+          "is_disabled": true
+        },
+        "text": "<b>⚠️ 1 needs you · herdrchat · 3 terminals</b>\n\n<b>Waiting for you</b>\n• <b>beta / T1_ABC-2</b> · ⚠️ needs you · <i>00:00: Allow ls?</i>\n• <b>alpha / docs</b> · ✅ done · <i>00:00: Fixed *it* &lt;now&gt;.</i>\n\n<b>This computer</b>\n• <b>alpha</b>\n      ◦ docs · ✅ done\n      ◦ shell · zsh\n\n<b>box</b>\n• <b>beta</b>\n      ◦ T1_ABC-2 · ⚠️ needs you",
+        "parse_mode": "HTML"
+      }
+    },
+    {
+      "method": "editMessageText",
+      "body": {
+        "chat_id": "42",
+        "message_id": 11,
+        "text": "✓ <b>work / master</b> · handled · 10:00\n<i>Fixed *it* &lt;now&gt;.</i>\n<i>you replied · 10:03</i>",
+        "parse_mode": "HTML",
+        "link_preview_options": {
+          "is_disabled": true
+        }
+      }
+    },
+    {
+      "method": "editMessageText",
+      "body": {
+        "chat_id": "42",
+        "message_id": 12,
+        "text": "An old overview. The new one is further down.",
+        "parse_mode": "HTML",
+        "link_preview_options": {
+          "is_disabled": true
+        }
       }
     }
   ],
@@ -890,7 +1020,7 @@
     ],
     [
       "editCard",
-      "m2",
+      "m3",
       {
         "title": "✅ Worked",
         "tone": "closed",
@@ -956,10 +1086,9 @@
       }
     ],
     [
-      "ring",
-      "s|t1",
-      "m3",
-      "✅ done"
+      "showRecord",
+      "o2",
+      []
     ],
     [
       "placeRoom",
@@ -1012,18 +1141,12 @@
         "a": "t1",
         "k": "3edc02f48551"
       },
-      "m4"
+      "m6"
     ],
     [
       "pin",
       "s|t1",
       "room1"
-    ],
-    [
-      "ring",
-      "s|t1",
-      "m4",
-      "⚠️ needs you"
     ],
     [
       "placeRoom",
@@ -1033,12 +1156,29 @@
       }
     ],
     [
+      "showRecord",
+      "o5",
+      [
+        {
+          "kind": "done",
+          "name": "proj / master",
+          "room": "room1",
+          "line": "Fixed it.",
+          "at": "<time>",
+          "handled": {
+            "how": "replaced",
+            "at": "<time>"
+          }
+        }
+      ]
+    ],
+    [
       "unpin",
       "s|t1"
     ],
     [
       "closeDialog",
-      "m4",
+      "m6",
       {
         "menu": {
           "beside": false,
@@ -1161,7 +1301,7 @@
       "data": {
         "receive_id": "ou_owner",
         "msg_type": "interactive",
-        "content": "{\"schema\":\"2.0\",\"config\":{\"update_multi\":true},\"header\":{\"title\":{\"tag\":\"plain_text\",\"content\":\"herdrchat · 1 terminals\"},\"template\":\"green\",\"icon\":{\"tag\":\"standard_icon\",\"token\":\"done_outlined\",\"color\":\"green\"}},\"body\":{\"elements\":[{\"tag\":\"markdown\",\"content\":\"<text_tag color='neutral'>idle</text_tag> **[proj / master](https://applink.feishu.cn/client/chat/open?openChatId=oc_2)** · `t1`\"},{\"tag\":\"markdown\",\"content\":\"Updated <time>\",\"text_size\":\"notation\"}]}}"
+        "content": "{\"schema\":\"2.0\",\"config\":{\"update_multi\":true,\"summary\":{\"content\":\"herdrchat · 1 terminals\"}},\"header\":{\"title\":{\"tag\":\"plain_text\",\"content\":\"herdrchat · 1 terminals\"},\"template\":\"green\",\"icon\":{\"tag\":\"standard_icon\",\"token\":\"done_outlined\",\"color\":\"green\"}},\"body\":{\"elements\":[{\"tag\":\"markdown\",\"content\":\"### This computer\"},{\"tag\":\"table\",\"page_size\":10,\"row_height\":\"low\",\"header_style\":{\"background_style\":\"grey\",\"text_color\":\"grey\",\"bold\":true},\"columns\":[{\"name\":\"room\",\"display_name\":\"Room\",\"data_type\":\"lark_md\",\"width\":\"auto\"},{\"name\":\"state\",\"display_name\":\"State\",\"data_type\":\"options\",\"width\":\"auto\"},{\"name\":\"latest\",\"display_name\":\"Latest\",\"data_type\":\"text\",\"width\":\"auto\"}],\"rows\":[{\"room\":\"[proj / master](https://applink.feishu.cn/client/chat/open?openChatId=oc_2)\",\"state\":[{\"text\":\"idle\",\"color\":\"neutral\"}],\"latest\":\"\"}]},{\"tag\":\"markdown\",\"content\":\"Updated <time>\",\"text_size\":\"notation\"},{\"tag\":\"markdown\",\"content\":\"Your groups ring on every post too: send /auth, so herdrchat mutes them and only this chat rings.\",\"text_size\":\"notation\"}]}}"
       }
     },
     {
@@ -1198,6 +1338,26 @@
     },
     {
       "method": "post",
+      "path": "/open-apis/im/v1/messages",
+      "params": {
+        "receive_id_type": "open_id"
+      },
+      "data": {
+        "receive_id": "ou_owner",
+        "msg_type": "interactive",
+        "content": "{\"schema\":\"2.0\",\"config\":{\"update_multi\":true,\"summary\":{\"content\":\"⚠️ needs you · proj / master\"}},\"header\":{\"title\":{\"tag\":\"plain_text\",\"content\":\"herdrchat · 1 terminals\"},\"template\":\"orange\",\"icon\":{\"tag\":\"standard_icon\",\"token\":\"warning_outlined\",\"color\":\"orange\"}},\"body\":{\"elements\":[{\"tag\":\"markdown\",\"content\":\"### Waiting for you\"},{\"tag\":\"table\",\"page_size\":10,\"row_height\":\"low\",\"header_style\":{\"background_style\":\"grey\",\"text_color\":\"grey\",\"bold\":true},\"columns\":[{\"name\":\"room\",\"display_name\":\"Room\",\"data_type\":\"lark_md\",\"width\":\"auto\"},{\"name\":\"state\",\"display_name\":\"State\",\"data_type\":\"options\",\"width\":\"auto\"},{\"name\":\"latest\",\"display_name\":\"Latest\",\"data_type\":\"text\",\"width\":\"auto\"}],\"rows\":[{\"room\":\"[proj / master](https://applink.feishu.cn/client/chat/open?openChatId=oc_2)\",\"state\":[{\"text\":\"needs you\",\"color\":\"orange\"}],\"latest\":\"\"}]},{\"tag\":\"markdown\",\"content\":\"### This computer\"},{\"tag\":\"table\",\"page_size\":10,\"row_height\":\"low\",\"header_style\":{\"background_style\":\"grey\",\"text_color\":\"grey\",\"bold\":true},\"columns\":[{\"name\":\"room\",\"display_name\":\"Room\",\"data_type\":\"lark_md\",\"width\":\"auto\"},{\"name\":\"state\",\"display_name\":\"State\",\"data_type\":\"options\",\"width\":\"auto\"},{\"name\":\"latest\",\"display_name\":\"Latest\",\"data_type\":\"text\",\"width\":\"auto\"}],\"rows\":[{\"room\":\"[proj / master](https://applink.feishu.cn/client/chat/open?openChatId=oc_2)\",\"state\":[{\"text\":\"idle\",\"color\":\"neutral\"}],\"latest\":\"\"}]},{\"tag\":\"markdown\",\"content\":\"Updated <time>\",\"text_size\":\"notation\"},{\"tag\":\"markdown\",\"content\":\"Your groups ring on every post too: send /auth, so herdrchat mutes them and only this chat rings.\",\"text_size\":\"notation\"}]}}"
+      }
+    },
+    {
+      "method": "patch",
+      "path": "/open-apis/im/v1/messages/om_6",
+      "params": {},
+      "data": {
+        "content": "{\"schema\":\"2.0\",\"config\":{\"update_multi\":true,\"summary\":{\"content\":\"An old overview. The new one is further down.\"}},\"body\":{\"elements\":[{\"tag\":\"markdown\",\"content\":\"An old overview. The new one is further down.\"}]}}"
+      }
+    },
+    {
+      "method": "post",
       "path": "/open-apis/im/v1/images",
       "params": {},
       "data": "(form)"
@@ -1211,15 +1371,15 @@
       "data": {
         "receive_id": "oc_2",
         "msg_type": "interactive",
-        "content": "{\"schema\":\"2.0\",\"config\":{\"update_multi\":true},\"header\":{\"title\":{\"tag\":\"plain_text\",\"content\":\"Working…\"},\"template\":\"blue\",\"icon\":{\"tag\":\"standard_icon\",\"token\":\"loading_outlined\",\"color\":\"blue\"}},\"body\":{\"elements\":[{\"tag\":\"markdown\",\"content\":\"**You:**\\n> typed in the terminal too\\n\\n▸ bash: ls &#42;.md\\n▸ read: a&#95;b.txt\\n\\n![image](img_10)\\n\\n**From t7 review** _(answer: t1)_\\n> look at this\"},{\"tag\":\"markdown\",\"content\":\"fake-agent · model-a · main · context 25% (50k)\",\"text_size\":\"notation\"}]}}"
+        "content": "{\"schema\":\"2.0\",\"config\":{\"update_multi\":true},\"header\":{\"title\":{\"tag\":\"plain_text\",\"content\":\"Working…\"},\"template\":\"blue\",\"icon\":{\"tag\":\"standard_icon\",\"token\":\"loading_outlined\",\"color\":\"blue\"}},\"body\":{\"elements\":[{\"tag\":\"markdown\",\"content\":\"**You:**\\n> typed in the terminal too\\n\\n▸ bash: ls &#42;.md\\n▸ read: a&#95;b.txt\\n\\n![image](img_12)\\n\\n**From t7 review** _(answer: t1)_\\n> look at this\"},{\"tag\":\"markdown\",\"content\":\"fake-agent · model-a · main · context 25% (50k)\",\"text_size\":\"notation\"}]}}"
       }
     },
     {
       "method": "patch",
-      "path": "/open-apis/im/v1/messages/om_11",
+      "path": "/open-apis/im/v1/messages/om_13",
       "params": {},
       "data": {
-        "content": "{\"schema\":\"2.0\",\"config\":{\"update_multi\":true},\"header\":{\"title\":{\"tag\":\"plain_text\",\"content\":\"Worked\"},\"template\":\"grey\",\"icon\":{\"tag\":\"standard_icon\",\"token\":\"done_outlined\",\"color\":\"grey\"}},\"body\":{\"elements\":[{\"tag\":\"markdown\",\"content\":\"**You:**\\n> typed in the terminal too\\n\\n▸ bash: ls &#42;.md\\n▸ read: a&#95;b.txt\\n\\n![image](img_10)\\n\\n**From t7 review** _(answer: t1)_\\n> look at this\"},{\"tag\":\"markdown\",\"content\":\"fake-agent · model-a · main · context 25% (50k)\",\"text_size\":\"notation\"}]}}"
+        "content": "{\"schema\":\"2.0\",\"config\":{\"update_multi\":true},\"header\":{\"title\":{\"tag\":\"plain_text\",\"content\":\"Worked\"},\"template\":\"grey\",\"icon\":{\"tag\":\"standard_icon\",\"token\":\"done_outlined\",\"color\":\"grey\"}},\"body\":{\"elements\":[{\"tag\":\"markdown\",\"content\":\"**You:**\\n> typed in the terminal too\\n\\n▸ bash: ls &#42;.md\\n▸ read: a&#95;b.txt\\n\\n![image](img_12)\\n\\n**From t7 review** _(answer: t1)_\\n> look at this\"},{\"tag\":\"markdown\",\"content\":\"fake-agent · model-a · main · context 25% (50k)\",\"text_size\":\"notation\"}]}}"
       }
     },
     {
@@ -1235,11 +1395,31 @@
       }
     },
     {
+      "method": "post",
+      "path": "/open-apis/im/v1/messages",
+      "params": {
+        "receive_id_type": "open_id"
+      },
+      "data": {
+        "receive_id": "ou_owner",
+        "msg_type": "interactive",
+        "content": "{\"schema\":\"2.0\",\"config\":{\"update_multi\":true,\"summary\":{\"content\":\"✅ done · proj / master: Fixed it: T1_ABC <now> & done.\"}},\"header\":{\"title\":{\"tag\":\"plain_text\",\"content\":\"herdrchat · 1 terminals\"},\"template\":\"green\",\"icon\":{\"tag\":\"standard_icon\",\"token\":\"done_outlined\",\"color\":\"green\"}},\"body\":{\"elements\":[{\"tag\":\"markdown\",\"content\":\"### Waiting for you\"},{\"tag\":\"table\",\"page_size\":10,\"row_height\":\"low\",\"header_style\":{\"background_style\":\"grey\",\"text_color\":\"grey\",\"bold\":true},\"columns\":[{\"name\":\"room\",\"display_name\":\"Room\",\"data_type\":\"lark_md\",\"width\":\"auto\"},{\"name\":\"state\",\"display_name\":\"State\",\"data_type\":\"options\",\"width\":\"auto\"},{\"name\":\"latest\",\"display_name\":\"Latest\",\"data_type\":\"text\",\"width\":\"auto\"}],\"rows\":[{\"room\":\"[proj / master](https://applink.feishu.cn/client/chat/open?openChatId=oc_2)\",\"state\":[{\"text\":\"done\",\"color\":\"green\"}],\"latest\":\"<time>: Fixed it: T1_ABC <now> & done.\"}]},{\"tag\":\"markdown\",\"content\":\"### This computer\"},{\"tag\":\"table\",\"page_size\":10,\"row_height\":\"low\",\"header_style\":{\"background_style\":\"grey\",\"text_color\":\"grey\",\"bold\":true},\"columns\":[{\"name\":\"room\",\"display_name\":\"Room\",\"data_type\":\"lark_md\",\"width\":\"auto\"},{\"name\":\"state\",\"display_name\":\"State\",\"data_type\":\"options\",\"width\":\"auto\"},{\"name\":\"latest\",\"display_name\":\"Latest\",\"data_type\":\"text\",\"width\":\"auto\"}],\"rows\":[{\"room\":\"[proj / master](https://applink.feishu.cn/client/chat/open?openChatId=oc_2)\",\"state\":[{\"text\":\"idle\",\"color\":\"neutral\"}],\"latest\":\"<time>: Fixed it: T1_ABC <now> & done.\"}]},{\"tag\":\"markdown\",\"content\":\"Updated <time>\",\"text_size\":\"notation\"},{\"tag\":\"markdown\",\"content\":\"Your groups ring on every post too: send /auth, so herdrchat mutes them and only this chat rings.\",\"text_size\":\"notation\"}]}}"
+      }
+    },
+    {
       "method": "patch",
-      "path": "/open-apis/im/v1/messages/om_6",
+      "path": "/open-apis/im/v1/messages/om_10",
       "params": {},
       "data": {
-        "content": "{\"schema\":\"2.0\",\"config\":{\"update_multi\":true},\"header\":{\"title\":{\"tag\":\"plain_text\",\"content\":\"1 needs you · herdrchat · 1 terminals\"},\"template\":\"orange\",\"icon\":{\"tag\":\"standard_icon\",\"token\":\"warning_outlined\",\"color\":\"orange\"}},\"body\":{\"elements\":[{\"tag\":\"markdown\",\"content\":\"<text_tag color='orange'>needs you (permission)</text_tag> **[proj / master](https://applink.feishu.cn/client/chat/open?openChatId=oc_2)** · since <time> · `t1`\"},{\"tag\":\"markdown\",\"content\":\"Updated <time>\",\"text_size\":\"notation\"}]}}"
+        "content": "{\"schema\":\"2.0\",\"config\":{\"update_multi\":true,\"summary\":{\"content\":\"✓ handled · proj / master\"}},\"body\":{\"elements\":[{\"tag\":\"markdown\",\"content\":\"<text_tag color='neutral'>handled</text_tag> **[proj / master](https://applink.feishu.cn/client/chat/open?openChatId=oc_2)** · <time>\\n<font color='grey'>a newer note is below · <time></font>\"}]}}"
+      }
+    },
+    {
+      "method": "patch",
+      "path": "/open-apis/im/v1/messages/om_16",
+      "params": {},
+      "data": {
+        "content": "{\"schema\":\"2.0\",\"config\":{\"update_multi\":true,\"summary\":{\"content\":\"✅ done · proj / master: Fixed it: T1_ABC <now> & done.\"}},\"header\":{\"title\":{\"tag\":\"plain_text\",\"content\":\"1 needs you · herdrchat · 1 terminals\"},\"template\":\"orange\",\"icon\":{\"tag\":\"standard_icon\",\"token\":\"warning_outlined\",\"color\":\"orange\"}},\"body\":{\"elements\":[{\"tag\":\"markdown\",\"content\":\"### Waiting for you\"},{\"tag\":\"table\",\"page_size\":10,\"row_height\":\"low\",\"header_style\":{\"background_style\":\"grey\",\"text_color\":\"grey\",\"bold\":true},\"columns\":[{\"name\":\"room\",\"display_name\":\"Room\",\"data_type\":\"lark_md\",\"width\":\"auto\"},{\"name\":\"state\",\"display_name\":\"State\",\"data_type\":\"options\",\"width\":\"auto\"},{\"name\":\"latest\",\"display_name\":\"Latest\",\"data_type\":\"text\",\"width\":\"auto\"}],\"rows\":[{\"room\":\"[proj / master](https://applink.feishu.cn/client/chat/open?openChatId=oc_2)\",\"state\":[{\"text\":\"done\",\"color\":\"green\"}],\"latest\":\"<time>: Fixed it: T1_ABC <now> & done.\"}]},{\"tag\":\"markdown\",\"content\":\"### This computer\"},{\"tag\":\"table\",\"page_size\":10,\"row_height\":\"low\",\"header_style\":{\"background_style\":\"grey\",\"text_color\":\"grey\",\"bold\":true},\"columns\":[{\"name\":\"room\",\"display_name\":\"Room\",\"data_type\":\"lark_md\",\"width\":\"auto\"},{\"name\":\"state\",\"display_name\":\"State\",\"data_type\":\"options\",\"width\":\"auto\"},{\"name\":\"latest\",\"display_name\":\"Latest\",\"data_type\":\"text\",\"width\":\"auto\"}],\"rows\":[{\"room\":\"[proj / master](https://applink.feishu.cn/client/chat/open?openChatId=oc_2)\",\"state\":[{\"text\":\"needs you\",\"color\":\"orange\"}],\"latest\":\"<time>: Fixed it: T1_ABC <now> & done.\"}]},{\"tag\":\"markdown\",\"content\":\"Updated <time>\",\"text_size\":\"notation\"},{\"tag\":\"markdown\",\"content\":\"Your groups ring on every post too: send /auth, so herdrchat mutes them and only this chat rings.\",\"text_size\":\"notation\"}]}}"
       }
     },
     {
@@ -1255,8 +1435,28 @@
       }
     },
     {
+      "method": "post",
+      "path": "/open-apis/im/v1/messages",
+      "params": {
+        "receive_id_type": "open_id"
+      },
+      "data": {
+        "receive_id": "ou_owner",
+        "msg_type": "interactive",
+        "content": "{\"schema\":\"2.0\",\"config\":{\"update_multi\":true,\"summary\":{\"content\":\"⚠️ needs you · proj / master: Allow ls?\"}},\"header\":{\"title\":{\"tag\":\"plain_text\",\"content\":\"1 needs you · herdrchat · 1 terminals\"},\"template\":\"orange\",\"icon\":{\"tag\":\"standard_icon\",\"token\":\"warning_outlined\",\"color\":\"orange\"}},\"body\":{\"elements\":[{\"tag\":\"markdown\",\"content\":\"### Waiting for you\"},{\"tag\":\"table\",\"page_size\":10,\"row_height\":\"low\",\"header_style\":{\"background_style\":\"grey\",\"text_color\":\"grey\",\"bold\":true},\"columns\":[{\"name\":\"room\",\"display_name\":\"Room\",\"data_type\":\"lark_md\",\"width\":\"auto\"},{\"name\":\"state\",\"display_name\":\"State\",\"data_type\":\"options\",\"width\":\"auto\"},{\"name\":\"latest\",\"display_name\":\"Latest\",\"data_type\":\"text\",\"width\":\"auto\"}],\"rows\":[{\"room\":\"[proj / master](https://applink.feishu.cn/client/chat/open?openChatId=oc_2)\",\"state\":[{\"text\":\"needs you\",\"color\":\"orange\"}],\"latest\":\"<time>: Allow ls?\"}]},{\"tag\":\"markdown\",\"content\":\"### This computer\"},{\"tag\":\"table\",\"page_size\":10,\"row_height\":\"low\",\"header_style\":{\"background_style\":\"grey\",\"text_color\":\"grey\",\"bold\":true},\"columns\":[{\"name\":\"room\",\"display_name\":\"Room\",\"data_type\":\"lark_md\",\"width\":\"auto\"},{\"name\":\"state\",\"display_name\":\"State\",\"data_type\":\"options\",\"width\":\"auto\"},{\"name\":\"latest\",\"display_name\":\"Latest\",\"data_type\":\"text\",\"width\":\"auto\"}],\"rows\":[{\"room\":\"[proj / master](https://applink.feishu.cn/client/chat/open?openChatId=oc_2)\",\"state\":[{\"text\":\"needs you\",\"color\":\"orange\"}],\"latest\":\"<time>: Allow ls?\"}]},{\"tag\":\"markdown\",\"content\":\"Updated <time>\",\"text_size\":\"notation\"},{\"tag\":\"markdown\",\"content\":\"Your groups ring on every post too: send /auth, so herdrchat mutes them and only this chat rings.\",\"text_size\":\"notation\"}]}}"
+      }
+    },
+    {
       "method": "patch",
-      "path": "/open-apis/im/v1/messages/om_15",
+      "path": "/open-apis/im/v1/messages/om_16",
+      "params": {},
+      "data": {
+        "content": "{\"schema\":\"2.0\",\"config\":{\"update_multi\":true,\"summary\":{\"content\":\"✓ handled · proj / master: Fixed it: T1_ABC <now> & done.\"}},\"body\":{\"elements\":[{\"tag\":\"markdown\",\"content\":\"<text_tag color='neutral'>handled</text_tag> **[proj / master](https://applink.feishu.cn/client/chat/open?openChatId=oc_2)** · <time>\\n<font color='grey'>Fixed it: T1&#95;ABC &#60;now&#62; &#38; done.</font>\\n<font color='grey'>a newer note is below · <time></font>\"}]}}"
+      }
+    },
+    {
+      "method": "patch",
+      "path": "/open-apis/im/v1/messages/om_19",
       "params": {},
       "data": {
         "content": "{\"schema\":\"2.0\",\"config\":{\"update_multi\":true,\"summary\":{\"content\":\"Allow ls?\"}},\"header\":{\"title\":{\"tag\":\"plain_text\",\"content\":\"Done\"},\"template\":\"grey\",\"icon\":{\"tag\":\"standard_icon\",\"token\":\"done_outlined\",\"color\":\"grey\"}},\"body\":{\"elements\":[{\"tag\":\"markdown\",\"content\":\"╭──────╮\\nAllow ls?\"},{\"tag\":\"markdown\",\"content\":\"Answered.\",\"text_size\":\"notation\",\"icon\":{\"tag\":\"standard_icon\",\"token\":\"done_outlined\",\"color\":\"grey\"}},{\"tag\":\"markdown\",\"content\":\"fake-agent · screen · main\",\"text_size\":\"notation\"}]}}"
@@ -1264,10 +1464,10 @@
     },
     {
       "method": "patch",
-      "path": "/open-apis/im/v1/messages/om_6",
+      "path": "/open-apis/im/v1/messages/om_20",
       "params": {},
       "data": {
-        "content": "{\"schema\":\"2.0\",\"config\":{\"update_multi\":true},\"header\":{\"title\":{\"tag\":\"plain_text\",\"content\":\"herdrchat · 1 terminals\"},\"template\":\"blue\",\"icon\":{\"tag\":\"standard_icon\",\"token\":\"loading_outlined\",\"color\":\"blue\"}},\"body\":{\"elements\":[{\"tag\":\"markdown\",\"content\":\"<text_tag color='blue'>working</text_tag> **[proj / master](https://applink.feishu.cn/client/chat/open?openChatId=oc_2)** · since <time> · `t1`\"},{\"tag\":\"markdown\",\"content\":\"Updated <time>\",\"text_size\":\"notation\"}]}}"
+        "content": "{\"schema\":\"2.0\",\"config\":{\"update_multi\":true,\"summary\":{\"content\":\"herdrchat · 1 terminals\"}},\"header\":{\"title\":{\"tag\":\"plain_text\",\"content\":\"herdrchat · 1 terminals\"},\"template\":\"blue\",\"icon\":{\"tag\":\"standard_icon\",\"token\":\"loading_outlined\",\"color\":\"blue\"}},\"body\":{\"elements\":[{\"tag\":\"markdown\",\"content\":\"### This computer\"},{\"tag\":\"table\",\"page_size\":10,\"row_height\":\"low\",\"header_style\":{\"background_style\":\"grey\",\"text_color\":\"grey\",\"bold\":true},\"columns\":[{\"name\":\"room\",\"display_name\":\"Room\",\"data_type\":\"lark_md\",\"width\":\"auto\"},{\"name\":\"state\",\"display_name\":\"State\",\"data_type\":\"options\",\"width\":\"auto\"},{\"name\":\"latest\",\"display_name\":\"Latest\",\"data_type\":\"text\",\"width\":\"auto\"}],\"rows\":[{\"room\":\"[proj / master](https://applink.feishu.cn/client/chat/open?openChatId=oc_2)\",\"state\":[{\"text\":\"working\",\"color\":\"blue\"}],\"latest\":\"<time>: Allow ls?\"}]},{\"tag\":\"markdown\",\"content\":\"Updated <time>\",\"text_size\":\"notation\"},{\"tag\":\"markdown\",\"content\":\"Your groups ring on every post too: send /auth, so herdrchat mutes them and only this chat rings.\",\"text_size\":\"notation\"}]}}"
       }
     },
     {
@@ -1313,16 +1513,16 @@
         "tag_biz_type": "chat",
         "biz_entity_id": "oc_2",
         "tag_ids": [
-          "tag_20"
+          "tag_26"
         ]
       }
     },
     {
       "method": "patch",
-      "path": "/open-apis/im/v1/messages/om_6",
+      "path": "/open-apis/im/v1/messages/om_20",
       "params": {},
       "data": {
-        "content": "{\"schema\":\"2.0\",\"config\":{\"update_multi\":true},\"header\":{\"title\":{\"tag\":\"plain_text\",\"content\":\"herdrchat · 0 terminals\"},\"template\":\"green\",\"icon\":{\"tag\":\"standard_icon\",\"token\":\"done_outlined\",\"color\":\"green\"}},\"body\":{\"elements\":[{\"tag\":\"markdown\",\"content\":\"No terminal is shown in herdr-app.\"},{\"tag\":\"markdown\",\"content\":\"Updated <time>\",\"text_size\":\"notation\"}]}}"
+        "content": "{\"schema\":\"2.0\",\"config\":{\"update_multi\":true,\"summary\":{\"content\":\"herdrchat · 0 terminals\"}},\"header\":{\"title\":{\"tag\":\"plain_text\",\"content\":\"herdrchat · 0 terminals\"},\"template\":\"green\",\"icon\":{\"tag\":\"standard_icon\",\"token\":\"done_outlined\",\"color\":\"green\"}},\"body\":{\"elements\":[{\"tag\":\"markdown\",\"content\":\"No terminal is shown in herdr-app.\"},{\"tag\":\"markdown\",\"content\":\"Updated <time>\",\"text_size\":\"notation\"},{\"tag\":\"markdown\",\"content\":\"Your groups ring on every post too: send /auth, so herdrchat mutes them and only this chat rings.\",\"text_size\":\"notation\"}]}}"
       }
     },
     {
@@ -1348,15 +1548,11 @@
       }
     },
     {
-      "method": "sendMessage",
+      "method": "createForumTopic",
       "body": {
         "chat_id": "42",
-        "disable_notification": true,
-        "link_preview_options": {
-          "is_disabled": true
-        },
-        "text": "<b>herdrchat · 1 terminals</b>\n\n❓ <b>proj / master</b> · idle · <code>t1</code>",
-        "parse_mode": "HTML"
+        "name": "📋 herdr",
+        "icon_color": 7322096
       }
     },
     {
@@ -1390,16 +1586,11 @@
       "body": {
         "chat_id": "42",
         "message_thread_id": 77,
-        "disable_notification": false,
+        "disable_notification": true,
         "link_preview_options": {
           "is_disabled": true
         },
-        "reply_parameters": {
-          "message_id": 4,
-          "allow_sending_without_reply": true,
-          "quote": "(blank)"
-        },
-        "text": "⚠️ needs you",
+        "text": "<b>herdrchat · 1 terminals</b>\n\n<b>This computer</b>\n• <b>proj</b>\n      ◦ master · idle",
         "parse_mode": "HTML"
       }
     },
@@ -1421,12 +1612,37 @@
       "body": {
         "chat_id": "42",
         "message_thread_id": 77,
+        "disable_notification": false,
+        "link_preview_options": {
+          "is_disabled": true
+        },
+        "text": "<b>herdrchat · 1 terminals</b>\n\n<b>Waiting for you</b>\n• <b>proj / master</b> · ⚠️ needs you\n\n<b>This computer</b>\n• <b>proj</b>\n      ◦ master · idle",
+        "parse_mode": "HTML"
+      }
+    },
+    {
+      "method": "sendMessage",
+      "body": {
+        "chat_id": "42",
+        "message_thread_id": 77,
         "disable_notification": true,
         "link_preview_options": {
           "is_disabled": true
         },
         "text": "<b>⌛️ Working…</b>\n\n<b>You:</b>\n<blockquote>typed in the terminal too</blockquote>\n\n▸ bash: ls *.md\n▸ read: a_b.txt\n\n<b>From t7 review</b> <i>(answer: t1)</i>\n<blockquote>look at this</blockquote>\n\n<i>fake-agent · model-a · main · context 25% (50k)</i>",
         "parse_mode": "HTML"
+      }
+    },
+    {
+      "method": "editMessageText",
+      "body": {
+        "chat_id": "42",
+        "message_id": 5,
+        "text": "An old overview. The new one is further down.",
+        "parse_mode": "HTML",
+        "link_preview_options": {
+          "is_disabled": true
+        }
       }
     },
     {
@@ -1442,7 +1658,7 @@
       "method": "editMessageText",
       "body": {
         "chat_id": "42",
-        "message_id": 7,
+        "message_id": 8,
         "text": "<b>✅ Worked</b>\n\n<b>You:</b>\n<blockquote>typed in the terminal too</blockquote>\n\n▸ bash: ls *.md\n▸ read: a_b.txt\n\n<b>From t7 review</b> <i>(answer: t1)</i>\n<blockquote>look at this</blockquote>\n\n<i>fake-agent · model-a · main · context 25% (50k)</i>",
         "parse_mode": "HTML",
         "link_preview_options": {
@@ -1472,25 +1688,8 @@
         "link_preview_options": {
           "is_disabled": true
         },
-        "reply_parameters": {
-          "message_id": 10,
-          "allow_sending_without_reply": true,
-          "quote": "Fixed it: T1_ABC <now> &"
-        },
-        "text": "✅ done",
+        "text": "<b>herdrchat · 1 terminals</b>\n\n<b>Waiting for you</b>\n• <b>proj / master</b> · ✅ done · <i><time>: Fixed it: T1_ABC &lt;now&gt; &amp; done.</i>\n\n<b>This computer</b>\n• <b>proj</b>\n      ◦ master · idle · <i><time>: Fixed it: T1_ABC &lt;now&gt; &amp; done.</i>",
         "parse_mode": "HTML"
-      }
-    },
-    {
-      "method": "editMessageText",
-      "body": {
-        "chat_id": "42",
-        "message_id": 2,
-        "text": "<b>⚠️ 1 needs you · herdrchat · 1 terminals</b>\n\n⚠️ <b>proj / master</b> · needs you (permission) · since <time> · <code>t1</code>",
-        "parse_mode": "HTML",
-        "link_preview_options": {
-          "is_disabled": true
-        }
       }
     },
     {
@@ -1529,11 +1728,42 @@
       }
     },
     {
+      "method": "editMessageText",
+      "body": {
+        "chat_id": "42",
+        "message_id": 7,
+        "text": "✓ <b>proj / master</b> · handled · <time>\n<i>a newer note is below · <time></i>",
+        "parse_mode": "HTML",
+        "link_preview_options": {
+          "is_disabled": true
+        }
+      }
+    },
+    {
       "method": "pinChatMessage",
       "body": {
         "chat_id": "42",
-        "message_id": 13,
+        "message_id": 14,
         "disable_notification": true
+      }
+    },
+    {
+      "method": "editMessageText",
+      "body": {
+        "chat_id": "42",
+        "message_id": 13,
+        "text": "<b>⚠️ 1 needs you · herdrchat · 1 terminals</b>\n\n<b>Waiting for you</b>\n• <b>proj / master</b> · ✅ done · <i><time>: Fixed it: T1_ABC &lt;now&gt; &amp; done.</i>\n\n<b>This computer</b>\n• <b>proj</b>\n      ◦ master · ⚠️ needs you · <i><time>: Fixed it: T1_ABC &lt;now&gt; &amp; done.</i>",
+        "parse_mode": "HTML",
+        "link_preview_options": {
+          "is_disabled": true
+        }
+      }
+    },
+    {
+      "method": "unpinChatMessage",
+      "body": {
+        "chat_id": "42",
+        "message_id": 14
       }
     },
     {
@@ -1545,31 +1775,22 @@
         "link_preview_options": {
           "is_disabled": true
         },
-        "reply_parameters": {
-          "message_id": 13,
-          "allow_sending_without_reply": true,
-          "quote": "Allow ls?"
-        },
-        "text": "⚠️ needs you",
+        "text": "<b>herdrchat · 1 terminals</b>\n\n<b>This computer</b>\n• <b>proj</b>\n      ◦ master · ⏳ working · <i><time>: Allow ls?</i>",
         "parse_mode": "HTML"
-      }
-    },
-    {
-      "method": "unpinChatMessage",
-      "body": {
-        "chat_id": "42",
-        "message_id": 13
       }
     },
     {
       "method": "editMessageText",
       "body": {
         "chat_id": "42",
-        "message_id": 2,
-        "text": "<b>herdrchat · 1 terminals</b>\n\n⌛️ <b>proj / master</b> · working · since <time> · <code>t1</code>",
+        "message_id": 14,
+        "text": "<b>✅ Done</b>\n\n╭──────╮\nAllow ls?\n\n<b>✔ Answered.</b>\n\n<i>fake-agent · screen · main</i>",
         "parse_mode": "HTML",
         "link_preview_options": {
           "is_disabled": true
+        },
+        "reply_markup": {
+          "inline_keyboard": []
         }
       }
     },
@@ -1578,13 +1799,10 @@
       "body": {
         "chat_id": "42",
         "message_id": 13,
-        "text": "<b>✅ Done</b>\n\n╭──────╮\nAllow ls?\n\n<b>✔ Answered.</b>\n\n<i>fake-agent · screen · main</i>",
+        "text": "✓ <b>proj / master</b> · handled · <time>\n<i>Fixed it: T1_ABC &lt;now&gt; &amp; done.</i>\n<i>a newer note is below · <time></i>",
         "parse_mode": "HTML",
         "link_preview_options": {
           "is_disabled": true
-        },
-        "reply_markup": {
-          "inline_keyboard": []
         }
       }
     },
@@ -1617,7 +1835,7 @@
       "method": "editMessageText",
       "body": {
         "chat_id": "42",
-        "message_id": 2,
+        "message_id": 19,
         "text": "<b>herdrchat · 0 terminals</b>\n\nNo terminal is shown in herdr-app.",
         "parse_mode": "HTML",
         "link_preview_options": {
@@ -1643,6 +1861,238 @@
         },
         "text": "Not delivered: this terminal has ended. Nothing you send here reaches it.",
         "parse_mode": "HTML"
+      }
+    }
+  ],
+  "feishu.overview.notes": {
+    "text": "[{\"tag\":\"markdown\",\"content\":\"### Waiting for you\"},{\"tag\":\"table\",\"page_size\":10,\"row_height\":\"low\",\"header_style\":{\"background_style\":\"grey\",\"text_color\":\"grey\",\"bold\":true},\"columns\":[{\"name\":\"room\",\"display_name\":\"Room\",\"data_type\":\"lark_md\",\"width\":\"auto\"},{\"name\":\"state\",\"display_name\":\"State\",\"data_type\":\"options\",\"width\":\"auto\"},{\"name\":\"latest\",\"display_name\":\"Latest\",\"data_type\":\"text\",\"width\":\"auto\"}],\"rows\":[{\"room\":\"[beta / T1_ABC-2](https://applink.feishu.cn/client/chat/open?openChatId=oc_b)\",\"state\":[{\"text\":\"needs you\",\"color\":\"orange\"}],\"latest\":\"00:00: Allow ls?\"},{\"room\":\"[alpha / docs](https://applink.feishu.cn/client/chat/open?openChatId=oc_a)\",\"state\":[{\"text\":\"done\",\"color\":\"green\"}],\"latest\":\"00:00: Fixed *it* <now>.\"}]},{\"tag\":\"markdown\",\"content\":\"### This computer\"},{\"tag\":\"table\",\"page_size\":10,\"row_height\":\"low\",\"header_style\":{\"background_style\":\"grey\",\"text_color\":\"grey\",\"bold\":true},\"columns\":[{\"name\":\"room\",\"display_name\":\"Room\",\"data_type\":\"lark_md\",\"width\":\"auto\"},{\"name\":\"state\",\"display_name\":\"State\",\"data_type\":\"options\",\"width\":\"auto\"},{\"name\":\"latest\",\"display_name\":\"Latest\",\"data_type\":\"text\",\"width\":\"auto\"}],\"rows\":[{\"room\":\"[alpha / docs](https://applink.feishu.cn/client/chat/open?openChatId=oc_a)\",\"state\":[{\"text\":\"done\",\"color\":\"green\"}],\"latest\":\"\"},{\"room\":\"alpha / shell\",\"state\":[{\"text\":\"zsh\",\"color\":\"neutral\"}],\"latest\":\"\"}]},{\"tag\":\"markdown\",\"content\":\"### box\"},{\"tag\":\"table\",\"page_size\":10,\"row_height\":\"low\",\"header_style\":{\"background_style\":\"grey\",\"text_color\":\"grey\",\"bold\":true},\"columns\":[{\"name\":\"room\",\"display_name\":\"Room\",\"data_type\":\"lark_md\",\"width\":\"auto\"},{\"name\":\"state\",\"display_name\":\"State\",\"data_type\":\"options\",\"width\":\"auto\"},{\"name\":\"latest\",\"display_name\":\"Latest\",\"data_type\":\"text\",\"width\":\"auto\"}],\"rows\":[{\"room\":\"[beta / T1_ABC-2](https://applink.feishu.cn/client/chat/open?openChatId=oc_b)\",\"state\":[{\"text\":\"needs you\",\"color\":\"orange\"}],\"latest\":\"\"}]}]",
+    "card": {
+      "schema": "2.0",
+      "config": {
+        "update_multi": true,
+        "summary": {
+          "content": "⚠️ needs you · beta / T1_ABC-2: Allow ls?"
+        }
+      },
+      "header": {
+        "title": {
+          "tag": "plain_text",
+          "content": "1 needs you · herdrchat · 3 terminals"
+        },
+        "template": "orange",
+        "icon": {
+          "tag": "standard_icon",
+          "token": "warning_outlined",
+          "color": "orange"
+        }
+      },
+      "body": {
+        "elements": [
+          {
+            "tag": "markdown",
+            "content": "### Waiting for you"
+          },
+          {
+            "tag": "table",
+            "page_size": 10,
+            "row_height": "low",
+            "header_style": {
+              "background_style": "grey",
+              "text_color": "grey",
+              "bold": true
+            },
+            "columns": [
+              {
+                "name": "room",
+                "display_name": "Room",
+                "data_type": "lark_md",
+                "width": "auto"
+              },
+              {
+                "name": "state",
+                "display_name": "State",
+                "data_type": "options",
+                "width": "auto"
+              },
+              {
+                "name": "latest",
+                "display_name": "Latest",
+                "data_type": "text",
+                "width": "auto"
+              }
+            ],
+            "rows": [
+              {
+                "room": "[beta / T1_ABC-2](https://applink.feishu.cn/client/chat/open?openChatId=oc_b)",
+                "state": [
+                  {
+                    "text": "needs you",
+                    "color": "orange"
+                  }
+                ],
+                "latest": "00:00: Allow ls?"
+              },
+              {
+                "room": "[alpha / docs](https://applink.feishu.cn/client/chat/open?openChatId=oc_a)",
+                "state": [
+                  {
+                    "text": "done",
+                    "color": "green"
+                  }
+                ],
+                "latest": "00:00: Fixed *it* <now>."
+              }
+            ]
+          },
+          {
+            "tag": "markdown",
+            "content": "### This computer"
+          },
+          {
+            "tag": "table",
+            "page_size": 10,
+            "row_height": "low",
+            "header_style": {
+              "background_style": "grey",
+              "text_color": "grey",
+              "bold": true
+            },
+            "columns": [
+              {
+                "name": "room",
+                "display_name": "Room",
+                "data_type": "lark_md",
+                "width": "auto"
+              },
+              {
+                "name": "state",
+                "display_name": "State",
+                "data_type": "options",
+                "width": "auto"
+              },
+              {
+                "name": "latest",
+                "display_name": "Latest",
+                "data_type": "text",
+                "width": "auto"
+              }
+            ],
+            "rows": [
+              {
+                "room": "[alpha / docs](https://applink.feishu.cn/client/chat/open?openChatId=oc_a)",
+                "state": [
+                  {
+                    "text": "done",
+                    "color": "green"
+                  }
+                ],
+                "latest": ""
+              },
+              {
+                "room": "alpha / shell",
+                "state": [
+                  {
+                    "text": "zsh",
+                    "color": "neutral"
+                  }
+                ],
+                "latest": ""
+              }
+            ]
+          },
+          {
+            "tag": "markdown",
+            "content": "### box"
+          },
+          {
+            "tag": "table",
+            "page_size": 10,
+            "row_height": "low",
+            "header_style": {
+              "background_style": "grey",
+              "text_color": "grey",
+              "bold": true
+            },
+            "columns": [
+              {
+                "name": "room",
+                "display_name": "Room",
+                "data_type": "lark_md",
+                "width": "auto"
+              },
+              {
+                "name": "state",
+                "display_name": "State",
+                "data_type": "options",
+                "width": "auto"
+              },
+              {
+                "name": "latest",
+                "display_name": "Latest",
+                "data_type": "text",
+                "width": "auto"
+              }
+            ],
+            "rows": [
+              {
+                "room": "[beta / T1_ABC-2](https://applink.feishu.cn/client/chat/open?openChatId=oc_b)",
+                "state": [
+                  {
+                    "text": "needs you",
+                    "color": "orange"
+                  }
+                ],
+                "latest": ""
+              }
+            ]
+          },
+          {
+            "tag": "markdown",
+            "content": "Updated 10:00",
+            "text_size": "notation"
+          },
+          {
+            "tag": "markdown",
+            "content": "Your groups ring on every post too.",
+            "text_size": "notation"
+          }
+        ]
+      }
+    }
+  },
+  "feishu.recordCard": [
+    {
+      "schema": "2.0",
+      "config": {
+        "update_multi": true,
+        "summary": {
+          "content": "⚠️ needs you · beta / T1_ABC-2: Run *ls* <now>?"
+        }
+      },
+      "body": {
+        "elements": [
+          {
+            "tag": "markdown",
+            "content": "<text_tag color='orange'>needs you</text_tag> **[beta / T1&#95;ABC-2](https://applink.feishu.cn/client/chat/open?openChatId=oc_b)** · 10:00\n<font color='grey'>Run &#42;ls&#42; &#60;now&#62;?</font>\n<text_tag color='neutral'>handled</text_tag> **beta / T1&#95;ABC-2** · 10:00\n<font color='grey'>answered · 10:03</font>"
+          }
+        ]
+      }
+    },
+    {
+      "schema": "2.0",
+      "config": {
+        "update_multi": true,
+        "summary": {
+          "content": "An old overview. The new one is further down."
+        }
+      },
+      "body": {
+        "elements": [
+          {
+            "tag": "markdown",
+            "content": "An old overview. The new one is further down."
+          }
+        ]
       }
     }
   ]

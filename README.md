@@ -25,8 +25,11 @@ itself, so there is nothing to set up on your network: no public IP, no VPN. Eac
 herdr-app tab gets its own Feishu group, or a topic in your private chat with the
 Telegram bot. You read what the agent says while it works, tap buttons to answer its
 questions, send and receive images, and see all terminals in one overview. A new group or
-topic starts with the conversation so far, and your phone rings only when an agent needs
-you or is done (on Feishu once you have sent `/auth` to the bot; on Telegram right away).
+topic starts with the conversation so far. The groups and topics stay quiet: when an agent
+needs you or is done, the overview comes again at the bottom of your direct chat with the
+bot and rings, what rang first (the room, a tap opens it, and what it said); the one before
+it stays as a one-line record that says "handled" once you have dealt with it (Feishu mutes
+its groups once you have sent `/auth` to the bot; Telegram does so right away).
 
 Claude Code, Codex, OpenCode and Pi are mirrored fully, their dialogs answered with buttons
 (Pi asks nothing itself; an extension's dialog is read off the screen).
@@ -85,7 +88,8 @@ instead: the [guide](docs/guide.md#set-up-telegram).
 
 In your chat app: type in a terminal's group or topic to talk to it; tap a card's buttons
 to answer a question. In the direct chat with the bot: `/ls` for the overview, `/new` to
-start a terminal, `/kill` to end one, `/usage` for every account's limits.
+start a terminal, `/kill` to end one (or `/kill` in its own group or topic), `/usage` for
+every account's limits.
 
 | Ask your agent | What it does |
 |---|---|

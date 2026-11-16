@@ -15,13 +15,13 @@ const running = new Set();
 after(() => running.forEach((engine) => engine.stop()));
 
 // A core on the fakes, one session "s", started and given `list` as its first snapshot.
-async function setup(list = [], { logError = (...a) => { throw new Error(a.join(' ')); }, asks = {}, shell = async () => '', ownerActions = {} } = {}) {
+async function setup(list = [], { logError = (...a) => { throw new Error(a.join(' ')); }, asks = {}, shell = async () => '', ownerActions = {}, cfg = {} } = {}) {
   const chat = fakeChat();
   const hc = fakeHc();
   const store = fakeStore();
   const r = fakeReaders();
   const inbox = fs.mkdtempSync(path.join(os.tmpdir(), 'herdrchat-engine-test-'));
-  const engine = createEngine({ cfg: { sessions: ['s'] }, chat, hc, readers: r.readers, store, log: quiet, logWarn: quiet, logError, startedAt: '2026-01-01T00:00:00.000Z', inbox, quick: true, asksWaiting: () => Boolean(asks.waiting), askLives: async (s, m, id) => (asks.live ? asks.live(id) : true), shell, ownerActions });
+  const engine = createEngine({ cfg: { sessions: ['s'], doneWaitMs: 0, ...cfg }, chat, hc, readers: r.readers, store, log: quiet, logWarn: quiet, logError, startedAt: '2026-01-01T00:00:00.000Z', inbox, quick: true, asksWaiting: () => Boolean(asks.waiting), askLives: async (s, m, id) => (asks.live ? asks.live(id) : true), shell, ownerActions });
   running.add(engine);
   running.add(engine);
   const started = engine.start();
@@ -133,7 +133,7 @@ test('an agent\'s turn is posted from its reader, and what you sent is not repea
   await settle(engine);
   const posts = chat.of('post').map((c) => said(c.args[1]));
   assert.deepEqual(posts, ['Fixed.']);
-  assert.ok(chat.of('ring').some((c) => c.args[2] === '✅ done'));
+  assert.ok(rung(chat).includes('done'));
   assert.deepEqual(chat.of('markDone').map((c) => c.args[0]), ['m-in']);
   done();
 });
@@ -309,7 +309,7 @@ test('what an agent says before asking, first thing in a turn, rings no "done": 
   hc.turn('s', 't1', 'blocked');
   await settle(engine);
   assert.ok(chat.of('post').some((c) => /AskUserQuestion/.test(said(c.args[1]))), 'what it said is posted');
-  assert.deepEqual(chat.of('ring').map((c) => c.args[2]), ['⚠️ needs you']);
+  assert.deepEqual(rung(chat), ['needs']);
   done();
 });
 
@@ -353,7 +353,7 @@ test('after a restart, the card already out for a dialog is known: not posted ag
   assert.equal(chat.of('postDialog').length, 1);
   done();
   // the bot starts again on the same state.json
-  const again = createEngine({ cfg: { sessions: ['s'] }, chat, hc, readers: r.readers, store, log: quiet, logWarn: quiet, logError: (...a) => { throw new Error(a.join(' ')); }, startedAt: '2026-01-01T00:00:00.000Z', inbox: os.tmpdir(), quick: true });
+  const again = createEngine({ cfg: { sessions: ['s'], doneWaitMs: 0 }, chat, hc, readers: r.readers, store, log: quiet, logWarn: quiet, logError: (...a) => { throw new Error(a.join(' ')); }, startedAt: '2026-01-01T00:00:00.000Z', inbox: os.tmpdir(), quick: true });
   running.add(again);
   const started = again.start();
   hc.snapshot('s', [t]);
@@ -398,7 +398,7 @@ test('a new room gets the conversation before it: all of it as a file, the newes
   const before = Array.from({ length: 40 }, (_, i) => ({ role: i % 2 ? 'ai' : 'you', text: `old ${i} ${'x'.repeat(200)}`, at: `2025-12-31T10:${String(i).padStart(2, '0')}:00.000Z`, id: `o${i}` }));
   r.queue('t1', before);
   r.queue('t1', [{ role: 'ai', text: 'after the start', at: '2026-01-02T00:00:00.000Z', id: 'n1', end: true }]);
-  const engine = createEngine({ cfg: { sessions: ['s'] }, chat, hc, readers: r.readers, store, log: quiet, logWarn: quiet, logError: (...a) => { throw new Error(a.join(' ')); }, startedAt: '2026-01-01T00:00:00.000Z', inbox: os.tmpdir(), quick: true });
+  const engine = createEngine({ cfg: { sessions: ['s'], doneWaitMs: 0 }, chat, hc, readers: r.readers, store, log: quiet, logWarn: quiet, logError: (...a) => { throw new Error(a.join(' ')); }, startedAt: '2026-01-01T00:00:00.000Z', inbox: os.tmpdir(), quick: true });
   running.add(engine);
   const started = engine.start();
   hc.snapshot('s', [terminal('t1', { program: 'fake', agent: true })]);
@@ -438,7 +438,7 @@ test('HERDR_HISTORY leaves out what it does not name', async () => {
   const hc = fakeHc();
   const r = fakeReaders();
   r.queue('t1', [{ role: 'you', text: 'old', at: '2025-12-31T10:00:00.000Z', id: 'o1' }]);
-  const engine = createEngine({ cfg: { sessions: ['s'], history: { file: false, folded: true } }, chat, hc, readers: r.readers, store: fakeStore(), log: quiet, logWarn: quiet, logError: quiet, startedAt: '2026-01-01T00:00:00.000Z', inbox: os.tmpdir(), quick: true });
+  const engine = createEngine({ cfg: { sessions: ['s'], doneWaitMs: 0, history: { file: false, folded: true } }, chat, hc, readers: r.readers, store: fakeStore(), log: quiet, logWarn: quiet, logError: quiet, startedAt: '2026-01-01T00:00:00.000Z', inbox: os.tmpdir(), quick: true });
   running.add(engine);
   const started = engine.start();
   hc.snapshot('s', [terminal('t1', { program: 'fake', agent: true })]);
@@ -489,28 +489,38 @@ test('in a multi-select, boxes are ticked on the card only and Next sends them a
   }
 });
 
-test('Telegram posts silently only in muted spaces, and rings only there and never in silent ones', async () => {
+test('Telegram posts silently only in muted spaces; the overview, in herdr\'s own topic, sounds only when sent anew for a note; an old one becomes a record', async () => {
   const telegram = await import('../lib/chats/telegram/index.mjs');
   const store = fakeStore();
   const state = store.read();
-  state.chats = { 'a|t1': { chat: '11', name: 'work / master' }, 'a|t2': { chat: '12', name: 'tw-worker / job' }, 'a|t3': { chat: '13', name: 'play / x' } };
+  state.chats = { 'a|t1': { chat: '11', name: 'work / master' }, 'a|t3': { chat: '13', name: 'play / x' } };
   store.write(state);
-  const cfg = { env: { TELEGRAM_BOT_TOKEN: '1:test', TELEGRAM_OWNER_ID: '42' }, sessions: ['a'], muted: { all: false, spaces: ['work', 'tw-worker'] }, silent: { all: false, spaces: ['tw-worker'] } };
+  const cfg = { env: { TELEGRAM_BOT_TOKEN: '1:test', TELEGRAM_OWNER_ID: '42' }, sessions: ['a'], muted: { all: false, spaces: ['work'] }, silent: { all: false, spaces: [] } };
   const sent = [];
   const realFetch = globalThis.fetch;
   globalThis.fetch = async (url, opts) => {
     sent.push({ method: url.split('/').pop(), body: JSON.parse(opts.body) });
-    return { ok: true, json: async () => ({ ok: true, result: { message_id: sent.length } }) };
+    const method = url.split('/').pop();
+    return { ok: true, json: async () => ({ ok: true, result: method === 'createForumTopic' ? { message_thread_id: 900 } : { message_id: sent.length } }) };
   };
   try {
     const chat = telegram.create({ cfg, store, log: quiet, logWarn: quiet, logError: quiet, stateDir: os.tmpdir(), lane: () => {}, scopeOf: () => 'a' });
     await chat.post('11', 'in a muted space');
     await chat.post('13', 'in a loud space');
-    await chat.ring('a|t1', '1', 'needs you');
-    await chat.ring('a|t2', '1', 'needs you');
-    await chat.ring('a|t3', '1', 'done');
-    const messages = sent.filter((x) => x.method === 'sendMessage').map((x) => [x.body.message_thread_id, x.body.disable_notification, x.body.text]);
-    assert.deepEqual(messages, [[11, true, 'in a muted space'], [13, false, 'in a loud space'], [11, false, 'needs you']]);
+    const note = { kind: 'needs', line: 'Run <npm test>?', at: Date.UTC(2026, 0, 1, 12, 0) };
+    const rows = [{ name: 'work / master', address: 't1', state: 'blocked', room: '11', note }, { name: 'play / x', address: 't3', state: 'idle', room: '13' }];
+    const first = await chat.showOverview(rows.map(({ note: n, ...row }) => row), {});
+    const second = await chat.showOverview(rows, { fresh: true, ring: true });
+    assert.equal(second.old, first.message);
+    await chat.showRecord(second.message, [{ ...note, name: 'work / master', room: '11', handled: { how: 'answered', at: Date.UTC(2026, 0, 1, 12, 3) } }]);
+    const messages = sent.filter((x) => x.method === 'sendMessage').map((x) => [x.body.message_thread_id, x.body.disable_notification, x.body.text.split('\n')[0]]);
+    assert.deepEqual(messages, [[11, true, 'in a muted space'], [13, false, 'in a loud space'], [900, true, '<b>⚠️ 1 needs you · herdrchat · 2 terminals</b>'], [900, false, '<b>⚠️ 1 needs you · herdrchat · 2 terminals</b>']], 'the overview in herdr\'s own topic');
+    assert.deepEqual(sent.filter((x) => x.method === 'createForumTopic').map((x) => x.body.name), ['📋 herdr'], 'made once');
+    assert.equal(store.read().homeTopic, '900');
+    assert.equal(sent.filter((x) => x.method === 'deleteMessage').length, 0, 'nothing deleted');
+    const edit = sent.find((x) => x.method === 'editMessageText').body;
+    assert.equal(edit.message_id, Number(second.message));
+    assert.match(edit.text, /^✓ <b>work \/ master<\/b> · handled · \d\d:00\n<i>Run &lt;npm test&gt;\?<\/i>\n<i>answered · \d\d:03<\/i>$/, 'a record: in full');
   } finally {
     globalThis.fetch = realFetch;
   }
@@ -599,7 +609,7 @@ test('a held message survives a restart and goes in when the new bot finds it no
   const chat = fakeChat();
   const hc = fakeHc();
   const r = fakeReaders();
-  const engine = createEngine({ cfg: { sessions: ['s'] }, chat, hc, readers: r.readers, store: first.store, log: quiet, logWarn: quiet, logError: quiet, startedAt: '2026-01-01T00:00:00.000Z', inbox: os.tmpdir(), quick: true });
+  const engine = createEngine({ cfg: { sessions: ['s'], doneWaitMs: 0 }, chat, hc, readers: r.readers, store: first.store, log: quiet, logWarn: quiet, logError: quiet, startedAt: '2026-01-01T00:00:00.000Z', inbox: os.tmpdir(), quick: true });
   running.add(engine);
   const started = engine.start();
   hc.snapshot('s', [{ ...t, status: { app: 'fake-agent', state: 'idle' } }]);
@@ -1005,7 +1015,7 @@ test('a message sent while the last turn\'s end is still being read is the next 
   done();
 });
 
-test('a message an agent never starts working on (Codex: "Unrecognized command") gets the screen and a ring, not silence', async () => {
+test('a message an agent never starts working on (Codex: "Unrecognized command") gets the screen and a note, not silence', async () => {
   const t = terminal('t1', { program: 'fake', agent: true });
   t.status = { app: 'fake-agent', state: 'idle' };
   const { chat, hc, store, engine, r, done } = await setup([t]);
@@ -1018,7 +1028,7 @@ test('a message an agent never starts working on (Codex: "Unrecognized command")
   await new Promise((ok) => setTimeout(ok, 60));
   await settle(engine);
   assert.equal(said(chat.of('post').at(-1).args[1]), "```\n• Unrecognized command '/nosuchcmd'.\n› /nosuchcmd\n```\n\nIt did not take this, so its input box was emptied.");
-  assert.deepEqual(chat.of('ring').map((c) => c.args[2]), ['⚠️ needs you']);
+  assert.deepEqual(rung(chat), ['needs']);
   assert.deepEqual(hc.pressed.at(-1).names, ['ctrl+c']);
   // one that starts working is left to its turn's end
   await engine.onMessage({ room, where: room, message: 'm-2', text: 'hi', images: [] });
@@ -1026,7 +1036,7 @@ test('a message an agent never starts working on (Codex: "Unrecognized command")
   hc.change('s', 'status', t);
   await new Promise((ok) => setTimeout(ok, 60));
   await settle(engine);
-  assert.equal(chat.of('ring').length, 1);
+  assert.equal(rung(chat).length, 1);
   done();
 });
 
@@ -1099,7 +1109,7 @@ test('an agent that asks before it starts (trust this folder) gets a card; a tap
   assert.equal(dialog.title, '⚠️ Needs you (to start)');
   assert.deepEqual(dialog.menu.options.map((o) => o.label), ['No, exit', 'Yes, I trust this folder']);
   assert.match(said(dialog.body), /Quick safety check/);
-  assert.equal(chat.of('ring').at(-1).args[2], '⚠️ needs you');
+  assert.equal(rung(chat).at(-1), 'needs');
   const out = await engine.onAction({ value: { ...value, pick: 2, label: 'Yes, I trust this folder' }, message });
   assert.deepEqual(hc.pressed.at(-1).names, ['down', 'enter']);
   assert.match(out.toast.text, /Yes, I trust this folder/);
@@ -1180,7 +1190,7 @@ test('an agent stopped at its dialog (Esc) goes from asking to waiting without w
   hc.change('s', 'status', t); // no turn event: it never worked again
   await settle(engine);
   assert.equal(said(chat.of('post').at(-1).args[1]), '_(It stopped: Request interrupted by user for tool use)_');
-  assert.equal(chat.of('ring').at(-1).args[2], '✅ done');
+  assert.equal(rung(chat).at(-1), 'done');
   done();
 });
 
@@ -1266,4 +1276,294 @@ test('an overview that did not get through is shown again later, not left behind
   await settle(engine);
   assert.deepEqual(shown, [1], 'shown once the line is back');
   done();
+});
+
+// ---------- notes: what rings, the overview sent anew ----------
+
+// the overviews that rang (sent anew for a note), what each rang for (its newest note), the
+// rows the last one marks, and how the notes of the records made so far were handled
+const rang = (chat) => chat.of('showOverview').filter((c) => c.args[1].ring);
+const rung = (chat) => rang(chat).map((c) => c.args[0].filter((r) => r.note).sort((a, b) => b.note.at - a.note.at)[0]?.note.kind);
+const marked = (chat) => (chat.of('showOverview').at(-1)?.args[0] || []).filter((r) => r.note).map((r) => [r.name, r.note.kind, r.note.line]);
+const records = (chat) => chat.of('showRecord').map((c) => [c.args[0], c.args[1].map((n) => [n.kind, n.line, n.handled?.how || null])]);
+// a turn of t1 that ends with an answer
+function answer(r, hc, text, id) {
+  r.queue('t1', [{ role: 'ai', text, at: `2026-01-02T00:00:0${id}.000Z`, id: `a${id}`, end: true }]);
+  hc.turn('s', 't1', 'done');
+}
+const ASKS = '╭──────╮\n│ Allow ls?\n│ ❯ 1. Yes\n│   2. No\n╰──────╯';
+
+test('a "done" note waits HERDR_DONE_WAIT: your next message in its room meanwhile means you saw it, and nothing rings', async () => {
+  const t = terminal('t1', { program: 'fake', agent: true });
+  const { chat, hc, store, engine, r, done } = await setup([t], { cfg: { doneWaitMs: 400 } });
+  const room = rooms(store)['s|t1'].chat;
+  answer(r, hc, '**Fixed** it.\nMore lines.', 1);
+  await settle(engine);
+  assert.deepEqual(rung(chat), [], 'not yet');
+  assert.equal(store.read().notes['s|t1'].line, 'Fixed it.');
+  await engine.onMessage({ room, where: room, message: 'm-1', text: 'thanks', images: [] });
+  t.status = { ...t.status, state: 'working' }; // it took it
+  hc.change('s', 'status', t);
+  await pause(500);
+  await settle(engine);
+  assert.deepEqual(rung(chat), []);
+  assert.equal(store.read().notes?.['s|t1'], undefined);
+  done();
+});
+
+test('a note sends the overview anew, which rings; the one before becomes the record of what it rang for, never recalled', async () => {
+  const t = terminal('t1', { program: 'fake', agent: true });
+  const { chat, hc, store, engine, r, done } = await setup([t], { cfg: { doneWaitMs: 100 } });
+  const room = rooms(store)['s|t1'].chat;
+  const first = chat.overview;
+  answer(r, hc, 'Fixed it.', 1);
+  await pause(200);
+  await settle(engine);
+  assert.deepEqual(rung(chat), ['done']);
+  assert.deepEqual(marked(chat), [['proj / master', 'done', 'Fixed it.']]);
+  assert.deepEqual(records(chat), [[first, []]], 'the first overview rang for nothing: it says it is old');
+  const ringing = chat.overview;
+  t.status = { ...t.status, state: 'working' };
+  hc.change('s', 'status', t);
+  await settle(engine);
+  assert.deepEqual(marked(chat), []);
+  assert.equal(rang(chat).length, 1, 'handled: an edit, no ring');
+  assert.equal(chat.overview, ringing);
+  t.status = { ...t.status, state: 'idle' };
+  hc.change('s', 'status', t);
+  answer(r, hc, 'Done again.', 2);
+  await pause(200);
+  await settle(engine);
+  assert.deepEqual(rung(chat), ['done', 'done']);
+  assert.deepEqual(records(chat).at(-1), [ringing, [['done', 'Fixed it.', 'working']]], 'the overview it replaced: what it rang for, handled');
+  const newest = chat.overview;
+  await engine.onMessage({ room, where: room, message: 'm-2', text: 'ok', images: [] });
+  t.status = { ...t.status, state: 'working' }; // it took it (else its screen would ring)
+  hc.change('s', 'status', t);
+  await settle(engine);
+  assert.deepEqual(marked(chat), []);
+  assert.equal(chat.overview, newest);
+  assert.equal(records(chat).length, 2, 'the newest overview is not a record: its marks say it');
+  await engine.onMessage({ room: null, where: 'dm', message: 'm-3', text: '/ls', images: [] });
+  await settle(engine);
+  assert.deepEqual(records(chat).at(-1), [newest, [['done', 'Done again.', 'replied']]]);
+  done();
+});
+
+test('a dialog rings at once and takes the place of the room\'s "done"; answered, its mark goes; a silent space rings nothing', async () => {
+  const t = terminal('t1', { program: 'fake', agent: true });
+  const { chat, hc, engine, r, done } = await setup([t]);
+  answer(r, hc, 'Fixed it.', 1);
+  await settle(engine);
+  hc.screens.set('s|t1', ASKS);
+  t.status = { app: 'fake-agent', state: 'blocked', kind: 'permission' };
+  hc.change('s', 'status', t);
+  await settle(engine);
+  assert.deepEqual(rung(chat), ['done', 'needs']);
+  assert.deepEqual(marked(chat), [['proj / master', 'needs', 'Allow ls?']]);
+  assert.deepEqual(records(chat).at(-1)[1], [['done', 'Fixed it.', 'replaced']]);
+  t.status = { app: 'fake-agent', state: 'idle' }; // answered in the terminal
+  hc.change('s', 'status', t);
+  await settle(engine);
+  assert.deepEqual(marked(chat), []);
+  done();
+
+  const quietOne = await setup([terminal('t1', { program: 'fake', agent: true })], { cfg: { silent: { all: false, spaces: ['proj'] } } });
+  answer(quietOne.r, quietOne.hc, 'Fixed it.', 1);
+  await settle(quietOne.engine);
+  assert.equal(quietOne.chat.of('post').length, 1);
+  assert.deepEqual(rung(quietOne.chat), []);
+  quietOne.done();
+});
+
+test('while you are in a room (you tapped or wrote there lately), what it asks waits as "done" does: answered meanwhile, nothing rings', async () => {
+  const t = terminal('t1', { program: 'fake', agent: true });
+  const { chat, hc, engine, done } = await setup([t], { cfg: { doneWaitMs: 400 } });
+  hc.screens.set('s|t1', ASKS);
+  t.status = { app: 'fake-agent', state: 'blocked', kind: 'permission' };
+  hc.change('s', 'status', t);
+  await settle(engine);
+  assert.deepEqual(rung(chat), ['needs'], 'not there: at once');
+  const [, , value, message] = chat.of('postDialog').at(-1).args;
+  await engine.onAction({ value: { ...value, pick: 1, label: 'Yes' }, message });
+  t.status = { app: 'fake-agent', state: 'working' };
+  hc.change('s', 'status', t);
+  await settle(engine);
+  hc.screens.set('s|t1', ASKS.replace('ls', 'rm'));
+  t.status = { app: 'fake-agent', state: 'blocked', kind: 'permission' };
+  hc.change('s', 'status', t);
+  hc.turn('s', 't1', 'blocked');
+  await settle(engine);
+  assert.equal(chat.of('postDialog').length, 2);
+  assert.deepEqual(rung(chat), ['needs'], 'you just tapped there: it waits');
+  t.status = { app: 'fake-agent', state: 'working' }; // answered meanwhile
+  hc.change('s', 'status', t);
+  await pause(500);
+  await settle(engine);
+  assert.deepEqual(rung(chat), ['needs']);
+  hc.screens.set('s|t1', ASKS.replace('ls', 'mv'));
+  t.status = { app: 'fake-agent', state: 'blocked', kind: 'permission' };
+  hc.change('s', 'status', t);
+  hc.turn('s', 't1', 'blocked');
+  await pause(500);
+  await settle(engine);
+  assert.deepEqual([chat.of('postDialog').length, rung(chat)], [3, ['needs', 'needs']], 'not answered: it rings once it waited');
+  done();
+});
+
+test('a dialog answered before its overview went out rings nothing', async () => {
+  const t = terminal('t1', { program: 'fake', agent: true });
+  const { chat, hc, engine, done } = await setup([t]);
+  hc.screens.set('s|t1', ASKS);
+  // answered the moment its card is out, before the overview's wait is over
+  const pin = chat.pin;
+  chat.pin = async (...a) => {
+    await pin(...a);
+    t.status = { app: 'fake-agent', state: 'working' };
+    hc.change('s', 'status', t);
+  };
+  t.status = { app: 'fake-agent', state: 'blocked', kind: 'permission' };
+  hc.change('s', 'status', t);
+  await settle(engine);
+  assert.equal(chat.of('postDialog').length, 1, 'its card went out');
+  assert.equal(rang(chat).length, 0);
+  assert.deepEqual(marked(chat), []);
+  done();
+});
+
+test('after a restart, a note that waited rings, a "needs you" whose terminal moved on is handled in its record, and a failed record edit is tried again', async () => {
+  const t1 = terminal('t1', { program: 'fake', agent: true });
+  const t2 = terminal('t2', { program: 'fake', agent: true, tab: 'b', tabId: 'tb2' });
+  const first = await setup([t1, t2]);
+  first.done();
+  const state = first.store.read();
+  const c = (k) => state.chats[k];
+  const asked = { kind: 'needs', name: c('s|t2').name, room: c('s|t2').chat, line: 'Allow?', at: 2 };
+  state.notes = {
+    's|t1': { kind: 'done', name: c('s|t1').name, room: c('s|t1').chat, line: 'waited', at: 3, due: 1 },
+    's|t2': { ...asked, asks: true, out: true, shown: 'o-old' },
+  };
+  state.records = { 'o-old': [{ k: 's|t2', ...asked }], 'o-older': [] };
+  state.recordEdits = ['o-older'];
+  first.store.write(state);
+  const chat = fakeChat();
+  const hc = fakeHc();
+  const r = fakeReaders();
+  const engine = createEngine({ cfg: { sessions: ['s'], doneWaitMs: 0 }, chat, hc, readers: r.readers, store: first.store, log: quiet, logWarn: quiet, logError: quiet, startedAt: '2026-01-01T00:00:00.000Z', inbox: os.tmpdir(), quick: true });
+  running.add(engine);
+  const started = engine.start();
+  hc.snapshot('s', [t1, t2]);
+  await started;
+  await pause(60);
+  await settle(engine);
+  assert.deepEqual(rung(chat), ['done']);
+  assert.deepEqual(marked(chat).map(([, kind, line]) => [kind, line]), [['done', 'waited']]);
+  const made = records(chat);
+  assert.deepEqual(made.find(([m]) => m === 'o-old'), ['o-old', [['needs', 'Allow?', 'answered']]]);
+  assert.deepEqual(made.find(([m]) => m === 'o-older'), ['o-older', []]);
+  assert.equal(first.store.read().recordEdits, undefined);
+  engine.stop();
+});
+
+test('/kill in a terminal\'s room ends that terminal, with no address to give', async () => {
+  const t = terminal('t1', { program: 'fake', agent: true });
+  const { chat, hc, store, engine, done } = await setup([t]);
+  const room = rooms(store)['s|t1'].chat;
+  await engine.onMessage({ room, where: room, message: 'm-1', text: '/kill', images: [] });
+  await settle(engine);
+  assert.deepEqual(hc.killed, [{ session: 's', address: 't1' }]);
+  assert.deepEqual(hc.sent, [], 'not typed into it');
+  assert.match(said(chat.of('reply').at(-1).args[1]), /Ended `t1`/);
+  done();
+});
+
+test('the overview shows each room\'s latest line, in a silent space too', async () => {
+  const t = terminal('t1', { program: 'fake', agent: true });
+  const { chat, hc, engine, r, done } = await setup([t], { cfg: { silent: { all: true, spaces: [] } } });
+  answer(r, hc, '**Fixed** it.\nMore.', 1);
+  await settle(engine);
+  const row = () => chat.of('showOverview').at(-1).args[0].find((x) => x.address === 't1');
+  assert.equal(row().latest, 'Fixed it.');
+  assert.equal(rang(chat).length, 0, 'silent: nothing rings');
+  done();
+});
+
+test('a room with no latest line gets the last answer in its agent\'s records, read until one is found', async () => {
+  const t = terminal('t1', { program: 'fake', agent: true });
+  const { chat, engine, r, done } = await setup([t]);
+  // from before the bot started: in its records, never posted
+  r.queue('t1', [
+    { role: 'you', text: 'old question', at: '2025-12-31T10:00:00.000Z', id: 'q' },
+    { role: 'ai', text: '**Old** answer.\nMore.', at: '2025-12-31T10:00:01.000Z', id: 'a' },
+  ]);
+  let reads = 0;
+  const after = r.reader.after;
+  r.reader.after = async (...a) => { reads += 1; return after(...a); };
+  engine.tick.sweep();
+  await settle(engine);
+  const row = () => chat.of('showOverview').at(-1).args[0].find((x) => x.address === 't1');
+  assert.equal(row().latest, 'Old answer.');
+  const before = reads;
+  engine.tick.sweep();
+  await settle(engine);
+  assert.equal(reads - before, 1, 'the next sweep reads only what is new, not the whole record again');
+  done();
+});
+
+test('a note\'s line has the marks of its markdown taken off, a word\'s own _ kept', async () => {
+  const { lineOf } = await import('../lib/core/engine/notes.mjs');
+  assert.equal(lineOf('_(It stopped: The user declined this tool call)_'), '(It stopped: The user declined this tool call)');
+  assert.equal(lineOf('**Fixed** *it* in `a.js`: [the PR](https://x.test) for T214_WLK-10224'), 'Fixed it in a.js: the PR for T214_WLK-10224');
+  assert.equal(lineOf([{ kind: 'screen', text: 'a screen' }, { kind: 'text', markdown: '\n\n- first item' }]), 'first item');
+  assert.equal(lineOf([{ kind: 'plain', text: 'Allow *this*?' }]), 'Allow *this*?', 'plain text is as it is');
+});
+
+test('Telegram: herdr\'s own topic is the direct chat, a command from outside any topic is answered there, and an overview from before it is not edited in place', async () => {
+  const telegram = await import('../lib/chats/telegram/index.mjs');
+  const store = fakeStore();
+  const state = store.read();
+  state.chats = { 'a|t1': { chat: '11', name: 'work / master' } };
+  state.overview = { message: '5288' }; // from before the topic, in the main thread
+  state.homeTopic = '900';
+  store.write(state);
+  const cfg = { env: { TELEGRAM_BOT_TOKEN: '1:test', TELEGRAM_OWNER_ID: '42' }, sessions: ['a'], muted: { all: true, spaces: [] }, silent: { all: false, spaces: [] } };
+  const sent = [];
+  const realFetch = globalThis.fetch;
+  let stopped = false;
+  let updates = [
+    { update_id: 1, message: { message_id: 50, from: { id: 42 }, chat: { id: 42, type: 'private' }, is_topic_message: true, message_thread_id: 900, text: '/ls' } },
+    { update_id: 2, message: { message_id: 51, from: { id: 42 }, chat: { id: 42, type: 'private' }, is_topic_message: true, message_thread_id: 11, text: 'hi' } },
+  ];
+  globalThis.fetch = async (url, opts) => {
+    const method = url.split('/').pop();
+    const body = JSON.parse(opts.body);
+    sent.push({ method, body });
+    if (method === 'getMe') return { ok: true, json: async () => ({ ok: true, result: { username: 'bot', has_topics_enabled: true } }) };
+    if (method === 'getUpdates') {
+      // once the test is done, the poll waits for ever: nothing keeps the process up
+      if (stopped) return new Promise(() => {});
+      const u = updates;
+      updates = [];
+      if (!u.length) await new Promise((r) => setTimeout(r, 50));
+      return { ok: true, json: async () => ({ ok: true, result: u }) };
+    }
+    return { ok: true, json: async () => ({ ok: true, result: method === 'createForumTopic' ? { message_thread_id: 900 } : { message_id: sent.length } }) };
+  };
+  try {
+    const chat = telegram.create({ cfg, store, log: quiet, logWarn: quiet, logError: quiet, stateDir: os.tmpdir(), lane: () => {}, scopeOf: () => 'a' });
+    const got = [];
+    chat.start({ onMessage: async (m) => { got.push(m); }, onAction: async () => ({}) });
+    for (let i = 0; i < 100 && got.length < 2; i += 1) await new Promise((r) => setTimeout(r, 20));
+    assert.deepEqual(got.map((m) => [m.room, m.text]), [[null, '/ls'], ['11', 'hi']], 'its own topic is the direct chat; a room\'s topic is that room');
+    await chat.reply('42:', 'answer');
+    assert.equal(sent.filter((x) => x.method === 'sendMessage').at(-1).body.message_thread_id, 900, 'a command sent outside any topic is answered in herdr\'s topic');
+    const shown = await chat.showOverview([{ name: 'work / master', address: 't1', state: 'idle', room: '11' }], {});
+    assert.deepEqual(shown.old, '5288', 'the old one, outside the topic, is left for its record');
+    assert.equal(sent.filter((x) => x.method === 'editMessageText').length, 0);
+    assert.equal(sent.filter((x) => x.method === 'sendMessage').at(-1).body.message_thread_id, 900);
+  } finally {
+    stopped = true;
+    await new Promise((r) => setTimeout(r, 120)); // the poll in flight comes back once more
+    globalThis.fetch = realFetch;
+  }
 });

@@ -12,7 +12,7 @@ import { fileURLToPath } from 'node:url';
 import { createEngine } from '../lib/core/engine.mjs';
 import { sendMarkdown } from '../lib/chats/feishu/client.mjs';
 import { doneCard, foldedCard, header, menuCard, ownerCard, textCard } from '../lib/chats/feishu/render.mjs';
-import { overviewCard, overviewText } from '../lib/chats/feishu/overview.mjs';
+import { overviewCard, overviewText, recordCard } from '../lib/chats/feishu/overview.mjs';
 import { fakeChat, fakeHc, fakeReaders, fakeStore, terminal } from './fakes.mjs';
 
 process.env.TZ = 'UTC'; // the overview's clock
@@ -42,6 +42,12 @@ const ROWS = [
   { name: 'beta / T1_ABC-2', address: 'box/t2', state: 'blocked', kind: 'permission', room: 'oc_b' },
   { name: 'alpha / shell', address: 't4', program: 'zsh' },
 ];
+// the same, two rooms with a note not yet handled (what rang)
+const NOTED = [
+  { ...ROWS[0], note: { kind: 'done', line: 'Fixed *it* <now>.', at: 1 } },
+  { ...ROWS[1], note: { kind: 'needs', line: 'Allow ls?', at: 2 } },
+  ROWS[2],
+];
 
 test('Feishu: every kind of card', async () => {
   same('feishu.header', ['working', 'closed', 'needs', 'done', 'good', 'bad'].map((tone) => header('✅ A title', tone)));
@@ -52,6 +58,9 @@ test('Feishu: every kind of card', async () => {
   same('feishu.ownerCard', ownerCard({ title: '⬆️ herdrchat 9.9.9 is out', tone: 'working', markdown: 'You run 1.0.0.', buttons: [{ label: 'Update to 9.9.9', value: { update: '9.9.9' } }] }));
   same('feishu.foldedCard', foldedCard('📜 Before this room', '**You:**\n> hi\n\nHello.'));
   same('feishu.overview', { text: overviewText(ROWS), card: overviewCard(ROWS, Date.UTC(2026, 0, 1, 10, 0)) });
+  const note = { kind: 'needs', name: 'beta / T1_ABC-2', room: 'oc_b', line: 'Run *ls* <now>?', at: Date.UTC(2026, 0, 1, 10, 0) };
+  same('feishu.recordCard', [recordCard([note, { ...note, kind: 'done', line: '', room: null, handled: { how: 'answered', at: Date.UTC(2026, 0, 1, 10, 3) } }]), recordCard([])]);
+  same('feishu.overview.notes', { text: overviewText(NOTED), card: overviewCard(NOTED, Date.UTC(2026, 0, 1, 10, 0), { hint: 'Your groups ring on every post too.' }) });
   const sent = [];
   const client = { im: { v1: { message: { create: async (req) => { sent.push(req); return { data: { message_id: `m${sent.length}` } }; } } } } };
   await sendMarkdown(client, 'oc_room', `${'line one\n'.repeat(800)}last`, { app: 'pi', model: 'glm' });
@@ -80,11 +89,13 @@ test('Telegram: every kind of message', async () => {
     await chat.postDialog('11', { title: '⚠️ Needs you (permission)', markdown: 'Run ls?', menu: MENU, footer: { app: 'claude', screen: true } }, { s: 'a', a: 't1', k: 'k1' });
     await chat.postDialog('11', { title: '⚠️ Needs you (question)', markdown: 'Which colors?', menu: MULTI }, { s: 'a', a: 't1', k: 'k2' });
     await chat.closeDialog('4', { doneTitle: '✅ Done', markdown: 'Run ls?', footer: { app: 'claude', model: 'm' } }, '✔ Yes');
-    await chat.ring('a|t1', '1', '✅ done');
     await chat.reply('11', 'It asks something first.');
     await chat.postFolded('11', { title: '📜 Before this room', markdown: '**You:**\n> hi\n\nHello.' });
     await chat.tellOwner({ title: '⬆️ herdrchat 9.9.9 is out', tone: 'working', markdown: 'You run 1.0.0.', buttons: [{ label: 'Update to 9.9.9', value: { update: '9.9.9' } }] });
     await chat.showOverview(ROWS.map((r) => ({ ...r, room: r.room ? '11' : null })));
+    const sentAnew = await chat.showOverview(NOTED.map((r) => ({ ...r, room: r.room ? '11' : null })), { fresh: true, ring: true });
+    await chat.showRecord(sentAnew.old, [{ kind: 'done', name: 'work / master', room: '11', line: 'Fixed *it* <now>.', at: Date.UTC(2026, 0, 1, 10, 0), handled: { how: 'replied', at: Date.UTC(2026, 0, 1, 10, 3) } }]);
+    await chat.showRecord(sentAnew.message, []);
   } finally {
     globalThis.fetch = realFetch;
   }
@@ -112,7 +123,7 @@ test('the core: what it hands the chat app for a turn, a dialog, a screen and an
   const inbox = fs.mkdtempSync(path.join(os.tmpdir(), 'herdrchat-render-test-'));
   const t = terminal('t1', { program: 'fake', agent: true });
   t.foreground.cwd = '/w';
-  const engine = createEngine({ cfg: { sessions: ['s'] }, chat, hc, readers: r.readers, store, log: quiet, logWarn: quiet, logError: (...a) => { throw new Error(a.join(' ')); }, startedAt: '2026-01-01T00:00:00.000Z', inbox, quick: true, asksWaiting: () => false, askLives: async () => true, shell: async () => 'main\n' });
+  const engine = createEngine({ cfg: { sessions: ['s'], doneWaitMs: 0 }, chat, hc, readers: r.readers, store, log: quiet, logWarn: quiet, logError: (...a) => { throw new Error(a.join(' ')); }, startedAt: '2026-01-01T00:00:00.000Z', inbox, quick: true, asksWaiting: () => false, askLives: async () => true, shell: async () => 'main\n' });
   running.add(engine);
   const started = engine.start();
   hc.snapshot('s', [t]);
@@ -153,7 +164,8 @@ test('the core: what it hands the chat app for a turn, a dialog, a screen and an
   engine.stop();
   fs.rmSync(inbox, { recursive: true, force: true });
   const calls = chat.calls.filter((c) => !['start', 'showOverview', 'markWorking', 'markDone'].includes(c.name)).map((c) => [c.name, ...c.args]);
-  same('core.calls', calls);
+  // a note's times are the clock's when the test ran
+  same('core.calls', JSON.parse(JSON.stringify(calls), (k, v) => (k === 'at' && typeof v === 'number' ? '<time>' : v)));
 });
 
 // End to end: the core driving each real chat app, with only the network faked, so what
@@ -162,7 +174,8 @@ test('the core: what it hands the chat app for a turn, a dialog, a screen and an
 // from another terminal and the answer; a dialog read off the screen, answered; one with no
 // menu; /screen; the terminal ends, and a message to it after that.
 // the clock in the overview ("Updated 15:31", "since 15:31") is the time the test ran
-const atNoTime = (value) => JSON.parse(JSON.stringify(value).replace(/\b(Updated|since) \d{2}:\d{2}\b/g, '$1 <time>'));
+// and when a note was handled ("answered · 15:31") or a line was said ("15:31: Fixed it.")
+const atNoTime = (value) => JSON.parse(JSON.stringify(value).replace(/\b(Updated|since) \d{2}:\d{2}\b/g, '$1 <time>').replace(/ · \d{2}:\d{2}\b/g, ' · <time>').replace(/\b\d{2}:\d{2}: /g, '<time>: '));
 
 async function playEndToEnd(makeChat) {
   const hc = fakeHc();
@@ -181,7 +194,7 @@ async function playEndToEnd(makeChat) {
     dialogs.push({ dialog, value, message });
     return message;
   };
-  engine = createEngine({ cfg: { sessions: ['s'] }, chat, hc, readers: r.readers, store, log: quiet, logWarn: quiet, logError: (...a) => { throw new Error(a.join(' ')); }, startedAt: '2026-01-01T00:00:00.000Z', inbox, quick: true, asksWaiting: () => false, askLives: async () => true, shell: async () => 'main\n' });
+  engine = createEngine({ cfg: { sessions: ['s'], doneWaitMs: 0 }, chat, hc, readers: r.readers, store, log: quiet, logWarn: quiet, logError: (...a) => { throw new Error(a.join(' ')); }, startedAt: '2026-01-01T00:00:00.000Z', inbox, quick: true, asksWaiting: () => false, askLives: async () => true, shell: async () => 'main\n' });
   running.add(engine);
   const started = engine.start();
   hc.snapshot('s', [t]);

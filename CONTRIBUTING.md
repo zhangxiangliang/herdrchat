@@ -48,8 +48,9 @@ Before a commit:
 Check the live result, not only the code: count what actually happened in Feishu with
 the bot's own client (`lib/chats/feishu/client.mjs` `createClient` with `loadConfig()`), for example:
 
-- mentions in a group since a time: `im.v1.message.list` on the chat, then each item's
-  `mentions` (a mention inside a card is not counted by Feishu, so it does not ring);
+- what rang since a time: `im.v1.message.list` on the direct chat with the bot: each
+  overview sent anew is what rang (the API shows a 2.0 card only as "upgrade your
+  client", so read what it rang for in state.json's records);
 - a group's bot tags: `im.v2.bizEntityTagRelation.get` with `tag_biz_type: 'chat'`;
 - whether a card was edited: `im.v1.message.get`, compare `update_time` with `create_time`.
 
@@ -66,6 +67,7 @@ Say which checks were run and which were not; "the code is there" is not "it wor
    which one rang.
 4. Measure the result (an API field, a read-back) instead of assuming it; ask the user
    only what only a phone shows (did it ring).
-5. Clean up in the same run: disband the test group, delete test labels and tags you
-   made, recall test messages, delete scratch files.
+5. Clean up in the same run: disband the test group (its test messages go with it),
+   delete test labels and tags you made, delete scratch files. Never recall a message in
+   the user's own chats: Feishu leaves a "recalled a message" line in its place.
 

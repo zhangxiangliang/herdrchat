@@ -43,14 +43,20 @@ Do these in order; the user does the Telegram steps, you check each one.
 
 The same settings as Feishu, in the Telegram profile's own config.env:
 
+- "⚠️ needs you" and "✅ done" ring by sending the overview anew in the bot's own topic,
+  `📋 herdr`, what rang under "waiting for you", just below its title (one line each: topic, state, the
+  time and its first line); the overview before it is edited into the record of what it
+  rang for (never deleted), each note in full and "handled" once dealt with. Below,
+  each machine lists its spaces and tabs the same way (Telegram has no tables). "done" (and "needs you" while the user is in that topic) waits `HERDR_DONE_WAIT`
+  seconds (60) and rings nothing if the user wrote in that topic, or the terminal moved
+  on, meanwhile (docs/guide.md, "What rings: the overview, sent anew").
 - `HERDR_MUTED_SPACES` (default `all`): in these spaces posts go silently (a notification
-  without sound) and only "⚠️ needs you" and "✅ done" ring, as a short reply. Elsewhere
-  every post rings.
-- `HERDR_SILENT_SPACES` (default none): nothing rings there, not even "needs you".
+  without sound), so only the overview rings. Elsewhere every post rings too.
+- `HERDR_SILENT_SPACES` (default none): nothing rings there, not even
+  "needs you".
 
-A bot cannot mute a chat or a topic for the user. A topic the user mutes in Telegram is
-fully quiet, "needs you" included; `HERDR_SILENT_SPACES` does the same for a whole space
-without muting each topic by hand.
+A bot cannot mute a chat or a topic for the user. Muting the bot's whole chat in Telegram
+mutes the overview too; `HERDR_SILENT_SPACES` quiets a whole space without that.
 
 ## What Telegram does differently
 
@@ -62,7 +68,7 @@ without muting each topic by hand.
 | a text box on a dialog card | type the answer in the topic |
 | pins the group that needs you | pins the dialog card in its topic until it is answered |
 | tags, labels, `/auth` | none (a bot cannot act as the user) |
-| the overview card | one message in the main thread, edited in place |
+| the direct chat | a topic of the bot's own, `📋 herdr` (made at the first start, again if deleted): the overview, its records, the commands and their answers; outside any topic they would be lost in "All Messages". The user can pin it; a bot cannot |
 | `/` commands: typed | `/` shows a menu: ls, new, kill, screen, answer, esc, history |
 
 ## When something is off

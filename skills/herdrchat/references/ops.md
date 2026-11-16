@@ -84,7 +84,7 @@ your token after `/auth`: never print it.
 | Telegram: `telegram poll: ... 409` | another copy polls the same token | stop it (another machine?), then start once |
 | a button gives error 200340 | the card callback is not set up | `references/feishu.md`: events and card callbacks |
 | a dialog had no card | answered in the terminal before the card; or no numbered menu on screen | log: `blocked`; the card says `/answer` when it saw no menu |
-| the phone rings too much | Feishu: not `/auth`ed; either app: settings | Feishu `/auth`; `HERDR_MUTED_SPACES` (quiet but for needs you and done), `HERDR_SILENT_SPACES` (nothing rings), per profile |
+| the phone rings too much | Feishu: not `/auth`ed; either app: settings | Feishu `/auth`; `HERDR_MUTED_SPACES` (rooms quiet, only the overview rings), `HERDR_SILENT_SPACES` (nothing rings), `HERDR_DONE_WAIT` (how long a "done" waits), per profile |
 | a ⚠️ warning in the direct chat about acting as you | the token could not be refreshed | send `/auth` again |
 | a group keeps an old name | its terminal is not live | it renames when the terminal is back |
 | a Feishu call fails with 400 in a burst | a rate limit (tags: 5 a second) | space the calls; the bot queues tag calls |

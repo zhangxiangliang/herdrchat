@@ -41,7 +41,6 @@ export function fakeChat() {
     pin: async (k, room) => { pins.add(k); record('pin', k, room); },
     unpin: async (k) => { pins.delete(k); record('unpin', k); },
     pinned: () => [...pins],
-    ring: async (...a) => record('ring', ...a),
     markWorking: async (message) => { record('markWorking', message); return `r-${message}`; },
     markDone: async (...a) => record('markDone', ...a),
     image: async () => 'img',
@@ -50,7 +49,15 @@ export function fakeChat() {
     foldedBytes: 3500,
     download: async (...a) => record('download', ...a),
     tellOwner: async (...a) => record('tellOwner', ...a),
-    showOverview: async (rows) => record('showOverview', rows),
+    overview: null,
+    showOverview: async (rows, opts = {}) => {
+      record('showOverview', rows, opts);
+      if (!opts.fresh && chat.overview) return null;
+      const old = chat.overview;
+      chat.overview = id('o');
+      return { message: chat.overview, old };
+    },
+    showRecord: async (...a) => record('showRecord', ...a),
   };
   for (const m of Object.keys(CHAT_MEMBERS)) if (!(m in chat)) throw new Error(`fakeChat misses ${m}`);
   return chat;
@@ -92,7 +99,8 @@ export function fakeHc() {
     named: [],
     run: async (session, opts) => { hc.ran = opts; return JSON.stringify({ address: 't99' }); },
     nameTab: async (tabId, name) => { hc.named.push({ tabId, name }); return true; },
-    kill: async () => {},
+    killed: [],
+    kill: async (session, address) => { hc.killed.push({ session, address }); },
     // test side
     snapshot(session, list) {
       const s = sessions.get(session);

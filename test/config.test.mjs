@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { onOff, placesOf, spacesOf } from '../lib/core/config.mjs';
+import { onOff, placesOf, secondsOf, spacesOf } from '../lib/core/config.mjs';
 
 test('HERDR_MUTED_SPACES and HERDR_SILENT_SPACES: all, none or some spaces, with a default', () => {
   assert.deepEqual(spacesOf(undefined, 'all'), { all: true, spaces: [] });
@@ -18,6 +18,16 @@ test('HERDR_BOT_TAGS and HERDR_USER_TAGS: on or off, with a default', () => {
   assert.equal(onOff(' ON ', false), true);
   assert.equal(onOff('no', true), false);
   assert.equal(onOff('maybe', true), true);
+});
+
+test('HERDR_DONE_WAIT: seconds, 0 or more, with a default; anything else is refused', () => {
+  assert.equal(secondsOf(undefined, 60), 60);
+  assert.equal(secondsOf(' ', 60), 60);
+  assert.equal(secondsOf('0', 60), 0);
+  assert.equal(secondsOf('90', 60), 90);
+  assert.equal(secondsOf('1.5', 60), 1.5);
+  assert.throws(() => secondsOf('-1', 60, 'HERDR_DONE_WAIT'), /HERDR_DONE_WAIT: -1 is not a number of seconds/);
+  assert.throws(() => secondsOf('1m', 60, 'HERDR_DONE_WAIT'), /HERDR_DONE_WAIT: 1m/);
 });
 
 test('places: one folder pair per profile under XDG, or one folder of your choice', () => {

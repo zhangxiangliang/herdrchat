@@ -17,7 +17,7 @@ Words used here:
 | session | one hc core and its terminals (`HC_SESSION`); `ls ~/.local/state/herdr-core` lists those on a machine |
 | space, tab | how herdr-app groups terminals in its sidebar |
 | room | where one tab is mirrored: a Feishu group or a Telegram topic |
-| direct chat | your private chat with the bot: the overview and the commands |
+| direct chat | your private chat with the bot: the overview and the commands (Telegram: the bot's own topic, `📋 herdr`) |
 | profile | one herdrchat setup for one chat app, with its own settings and state (`default` unless named) |
 | reader | the part that reads an agent's own conversation log (Claude Code so far) |
 
@@ -31,7 +31,7 @@ herdr-app, moved into one Feishu bot:
 | a space | one avatar for all of its groups: the space's first letter on a color of its own |
 | a terminal on another machine | a group named `<space> / <tab>`, tagged with the machine, made once |
 | a terminal that is gone | its group stays, with its history, tagged `ended` (untagged if it comes back) |
-| the sidebar | the direct chat with the bot: an overview card (every terminal's state, what waits for you first, each a link to its group), kept up to date in place; `/ls`, `/new`, `/kill`, `/usage` |
+| the sidebar | the direct chat with the bot: an overview card (what is waiting for you first; then a heading per machine and a table of its tabs: Room, a link to its group; State, a colored tag; Latest, the time and the first line of what it last said), kept up to date in place, sent anew when something rings; `/ls`, `/new`, `/kill`, `/usage` |
 
 A tab herdr-app only numbered (`2`) is named after the terminal's title instead (what the
 program sets; Claude Code sets its session name or topic), else its hc name.
@@ -50,7 +50,7 @@ the bot, Threaded Mode):
 | a tab | a topic named `<space> / <tab>` in the bot's private chat; type there to talk to it |
 | a space | one topic icon color for all of its topics (Telegram offers six) |
 | a terminal that is gone | its topic stays, its name starting with 🔚 (taken off if it comes back) |
-| the sidebar | the chat's main thread: the overview message, edited in place; `/ls`, `/new`, `/kill`, `/usage`; `/` shows the commands |
+| the sidebar | a topic of the bot's own, `📋 herdr`, made at the first start: the overview message, edited in place, sent anew when something rings; `/ls`, `/new`, `/kill`, `/usage`; `/` shows the commands. Outside any topic it would land in "All Messages", mixed with every room's posts |
 
 What differs is in "Feishu and Telegram side by side" below. Telegram takes about one
 message a second in a chat, so the bot queues and waits as Telegram asks. Setting it up:
@@ -65,12 +65,15 @@ Both do the same things; where an app cannot, something stands in.
 | a tab | a group | a topic in the bot's private chat |
 | a space | an avatar (its letter, its color) | a topic icon color |
 | an ended terminal | the `ended` tag | 🔚 before the topic's name |
-| the direct chat | the overview card, commands typed or from the bot menu (set in the console) | the main thread: the overview, commands with the `/` list (sent outside a topic, Telegram may make a new topic of a command; it is answered there, as in the main thread) |
+| the direct chat | the overview card (sent anew when something rings), commands typed or from the bot menu (set in the console) | the `📋 herdr` topic: the overview, commands with the `/` list (one sent outside any topic is answered in `📋 herdr`; one Telegram made a new topic of is answered there). A topic you deleted is made again. Pin it in Telegram to keep it on top (a bot cannot) |
 | what it says while working | one live card per turn, edited | one live message per turn, edited |
 | a dialog | a card with buttons, a text box for its own words | a message with buttons; its own words are typed in the topic |
-| needs you | the group pinned (after `/auth`), an @ that rings | the dialog card pinned in its topic, a reply that rings |
-| quiet spaces (`HERDR_MUTED_SPACES`) | groups muted (after `/auth`); only an @ rings | posts silent; only a short reply rings |
-| silent spaces (`HERDR_SILENT_SPACES`) | no @ | no ringing reply |
+| needs you | the group pinned (after `/auth`), the overview sent anew | the dialog card pinned in its topic, the overview sent anew |
+| the overview | "waiting for you" and a table per machine, each Room / State / Latest | the same as lists: a line per note, a bullet per space and a line per tab, each with its topic (a link), state and latest |
+| what rang | the card's summary (the lock screen) and the "waiting for you" table | the "waiting for you" lines, just under the title (a notification shows a message's first lines) |
+| an overview a newer one replaced | edited into the record of what it rang for, in full, never recalled | edited into the record of what it rang for, in full, never deleted |
+| quiet spaces (`HERDR_MUTED_SPACES`) | groups muted (after `/auth`); only the notes ring | posts silent; only the notes ring |
+| silent spaces (`HERDR_SILENT_SPACES`) | nothing rings | nothing rings |
 | a new room (`HERDR_HISTORY`), `/history` | the conversation as a file, its newest part in a folded panel | the same, the newest part in an expandable quote |
 | images | in the card, both ways | as photos after the text, both ways |
 | your message marked | a reaction, then OK | 👀, then 👌 |
@@ -86,8 +89,9 @@ In the profile's `config.env` (`herdrchat status` prints where it is):
 |---|---|---|---|
 | `HERDRCHAT_CHAT` | both | `feishu` | the chat app this profile mirrors into: `feishu` or `telegram` |
 | `HERDR_SESSIONS` | both | `default` | the hc sessions to mirror, comma-separated; machines they reach come along. `default` is hc's own session, which with herdr-app reaches every session it shows |
-| `HERDR_MUTED_SPACES` | both | `all` | spaces whose rooms are quiet: only "needs you" and "done" ring; empty for none |
-| `HERDR_SILENT_SPACES` | both | (none) | spaces where nothing rings, not even "needs you" |
+| `HERDR_MUTED_SPACES` | both | `all` | spaces whose rooms are quiet, so only the overview in the direct chat rings; empty for none |
+| `HERDR_SILENT_SPACES` | both | (none) | spaces that ring nothing at all, not even "needs you" |
+| `HERDR_DONE_WAIT` | both | `60` | seconds a "done" waits before it rings (and a "needs you" while you are in that room); your message in its room, or the terminal moving on, meanwhile means you saw it and nothing rings. `0`: at once |
 | `HERDR_HISTORY` | both | `file,folded` | what a new room gets of the conversation before it: `file`, `folded`, both, or empty |
 | `FEISHU_APP_ID`, `FEISHU_APP_SECRET` | Feishu | (required) | the Feishu app |
 | `FEISHU_OWNER_OPEN_ID` | Feishu | (empty) | you; the bot tells you yours when you message it |
@@ -141,12 +145,10 @@ A room is a Feishu group or a Telegram topic.
     as it is (the `*`, `_` and `/` of a command are no marks).
     It shows the program is alive, as herdr-app does, and since an edit is not a new
     message, the phone does not ring every few seconds;
-  - when the turn ends: its last answer, as a new message. In a space of
-    `HERDR_MUTED_SPACES` (all, by default) only "needs you" and "done" ring: in Feishu
-    the groups are muted (after `/auth`) and an @ under the answer rings; in Telegram
-    the posts go silently and a short reply rings. `HERDR_SILENT_SPACES` rings nothing.
-    The ringing reply quotes the post's first line (a dialog card's question), not all
-    of it with its footer.
+  - when the turn ends: its last answer, as a new message. Rooms ring nothing of their
+    own in a space of `HERDR_MUTED_SPACES` (all, by default): Feishu groups are muted
+    (after `/auth`), Telegram posts go silently. What rings is the overview, sent anew (below).
+    `HERDR_SILENT_SPACES` rings nothing.
   - A message another terminal sent with `hc send` shows as **From t7 review**, not as
     yours (hc wraps it in `<hc from="…">`, for any agent).
   - Images too: ones it looked at (a screenshot, an image file it read) and ones you
@@ -206,7 +208,49 @@ A room is a Feishu group or a Telegram topic.
   that still waits: one answered while its screen was read gets none.
 - A turn that stops on an error with no answer (you declined OpenCode's tool, with Reject
   or Esc; Pi's request failed): a line saying it stopped and why, in the agent's words
-  ("It stopped: The user declined this tool call"), and "done" rings.
+  ("It stopped: The user declined this tool call"), and it rings as "done".
+
+## What rings: the overview, sent anew
+
+When a room needs you or its turn is done, it gets a note, and the overview in your direct
+chat with the bot (Telegram: the `📋 herdr` topic) is sent anew at the bottom, which rings. It
+shows first what rang ("waiting for you"), and the lock screen says it. With nothing new, the newest overview is
+only edited, which does not ring.
+
+The overview is for seeing everything at once, so in Feishu it is tables, each with the
+same three columns:
+
+| Column | What it holds |
+|---|---|
+| Room | the space and tab (`herdrchat / master`), a link that opens its group |
+| State | a colored tag: needs you (orange), working (blue), done (green), error (red), idle (grey); with no agent, the program it runs |
+| Latest | the time and the first line of what it last said: `11:49: Fixed it.` (cut to fit; a tap shows it whole) |
+
+First "waiting for you" (the notes not handled yet), then a heading per machine and its
+table. A room's latest is kept from what it says; one with none yet gets the last answer
+in its agent's own records. A table shows ten rows a page; a card holds five tables, so a
+machine past them is a list. Telegram has no tables: the same as lists, each line its
+mark, its topic (a link), its state and its latest.
+
+- The overview before it is never taken back (in Feishu a recall leaves a "recalled a
+  message" line): it is edited into the record of what it rang for. A record is history,
+  read for its details, so it is not a table: each note in full, a few lines (what, the
+  room, when; its first line; once handled, how and when). So above the newest overview
+  the chat keeps a history of what rang.
+- **needs you** rings at once: a dialog, or a message it did not start working on.
+- **done** waits `HERDR_DONE_WAIT` seconds (60 by default). If you send a message in that
+  room meanwhile, or the terminal works again, you were watching, and nothing rings.
+- **While you are in a room** (you wrote or tapped a card there in the last
+  `HERDR_DONE_WAIT` seconds), a "needs you" from it waits the same way, and rings nothing
+  if you answer meanwhile: answering one question after another does not ring each time.
+- A note is handled when the dialog is answered (from the card, the group or the
+  terminal), you send a message in its room, the terminal works again, or it ends. Its
+  room leaves "waiting for you" (an edit, no ring). A room has one note at most: a newer
+  one takes its place. Several notes within two seconds ring once.
+- Notes and records are kept in `state.json`, so one due while the bot restarted still
+  rings, and one whose terminal moved on meanwhile is marked handled.
+- In Feishu, until `/auth` is done the groups are not muted and ring on every post too;
+  the overview says so at its bottom.
 
 ## Answering a dialog from the chat
 
@@ -340,9 +384,10 @@ is never updated from here: pull it, and the running bots follow the version in 
 
 ## Commands
 
-- Direct chat: `/ls` (the overview again at the bottom of the chat; the old one is
-  recalled), `/new <session> <space>/<tab> [command]` (start one; default `claude`;
-  `--cwd <dir>` first to pick its folder), `/kill <session> <address>`, `/usage` (every
+- Direct chat: `/ls` (the overview again at the bottom of the chat; the old one says it
+  is old: nothing is recalled, which in Feishu leaves a "recalled a message" line), `/new <session> <space>/<tab> [command]` (start one; default `claude`;
+  `--cwd <dir>` first to pick its folder), `/kill <session> <address>` (or `/kill` in the
+  terminal's own room), `/usage` (every
   account's limits, above), `/auth` (Feishu; see below). Telegram lists them when you
   type `/`; Feishu can have a bot menu for `/ls`, `/usage`, help and `/auth` (set in the
   developer console: `skills/herdrchat/references/feishu.md`, "The bot menu").
@@ -351,7 +396,7 @@ is never updated from here: pull it, and the running bots follow the version in 
   beside the terminal with `hc put`, on its machine, and its path is typed in with your
   text, so an agent like Claude Code opens it; `/screen`, `/answer <text>` (type into the
   dialog it waits on, as is), `/esc`, `/history` (the conversation so far, as a file and
-  a folded post). Dialog cards have buttons.
+  a folded post), `/kill` (end this terminal). Dialog cards have buttons.
 - On the command line, `herdrchat hooks` says whether herdrchat's hook is in Claude Code's
   and Codex's settings and its extension in Pi's; `herdrchat hooks install
   [claude|codex|pi]` puts them in (it shows the files and asks first; `--yes` does not
@@ -443,11 +488,9 @@ token is refreshed on its own and kept in `user-token.json` in the state folder 
 Then:
 
 - groups are muted (`HERDR_MUTED_SPACES` in `config.env`: `all`, the default; empty for none; or
-  some spaces, comma-separated; a change applies both ways at the next start), and in a
-  muted group a one-line reply that @-mentions you goes under each card that needs you and
-  under each turn's last answer, unless its space is in `HERDR_SILENT_SPACES` (empty by
-  default; same values) to stay fully quiet: in a muted group only a mention rings (a
-  mention inside a card does not count as one), so the phone rings only then;
+  some spaces, comma-separated; a change applies both ways at the next start), so only the
+  overview in the direct chat rings ("What rings: the overview, sent anew" above;
+  `HERDR_SILENT_SPACES` rings nothing);
 - each group is also in one of your own labels (the session or machine; `ended` once
   the terminal is gone), to filter the chat list by; the bot tags stay, since only they
   show next to a group's name, but an ended group in your `ended` label gets no `ended`
