@@ -1,3 +1,10 @@
+# [1.17.0](https://github.com/zhangxiangliang/herdrchat/compare/v1.16.1...v1.17.0) (2026-11-16)
+
+
+### Features
+
+* every group is in one "herdr" label too, to keep them out of the message list ([e666dcc](https://github.com/zhangxiangliang/herdrchat/commit/e666dcc0868a81d44bd7ec0876e5915282276a05))
+
 ## [1.16.1](https://github.com/zhangxiangliang/herdrchat/compare/v1.16.0...v1.16.1) (2026-11-16)
 
 
