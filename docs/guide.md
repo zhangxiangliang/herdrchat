@@ -27,10 +27,10 @@ herdr-app, moved into one Feishu bot:
 
 | herdr-app | Feishu |
 |---|---|
-| a tab | a group named `<space> / <tab>`, tagged with its session; type there to talk to it |
+| a tab | a group named `<space> / <tab>`, tagged `herdr`; type there to talk to it |
 | a space | one avatar for all of its groups: the space's first letter on a color of its own |
-| a terminal on another machine | a group named `<space> / <tab>`, tagged with the machine, made once |
-| a terminal that is gone | its group stays, with its history, tagged `ended` (untagged if it comes back) |
+| a terminal on another machine | a group named `<space> / <tab>`, tagged `herdr`, made once |
+| a terminal that is gone | its group stays, with its history, tagged `herdr-ended` too (untagged if it comes back) |
 | the sidebar | the direct chat with the bot: an overview card (what is waiting for you first; then a heading per machine and a table of its tabs: Room, a link to its group; State, a colored tag; Latest, the time and the first line of what it last said), kept up to date in place, sent anew when something rings; `/ls`, `/new`, `/kill`, `/usage` |
 
 A tab herdr-app only numbered (`2`) is named after the terminal's title instead (what the
@@ -64,7 +64,7 @@ Both do the same things; where an app cannot, something stands in.
 |---|---|---|
 | a tab | a group | a topic in the bot's private chat |
 | a space | an avatar (its letter, its color) | a topic icon color |
-| an ended terminal | the `ended` tag | 🔚 before the topic's name |
+| an ended terminal | the `herdr-ended` tag | 🔚 before the topic's name |
 | the direct chat | the overview card (sent anew when something rings), commands typed or from the bot menu (set in the console) | the `📋 herdr` topic: the overview, commands with the `/` list (one sent outside any topic is answered in `📋 herdr`; one Telegram made a new topic of is answered there). A topic you deleted is made again. Pin it in Telegram to keep it on top (a bot cannot) |
 | what it says while working | one live card per turn, edited | one live message per turn, edited |
 | a dialog | a card with buttons, a text box for its own words | a message with buttons; its own words are typed in the topic |
@@ -95,7 +95,7 @@ In the profile's `config.env` (`herdrchat status` prints where it is):
 | `HERDR_HISTORY` | both | `file,folded` | what a new room gets of the conversation before it: `file`, `folded`, both, or empty |
 | `FEISHU_APP_ID`, `FEISHU_APP_SECRET` | Feishu | (required) | the Feishu app |
 | `FEISHU_OWNER_OPEN_ID` | Feishu | (empty) | you; the bot tells you yours when you message it |
-| `HERDR_BOT_TAGS` | Feishu | `on` | the session or machine tag and `ended` next to a group's name |
+| `HERDR_BOT_TAGS` | Feishu | `on` | the `herdr` tag next to a group's name, and `herdr-ended` once its terminal is gone |
 | `HERDR_USER_TAGS` | Feishu | `on` | your sidebar labels, once `/auth` is done |
 | `TELEGRAM_BOT_TOKEN` | Telegram | (required) | the bot's token from @BotFather |
 | `TELEGRAM_OWNER_ID` | Telegram | (empty) | you; the bot tells you yours when you message it |
@@ -494,15 +494,14 @@ Then:
   some spaces, comma-separated; a change applies both ways at the next start), so only the
   overview in the direct chat rings ("What rings: the overview, sent anew" above;
   `HERDR_SILENT_SPACES` rings nothing);
-- each group is also in one of your own labels (the session or machine; `ended` once
-  the terminal is gone), to filter the chat list by, and in one label for all of them,
-  `herdr`. To keep the bot's groups out of the message list, so it holds only the direct
-  chat (which rings for what needs you) and your other chats: right click `herdr` >
+- each group is also in your own label `herdr`, and once its terminal is gone in
+  `herdr-ended` too (the same two names as the bot's tags), to filter the chat list by.
+  To keep the bot's groups out of the message list, so it holds only the direct chat
+  (which rings for what needs you) and your other chats: right click `herdr` >
   消息展示设置 > 始终不展示 (or 有新消息时展示), once; new groups go into it by themselves
   (Feishu 5.29 or later; a bot cannot set this). Your labels need `/auth`: without it a
-  group cannot leave the message list. The bot tags stay, since only they
-  show next to a group's name, and an ended group keeps its `ended` tag too (the tag is
-  what shows without `/auth`). Either can be turned off: `HERDR_USER_TAGS=off` takes the
+  group cannot leave the message list. The bot's tags show next to a group's name, with
+  `/auth` or without. Either can be turned off: `HERDR_USER_TAGS=off` takes the
   groups out of your labels (the labels stay), `HERDR_BOT_TAGS=off` takes the bot's tags
   off (they are tenant tags, visible to the whole tenant);
 - the group that needs you is pinned until it no longer does.
@@ -543,8 +542,6 @@ before it is started again. Tokens and secrets are never logged. The skill's
 - Only text, images and rich text are passed on; files, stickers and the rest are not.
 - An image that fails to upload three times is not sent; the group says so and why.
 - Feishu only, not Lark (the international version) yet: the bot talks to open.feishu.cn.
-- Feishu takes tag names of at most 16 characters; a longer session or machine name is cut
-  at its last `-`, `_` or `.` that fits (`build-agent-server` becomes `build-agent`).
 - Avatars are drawn with `sips`, so only on macOS; elsewhere groups keep Feishu's default.
 - Telegram: a bot cannot mute a topic for you; a topic you mute in Telegram stays fully
   quiet, "needs you" included. Closing a topic is documented for supergroups only, so an

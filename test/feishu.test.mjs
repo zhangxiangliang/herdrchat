@@ -113,7 +113,7 @@ test('a post is quoted by its first line with words, not by its footer', () => {
   assert.equal(summaryOf('x'.repeat(100)).length, 80);
 });
 
-test('an ended group gets the "ended" tag, in your "ended" label or not', async () => {
+test('bot tags: "herdr" on every group, "herdr-ended" too once ended (with /auth or not); a tag from before is taken off for them', async () => {
   const { createDecor } = await import('../lib/chats/feishu/rooms/decor.mjs');
   const calls = [];
   const ok = async () => ({ code: 0 });
@@ -121,29 +121,33 @@ test('an ended group gets the "ended" tag, in your "ended" label or not', async 
     tag: { create: async ({ data }) => ({ code: 0, data: { id: `tag-${data.create_tag.name}` } }) },
     bizEntityTagRelation: { create: async ({ data }) => { calls.push(['bind', data.tag_ids[0]]); return ok(); }, update: async ({ data }) => { calls.push(['unbind', data.tag_ids[0]]); return ok(); } },
   } } };
-  let state = { chats: {}, tags: { herdrchat: 'tag-herdrchat' } };
+  // from before: a tag per session, and "ended"
+  let state = { chats: {}, tags: { herdrchat: 'tag-herdrchat', '#ended': 'tag-ended' } };
   const store = { read: () => JSON.parse(JSON.stringify(state)), write: (s) => { state = JSON.parse(JSON.stringify(s)); } };
   const entryFor = (record) => { let r = record; return { get: () => r, set: (f) => { r = { ...r, ...f }; } }; };
   const quiet = () => {};
-  let asYou = true;
-  const decor = createDecor({ client, cfg: { botTags: true, userTags: true }, store, log: quiet, logError: (...a) => { throw new Error(a.join(' ')); }, userAuth: {}, asYou: async () => asYou });
-  // acting as you: your label says "ended", and so does the tag
-  const labelled = entryFor({ chat: 'oc_1', name: 'herdrchat / x', tag: 'tag-herdrchat', ended: true, endedTag: false });
-  await decor.botTags(labelled, 'herdrchat');
-  assert.deepEqual(calls, [['bind', 'tag-ended']]);
-  assert.equal(labelled.get().endedTag, true);
-  // not acting as you: the same
-  asYou = false;
+  const cfg = { botTags: true, userTags: true };
+  const decor = createDecor({ client, cfg, store, log: quiet, logError: (...a) => { throw new Error(a.join(' ')); }, userAuth: {}, asYou: async () => true });
+  const old = entryFor({ chat: 'oc_1', name: 'herdrchat / x', tag: 'tag-herdrchat', ended: true, endedTag: true });
+  await decor.botTags(old);
+  assert.deepEqual(calls, [['unbind', 'tag-herdrchat'], ['bind', 'tag-herdr'], ['unbind', 'tag-ended'], ['bind', 'tag-herdr-ended']]);
+  assert.deepEqual([old.get().tag, old.get().endedTag], ['tag-herdr', 'tag-herdr-ended']);
   calls.length = 0;
-  const alone = entryFor({ chat: 'oc_2', name: 'herdrchat / y', tag: 'tag-herdrchat', ended: true, endedTag: false });
-  await decor.botTags(alone, 'herdrchat');
-  assert.deepEqual(calls, [['bind', 'tag-ended']]);
+  const live = entryFor({ chat: 'oc_2', name: 'herdrchat / y' });
+  await decor.botTags(live);
+  assert.deepEqual(calls, [['bind', 'tag-herdr']], 'live: "herdr" only');
+  calls.length = 0;
+  await decor.botTags(old);
+  assert.deepEqual(calls, [], 'nothing to change');
+  cfg.botTags = false;
+  await decor.botTags(old);
+  assert.deepEqual(calls, [['unbind', 'tag-herdr'], ['unbind', 'tag-herdr-ended']], 'off: both off');
 });
 
-test('acting as you, every group is in its own label and in "herdr" too, ended or not; off takes it out of both', async () => {
+test('acting as you, every group is in "herdr", an ended one in "herdr-ended" too; one in a label from before is taken out; off takes it out of both', async () => {
   const { createDecor } = await import('../lib/chats/feishu/rooms/decor.mjs');
   const calls = [];
-  const labels = { herdrchat: 'ofg_s', ended: 'ofg_e', herdr: 'ofg_all' };
+  const labels = { herdrchat: 'ofg_s', 'herdr-ended': 'ofg_e', herdr: 'ofg_all' };
   const userAuth = {
     feedGroups: async () => ({ groups: Object.entries(labels).map(([name, group_id]) => ({ name, group_id })) }),
     createFeedGroup: async () => { throw new Error('none made: all are there'); },
@@ -157,16 +161,22 @@ test('acting as you, every group is in its own label and in "herdr" too, ended o
   const cfg = { botTags: false, userTags: true };
   const decor = createDecor({ client: {}, cfg, store, log: quiet, logError: (...a) => { throw new Error(a.join(' ')); }, userAuth, asYou: async () => true });
   const live = entryFor({ chat: 'oc_1', name: 'herdrchat / x' });
-  await decor.userLabel(live, 'herdrchat');
-  assert.deepEqual(calls, [['add', 'ofg_s', 'oc_1'], ['add', 'ofg_all', 'oc_1']]);
+  await decor.userLabel(live);
+  assert.deepEqual(calls, [['add', 'ofg_all', 'oc_1']], 'a live group: "herdr" only');
   calls.length = 0;
-  await decor.userLabel(entryFor({ ...live.get(), ended: true }), 'herdrchat');
-  assert.deepEqual(calls, [['remove', 'ofg_s', 'oc_1'], ['add', 'ofg_e', 'oc_1']], 'ended: its own label changes, "herdr" stays');
+  const before = entryFor({ chat: 'oc_2', name: 'herdrchat / y', label: 'herdrchat', inAll: true });
+  await decor.userLabel(before);
+  assert.deepEqual(calls, [['remove', 'ofg_s', 'oc_2']], 'out of the session label it had');
+  assert.equal(before.get().label, null);
+  calls.length = 0;
+  const ended = entryFor({ ...live.get(), ended: true });
+  await decor.userLabel(ended);
+  assert.deepEqual(calls, [['add', 'ofg_e', 'oc_1']], 'ended: "ended" too, "herdr" stays');
   calls.length = 0;
   cfg.userTags = false;
-  const off = entryFor({ ...live.get() });
-  await decor.userLabel(off, 'herdrchat');
-  assert.deepEqual(calls, [['remove', 'ofg_s', 'oc_1'], ['remove', 'ofg_all', 'oc_1']]);
+  const off = entryFor({ ...ended.get() });
+  await decor.userLabel(off);
+  assert.deepEqual(calls, [['remove', 'ofg_e', 'oc_1'], ['remove', 'ofg_all', 'oc_1']]);
   assert.deepEqual([off.get().label, off.get().inAll], [null, false]);
 });
 
