@@ -230,7 +230,9 @@ same three columns:
 
 First "waiting for you" (what asks you something and is not answered yet; the overview
 that rings for a "done" shows it there too, once), then a heading per machine and its
-table. A room's latest is kept from what it says; one with none yet gets the last answer
+table, what needs you first: needs you, error, working, done, then idle and terminals
+with no agent; within one state the one that spoke last first. (Telegram's lists order
+their spaces and tabs the same way.) A room's latest is kept from what it says; one with none yet gets the last answer
 in its agent's own records. A table shows ten rows a page; a card holds five tables, so a
 machine past them is a list. Telegram has no tables: the same as lists, each line its
 mark, its topic (a link), its state and its latest.

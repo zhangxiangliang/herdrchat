@@ -20,6 +20,16 @@ test('the overview\'s shape: what waits for you first, then by machine (this com
   ]);
 });
 
+test('what needs you comes first: needs you, error, working, done, idle, no agent; within one state the one that spoke last; a space by its most urgent tab', () => {
+  const row = (name, state, latestAt) => ({ name, address: 't1', state, latestAt, room: name });
+  const { machines } = groupsOf([
+    row('a / idle', 'idle', 9), row('a / done-old', 'done', 1), row('a / shell', undefined, 0),
+    row('b / done-new', 'done', 5), row('b / working', 'working', 2), row('c / asks', 'blocked', 0), row('c / broke', 'error', 3),
+  ]);
+  assert.deepEqual(machines[0].tabs.map((t) => t.name), ['c / asks', 'c / broke', 'b / working', 'b / done-new', 'a / done-old', 'a / idle', 'a / shell']);
+  assert.deepEqual(machines[0].spaces.map((s) => [s.space, s.tabs.map((t) => t.tab)]), [['c', ['asks', 'broke']], ['b', ['working', 'done-new']], ['a', ['done-old', 'idle', 'shell']]]);
+});
+
 test('the Feishu overview: what waits for you, then a heading and a table per machine, every table Room / State / Latest', () => {
   const at = Date.UTC(2026, 0, 1, 9, 30);
   const rows = ROWS.map((r) => (r.name === 'alpha / build' ? { ...r, latest: 'Building it now', latestAt: at } : r));
@@ -37,8 +47,8 @@ test('the Feishu overview: what waits for you, then a heading and a table per ma
   assert.deepEqual(elements[3].rows, [
     { room: 'alpha / build', state: [{ text: 'working', color: 'blue' }], latest: `${clock}: Building it now` },
     { room: '[alpha / docs](https://applink.feishu.cn/client/chat/open?openChatId=oc_a)', state: [{ text: 'done', color: 'green' }], latest: '' },
-    { room: 'alpha / shell', state: [{ text: 'zsh', color: 'neutral' }], latest: '' },
     { room: '[gamma / master](https://applink.feishu.cn/client/chat/open?openChatId=oc_g)', state: [{ text: 'idle', color: 'neutral' }], latest: '' },
+    { room: 'alpha / shell', state: [{ text: 'zsh', color: 'neutral' }], latest: '' },
   ]);
   assert.equal(elements[4].content, '### box');
   assert.deepEqual(elements[5].rows, [{ room: '[beta / 1](https://applink.feishu.cn/client/chat/open?openChatId=oc_b)', state: [{ text: 'needs you', color: 'orange' }], latest: '' }]);
@@ -81,5 +91,5 @@ test('a name in a table cell or a link keeps its own marks; only what would brea
     { name: 'worker / T1_ABC-2', address: 't6j', state: 'done', room: 'oc_a' },
     { name: 'a*b / [x]', address: 't7', program: 'my_prog <x>' },
   ]);
-  assert.deepEqual(table.rows.map((r) => r.room), ['a*b / x', '[worker / T1_ABC-2](https://applink.feishu.cn/client/chat/open?openChatId=oc_a)']);
+  assert.deepEqual(table.rows.map((r) => r.room), ['[worker / T1_ABC-2](https://applink.feishu.cn/client/chat/open?openChatId=oc_a)', 'a*b / x']);
 });
