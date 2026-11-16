@@ -1,3 +1,12 @@
+# [1.18.0](https://github.com/zhangxiangliang/herdrchat/compare/v1.17.0...v1.18.0) (2026-11-16)
+
+
+### Features
+
+* the overview puts what needs you first ([594b2e8](https://github.com/zhangxiangliang/herdrchat/commit/594b2e8fe82d5b53952ce223a70a092d98f2d817))
+* two tags and two labels only, "herdr" and "herdr-ended" ([96ba12b](https://github.com/zhangxiangliang/herdrchat/commit/96ba12b37b881613ec0635e55fbfe40b6622df73))
+* what looks like a secret is hidden before it is posted or logged ([801b699](https://github.com/zhangxiangliang/herdrchat/commit/801b699854aa14223dddbd2efb2912f653d5c13e))
+
 # [1.17.0](https://github.com/zhangxiangliang/herdrchat/compare/v1.16.1...v1.17.0) (2026-11-16)
 
 
