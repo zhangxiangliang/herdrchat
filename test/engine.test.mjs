@@ -1540,6 +1540,31 @@ test('a note\'s line has the marks of its markdown taken off, a word\'s own _ ke
   assert.equal(lineOf([{ kind: 'plain', text: 'Allow *this*?' }]), 'Allow *this*?', 'plain text is as it is');
 });
 
+test('what this bot sent, tagged by hc with its process id on the way to another machine, is yours: not posted again, and never "From"', async () => {
+  const t = terminal('t1', { program: 'fake', agent: true });
+  const { chat, hc, store, engine, r, done } = await setup([t]);
+  const room = rooms(store)['s|t1'].chat;
+  assert.ok(store.read().botPids.includes(process.pid), 'its process id is kept');
+  await engine.onMessage({ room, where: room, message: 'm-1', text: 'fix it', images: [] });
+  r.queue('t1', [
+    { role: 'you', text: `<hc from="m1/ppid:${process.pid}">fix it</hc>`, at: '2026-01-02T00:00:01.000Z', id: 'a' },
+    { role: 'you', text: '<hc from="m1/ppid:4242">sent before a restart</hc>', at: '2026-01-02T00:00:02.000Z', id: 'b' },
+    { role: 'you', text: '<hc from="m1/ppid:7">a script\'s</hc>', at: '2026-01-02T00:00:03.000Z', id: 'c' },
+    { role: 'ai', text: 'Done.', at: '2026-01-02T00:00:04.000Z', id: 'd', end: true },
+  ]);
+  const state = store.read();
+  state.botPids = [4242, ...state.botPids];
+  store.write(state);
+  hc.turn('s', 't1', 'done');
+  await settle(engine);
+  const shown = chat.calls.filter((c) => ['post', 'postCard', 'editCard'].includes(c.name)).map((c) => JSON.stringify(c.args)).join('\n');
+  assert.ok(!/fix it/.test(shown), 'what you sent from the room is not posted again');
+  assert.match(shown, /"kind":"you","text":"sent before a restart"/, 'yours, by an id it ran as before');
+  assert.ok(!/ppid:4242/.test(shown));
+  assert.match(shown, /"kind":"you","text":"a script's","from":"m1\/ppid:7"/, 'another program\'s stays from it');
+  done();
+});
+
 test('Telegram: herdr\'s own topic is the direct chat, a command from outside any topic is answered there, and an overview from before it is not edited in place', async () => {
   const telegram = await import('../lib/chats/telegram/index.mjs');
   const store = fakeStore();
