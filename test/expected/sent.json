@@ -888,6 +888,19 @@
       "body": {
         "chat_id": "42",
         "message_thread_id": 77,
+        "disable_notification": true,
+        "link_preview_options": {
+          "is_disabled": true
+        },
+        "text": "📌 Pin this topic so the other topics do not push it down: in the topic list, long-press (right-click on a computer) 📋 herdr, then Pin. A bot cannot do it for you.",
+        "parse_mode": "HTML"
+      }
+    },
+    {
+      "method": "sendMessage",
+      "body": {
+        "chat_id": "42",
+        "message_thread_id": 77,
         "disable_notification": false,
         "link_preview_options": {
           "is_disabled": true
@@ -936,7 +949,7 @@
       "method": "editMessageText",
       "body": {
         "chat_id": "42",
-        "message_id": 11,
+        "message_id": 12,
         "text": "✓ <b>work / master</b> · handled · 10:00\n<i>Fixed *it* &lt;now&gt;.</i>\n<i>you replied · 10:03</i>",
         "parse_mode": "HTML",
         "link_preview_options": {
@@ -948,7 +961,7 @@
       "method": "editMessageText",
       "body": {
         "chat_id": "42",
-        "message_id": 12,
+        "message_id": 13,
         "text": "An old overview. The new one is further down.",
         "parse_mode": "HTML",
         "link_preview_options": {
@@ -1594,7 +1607,7 @@
         "link_preview_options": {
           "is_disabled": true
         },
-        "text": "<b>herdrchat · 1 terminals</b>\n\n<b>This computer</b>\n• <b>proj</b>\n      ◦ master · idle",
+        "text": "📌 Pin this topic so the other topics do not push it down: in the topic list, long-press (right-click on a computer) 📋 herdr, then Pin. A bot cannot do it for you.",
         "parse_mode": "HTML"
       }
     },
@@ -1616,11 +1629,11 @@
       "body": {
         "chat_id": "42",
         "message_thread_id": 77,
-        "disable_notification": false,
+        "disable_notification": true,
         "link_preview_options": {
           "is_disabled": true
         },
-        "text": "<b>herdrchat · 1 terminals</b>\n\n<b>Waiting for you</b>\n• <b>proj / master</b> · ⚠️ needs you\n\n<b>This computer</b>\n• <b>proj</b>\n      ◦ master · idle",
+        "text": "<b>herdrchat · 1 terminals</b>\n\n<b>This computer</b>\n• <b>proj</b>\n      ◦ master · idle",
         "parse_mode": "HTML"
       }
     },
@@ -1638,15 +1651,16 @@
       }
     },
     {
-      "method": "editMessageText",
+      "method": "sendMessage",
       "body": {
         "chat_id": "42",
-        "message_id": 5,
-        "text": "An old overview. The new one is further down.",
-        "parse_mode": "HTML",
+        "message_thread_id": 77,
+        "disable_notification": false,
         "link_preview_options": {
           "is_disabled": true
-        }
+        },
+        "text": "<b>herdrchat · 1 terminals</b>\n\n<b>Waiting for you</b>\n• <b>proj / master</b> · ⚠️ needs you\n\n<b>This computer</b>\n• <b>proj</b>\n      ◦ master · idle",
+        "parse_mode": "HTML"
       }
     },
     {
@@ -1656,6 +1670,18 @@
         "message_thread_id": "77",
         "disable_notification": "true",
         "photo": "(file image.png)"
+      }
+    },
+    {
+      "method": "editMessageText",
+      "body": {
+        "chat_id": "42",
+        "message_id": 7,
+        "text": "An old overview. The new one is further down.",
+        "parse_mode": "HTML",
+        "link_preview_options": {
+          "is_disabled": true
+        }
       }
     },
     {
@@ -1735,7 +1761,7 @@
       "method": "editMessageText",
       "body": {
         "chat_id": "42",
-        "message_id": 7,
+        "message_id": 9,
         "text": "✓ <b>proj / master</b> · handled · <time>\n<i>a newer note is below · <time></i>",
         "parse_mode": "HTML",
         "link_preview_options": {
@@ -1747,7 +1773,7 @@
       "method": "pinChatMessage",
       "body": {
         "chat_id": "42",
-        "message_id": 14,
+        "message_id": 15,
         "disable_notification": true
       }
     },
@@ -1755,7 +1781,7 @@
       "method": "editMessageText",
       "body": {
         "chat_id": "42",
-        "message_id": 13,
+        "message_id": 14,
         "text": "<b>⚠️ 1 needs you · herdrchat · 1 terminals</b>\n\n<b>This computer</b>\n• <b>proj</b>\n      ◦ master · ⚠️ needs you · <i><time>: Fixed it: T1_ABC &lt;now&gt; &amp; done.</i>",
         "parse_mode": "HTML",
         "link_preview_options": {
@@ -1767,14 +1793,14 @@
       "method": "unpinChatMessage",
       "body": {
         "chat_id": "42",
-        "message_id": 14
+        "message_id": 15
       }
     },
     {
       "method": "editMessageText",
       "body": {
         "chat_id": "42",
-        "message_id": 13,
+        "message_id": 14,
         "text": "<b>herdrchat · 1 terminals</b>\n\n<b>This computer</b>\n• <b>proj</b>\n      ◦ master · ⏳ working · <i><time>: Allow ls?</i>",
         "parse_mode": "HTML",
         "link_preview_options": {
@@ -1786,7 +1812,7 @@
       "method": "editMessageText",
       "body": {
         "chat_id": "42",
-        "message_id": 14,
+        "message_id": 15,
         "text": "<b>✅ Done</b>\n\n╭──────╮\nAllow ls?\n\n<b>✔ Answered.</b>\n\n<i>fake-agent · screen · main</i>",
         "parse_mode": "HTML",
         "link_preview_options": {
@@ -1826,7 +1852,7 @@
       "method": "editMessageText",
       "body": {
         "chat_id": "42",
-        "message_id": 13,
+        "message_id": 14,
         "text": "✅ <b>proj / master</b> · done · <time>\n<i>Fixed it: T1_ABC &lt;now&gt; &amp; done.</i>",
         "parse_mode": "HTML",
         "link_preview_options": {
@@ -1851,7 +1877,7 @@
       "method": "editMessageText",
       "body": {
         "chat_id": "42",
-        "message_id": 21,
+        "message_id": 22,
         "text": "<b>herdrchat · 0 terminals</b>\n\nNo terminal is shown in herdr-app.",
         "parse_mode": "HTML",
         "link_preview_options": {

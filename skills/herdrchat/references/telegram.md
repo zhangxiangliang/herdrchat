@@ -69,7 +69,7 @@ mutes the overview too; `HERDR_SILENT_SPACES` quiets a whole space without that.
 | a text box on a dialog card | type the answer in the topic |
 | puts the group that needs you on top of the overview | pins the dialog card in its topic until it is answered |
 | tags, labels, `/auth` | none (a bot cannot act as the user) |
-| the direct chat | a topic of the bot's own, `📋 herdr` (made at the first start, again if deleted): the overview, its records, the commands and their answers; outside any topic they would be lost in "All Messages". The user can pin it; a bot cannot |
+| the direct chat | a topic of the bot's own, `📋 herdr` (made at the first start, again if deleted): the overview, its records, the commands and their answers; outside any topic they would be lost in "All Messages". The user can pin it; a bot cannot, so a new one asks the user to, once |
 | `/` commands: typed | `/` shows a menu: ls, new, kill, screen, answer, esc, history |
 
 ## When something is off

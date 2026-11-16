@@ -65,7 +65,7 @@ Both do the same things; where an app cannot, something stands in.
 | a tab | a group | a topic in the bot's private chat |
 | a space | an avatar (its letter, its color) | a topic icon color |
 | an ended terminal | the `herdr-ended` tag | 🔚 before the topic's name |
-| the direct chat | the overview card (sent anew when something rings), commands typed or from the bot menu (set in the console) | the `📋 herdr` topic: the overview, commands with the `/` list (one sent outside any topic is answered in `📋 herdr`; one Telegram made a new topic of is answered there). A topic you deleted is made again. Pin it in Telegram to keep it on top (a bot cannot) |
+| the direct chat | the overview card (sent anew when something rings), commands typed or from the bot menu (set in the console) | the `📋 herdr` topic: the overview, commands with the `/` list (one sent outside any topic is answered in `📋 herdr`; one Telegram made a new topic of is answered there). A topic you deleted is made again. Pin it in Telegram to keep it on top (a bot cannot; a new topic asks you to, once) |
 | what it says while working | one live card per turn, edited | one live message per turn, edited |
 | a dialog | a card with buttons, a text box for its own words | a message with buttons; its own words are typed in the topic |
 | needs you | the overview sent anew, the group on top of it | the dialog card pinned in its topic, the overview sent anew |

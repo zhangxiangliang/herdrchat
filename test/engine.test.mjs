@@ -5,7 +5,7 @@ import path from 'node:path';
 import test, { after } from 'node:test';
 import { createEngine } from '../lib/core/engine.mjs';
 import { checkChat } from '../lib/chats/contract.mjs';
-import { footer } from '../lib/core/words.mjs';
+import { footer, PIN_HOME } from '../lib/core/words.mjs';
 import { fakeChat, fakeHc, fakeReaders, fakeStore, said, terminal } from './fakes.mjs';
 
 const quiet = () => {};
@@ -514,8 +514,8 @@ test('Telegram posts silently only in muted spaces; the overview, in herdr\'s ow
     assert.equal(second.old, first.message);
     await chat.showRecord(second.message, [{ ...note, name: 'work / master', room: '11', handled: { how: 'answered', at: Date.UTC(2026, 0, 1, 12, 3) } }]);
     const messages = sent.filter((x) => x.method === 'sendMessage').map((x) => [x.body.message_thread_id, x.body.disable_notification, x.body.text.split('\n')[0]]);
-    assert.deepEqual(messages, [[11, true, 'in a muted space'], [13, false, 'in a loud space'], [900, true, '<b>⚠️ 1 needs you · herdrchat · 2 terminals</b>'], [900, false, '<b>⚠️ 1 needs you · herdrchat · 2 terminals</b>']], 'the overview in herdr\'s own topic');
-    assert.deepEqual(sent.filter((x) => x.method === 'createForumTopic').map((x) => x.body.name), ['📋 herdr'], 'made once');
+    assert.deepEqual(messages, [[11, true, 'in a muted space'], [13, false, 'in a loud space'], [900, true, PIN_HOME], [900, true, '<b>⚠️ 1 needs you · herdrchat · 2 terminals</b>'], [900, false, '<b>⚠️ 1 needs you · herdrchat · 2 terminals</b>']], 'the overview in herdr\'s own topic');
+    assert.deepEqual(sent.filter((x) => x.method === 'createForumTopic').map((x) => x.body.name), ['📋 herdr'], 'made once, and asks once to be pinned');
     assert.equal(store.read().homeTopic, '900');
     assert.equal(sent.filter((x) => x.method === 'deleteMessage').length, 0, 'nothing deleted');
     const edit = sent.find((x) => x.method === 'editMessageText').body;
