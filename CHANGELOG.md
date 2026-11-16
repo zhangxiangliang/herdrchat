@@ -1,3 +1,10 @@
+# [1.19.0](https://github.com/zhangxiangliang/herdrchat/compare/v1.18.0...v1.19.0) (2026-11-16)
+
+
+### Features
+
+* the bot no longer pins a Feishu group ([78d605f](https://github.com/zhangxiangliang/herdrchat/commit/78d605fcb62dc6b63ae87f14627c2267f5623b2d))
+
 # [1.18.0](https://github.com/zhangxiangliang/herdrchat/compare/v1.17.0...v1.18.0) (2026-11-16)
 
 
