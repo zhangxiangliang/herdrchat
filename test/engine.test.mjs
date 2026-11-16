@@ -1477,6 +1477,28 @@ test('/kill in a terminal\'s room ends that terminal, with no address to give', 
   done();
 });
 
+test('a reader that fails on another machine posts no screen: the sweep posts what it said, once, when that machine answers', async () => {
+  const t = terminal('box/t1', { program: 'fake', agent: true });
+  // errors only logged, as in the bot (the tests' own logError throws)
+  const { chat, hc, engine, r, done } = await setup([t], { logError: quiet });
+  const after = r.reader.after;
+  let down = true;
+  r.reader.after = async (...a) => {
+    if (down) throw new Error('hc exec --on box: {"error":{"kind":"unavailable"}}');
+    return after(...a);
+  };
+  hc.screens.set('s|box/t1', 'some screen\n❯ ');
+  r.queue('box/t1', [{ role: 'ai', text: 'Found it.', at: '2026-01-02T00:00:01.000Z', id: 'a', end: true }]);
+  hc.turn('s', 'box/t1', 'done');
+  await settle(engine);
+  assert.deepEqual(chat.of('post').map((c) => said(c.args[1])), [], 'no screen while its machine does not answer');
+  down = false;
+  engine.tick.sweep();
+  await settle(engine);
+  assert.deepEqual(chat.of('post').map((c) => said(c.args[1])), ['Found it.']);
+  done();
+});
+
 test('the overview shows each room\'s latest line, in a silent space too', async () => {
   const t = terminal('t1', { program: 'fake', agent: true });
   const { chat, hc, engine, r, done } = await setup([t], { cfg: { silent: { all: true, spaces: [] } } });
