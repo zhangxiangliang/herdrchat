@@ -496,8 +496,8 @@ Then:
   `HERDR_SILENT_SPACES` rings nothing);
 - each group is also in one of your own labels (the session or machine; `ended` once
   the terminal is gone), to filter the chat list by; the bot tags stay, since only they
-  show next to a group's name, but an ended group in your `ended` label gets no `ended`
-  tag (its header would show "ended" twice). Either can be turned off: `HERDR_USER_TAGS=off` takes the
+  show next to a group's name, and an ended group keeps its `ended` tag too (the tag is
+  what shows without `/auth`). Either can be turned off: `HERDR_USER_TAGS=off` takes the
   groups out of your labels (the labels stay), `HERDR_BOT_TAGS=off` takes the bot's tags
   off (they are tenant tags, visible to the whole tenant);
 - the group that needs you is pinned until it no longer does.

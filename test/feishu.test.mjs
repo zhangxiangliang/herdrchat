@@ -113,7 +113,7 @@ test('a post is quoted by its first line with words, not by its footer', () => {
   assert.equal(summaryOf('x'.repeat(100)).length, 80);
 });
 
-test('an ended group in your "ended" label gets no "ended" tag too; without your label it does', async () => {
+test('an ended group gets the "ended" tag, in your "ended" label or not', async () => {
   const { createDecor } = await import('../lib/chats/feishu/rooms/decor.mjs');
   const calls = [];
   const ok = async () => ({ code: 0 });
@@ -127,12 +127,12 @@ test('an ended group in your "ended" label gets no "ended" tag too; without your
   const quiet = () => {};
   let asYou = true;
   const decor = createDecor({ client, cfg: { botTags: true, userTags: true }, store, log: quiet, logError: (...a) => { throw new Error(a.join(' ')); }, userAuth: {}, asYou: async () => asYou });
-  // acting as you: the label says "ended", and an "ended" tag it had comes off
-  const labelled = entryFor({ chat: 'oc_1', name: 'herdrchat / x', tag: 'tag-herdrchat', ended: true, endedTag: true });
+  // acting as you: your label says "ended", and so does the tag
+  const labelled = entryFor({ chat: 'oc_1', name: 'herdrchat / x', tag: 'tag-herdrchat', ended: true, endedTag: false });
   await decor.botTags(labelled, 'herdrchat');
-  assert.deepEqual(calls, [['unbind', 'tag-ended']]);
-  assert.equal(labelled.get().endedTag, false);
-  // not acting as you: the tag is the only "ended" there is
+  assert.deepEqual(calls, [['bind', 'tag-ended']]);
+  assert.equal(labelled.get().endedTag, true);
+  // not acting as you: the same
   asYou = false;
   calls.length = 0;
   const alone = entryFor({ chat: 'oc_2', name: 'herdrchat / y', tag: 'tag-herdrchat', ended: true, endedTag: false });
