@@ -93,6 +93,8 @@ In the profile's `config.env` (`herdrchat status` prints where it is):
 | `HERDR_SILENT_SPACES` | both | (none) | spaces that ring nothing at all, not even "needs you" |
 | `HERDR_DONE_WAIT` | both | `60` | seconds a "done" waits before it rings (and a "needs you" while you are in that room); your message in its room, or the terminal moving on, meanwhile means you saw it and nothing rings. `0`: at once |
 | `HERDR_HISTORY` | both | `file,folded` | what a new room gets of the conversation before it: `file`, `folded`, both, or empty |
+| `HERDR_REDACT` | both | `on` | what goes to the chat app (and the log) is hidden where it looks like a secret; see "Secrets are hidden" below. `off`: nothing is |
+| `HERDR_REDACT_WORDS` | both | (none) | words hidden too, comma-separated: a client's name, a codename |
 | `FEISHU_APP_ID`, `FEISHU_APP_SECRET` | Feishu | (required) | the Feishu app |
 | `FEISHU_OWNER_OPEN_ID` | Feishu | (empty) | you; the bot tells you yours when you message it |
 | `HERDR_BOT_TAGS` | Feishu | `on` | the `herdr` tag next to a group's name, and `herdr-ended` once its terminal is gone |
@@ -323,6 +325,29 @@ arrows to the option and presses Enter, and the card turns into what it asks nex
 you type meanwhile waits and goes in once it has started: typed in, its Enter would pick
 the option under the cursor (Claude's is "No, exit"). The card closes as the agent comes
 up, and says so when the terminal ended instead.
+
+## Secrets are hidden
+
+What is posted is kept on the chat app's servers, and a Feishu tenant's admins may read
+it; a bot's chat in Telegram is not end-to-end encrypted. So before anything goes out (a
+post, a card, a dialog, the conversation's file, the overview, its records), and before
+anything is logged, what looks like a secret is hidden: `[hidden: GitHub token]`. The log
+says only what kind was hidden, never what it was.
+
+| Hidden | For example |
+|---|---|
+| a key with a shape of its own | `sk-…` (OpenAI, Anthropic), `ghp_…`, `github_pat_…`, `glpat-…`, `xoxb-…`, `AKIA…`, `AIza…`, `sk_live_…`, `npm_…`, a Telegram bot token, a JWT |
+| a private key | the whole `-----BEGIN … PRIVATE KEY-----` block |
+| a value given to a name that says secret | `API_KEY=…`, `"client_secret": "…"`, `password: …` (the name stays; a number alone is a count, not a secret) |
+| a header's or a URL's | `Authorization: Bearer …`, `postgres://user:…@host` |
+| the bot's own | the secrets and tokens in its `config.env`, wherever they show |
+| your words | `HERDR_REDACT_WORDS` |
+
+It is a safety net, not a guarantee: only what has such a shape is hidden (never a guess
+at random-looking text, which commit ids and UUIDs look like too), so a password said in
+plain words still goes, and so does one in an image. What was posted before is left as it
+was, the agent itself sees everything, and what you type in a room goes to it as it is.
+`HERDR_REDACT=off` hides nothing.
 
 ## Nothing is lost
 

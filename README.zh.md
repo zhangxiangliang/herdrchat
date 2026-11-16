@@ -118,6 +118,7 @@ herdrchat update 1.10.2          # 退回到这个版本
 - 只有 `config.env` 里设置的 owner 能往你的终端里输入；其他人发的都会被忽略。
 - 飞书的 App Secret、Telegram 的 bot token 要像密码一样保管：谁拿到了，谁就能操作你的终端。
 - 飞书里 bot 打的标签，你整个团队都看得见（`HERDR_BOT_TAGS=off` 可以关掉）。
+- 看起来像密钥的内容（API key、token、私钥、`PASSWORD=…`）在发出去和写日志之前会被遮掉；这是一道安全网，不保证百分之百（见 docs/guide.md 的 "Secrets are hidden"）。
 - 装了 `herdrchat hooks install` 之后，在聊天里点一下就能批准 Claude Code 或 Codex 要做的事，和在终端里按键一样。
 
 ## 卸载

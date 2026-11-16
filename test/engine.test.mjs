@@ -1625,3 +1625,30 @@ test('a "done" kept waiting from before is let go at start, with nothing rung', 
   assert.equal(rang(chat).length, 0);
   engine.stop();
 });
+
+test('a secret an agent says is hidden in its room, in the overview\'s latest and in what rang; the log says only what kind was hidden', async () => {
+  const t = terminal('t1', { program: 'fake', agent: true });
+  const logs = [];
+  const chat = fakeChat();
+  const hc = fakeHc();
+  const store = fakeStore();
+  const r = fakeReaders();
+  const engine = createEngine({ cfg: { sessions: ['s'], doneWaitMs: 0, env: {} }, chat, hc, readers: r.readers, store, log: (...a) => logs.push(a.join(' ')), logWarn: quiet, logError: quiet, startedAt: '2026-01-01T00:00:00.000Z', inbox: os.tmpdir(), quick: true });
+  running.add(engine);
+  const started = engine.start();
+  hc.snapshot('s', [t]);
+  await started;
+  await settle(engine);
+  const token = 'ghp_AbCdEfGhIjKlMnOpQrStUvWxYz0123456789';
+  answer(r, hc, `Use ${token} to push.`, 1);
+  await pause(60);
+  await settle(engine);
+  const sent = JSON.stringify(chat.calls.filter((c) => c.name !== 'start').map((c) => c.args));
+  assert.ok(!sent.includes(token), 'nothing the chat app got holds it');
+  assert.match(said(chat.of('post').at(-1).args[1]), /Use \[hidden: GitHub token\] to push\./);
+  const row = chat.of('showOverview').at(-1).args[0].find((x) => x.address === 't1');
+  assert.equal(row.latest, 'Use [hidden: GitHub token] to push.');
+  assert.ok(logs.some((l) => /hidden in post: GitHub token ×1/.test(l)));
+  assert.ok(!logs.join('\n').includes(token), 'nor the log');
+  engine.stop();
+});

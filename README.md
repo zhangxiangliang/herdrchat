@@ -152,6 +152,9 @@ them. `herdrchat status` prints both.
   can drive your terminals.
 - On Feishu, the bot's tags are visible to your whole team (`HERDR_BOT_TAGS=off` turns
   them off).
+- What looks like a secret (an API key, a token, a private key, `PASSWORD=…`) is hidden
+  before it is posted or logged; it is a safety net, not a guarantee (docs/guide.md,
+  "Secrets are hidden").
 - With `herdrchat hooks install`, a tap in the chat can allow what Claude Code or Codex
   asks to do, as a key in the terminal can.
 
