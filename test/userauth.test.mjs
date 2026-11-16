@@ -11,7 +11,7 @@ test('without /auth the bot does nothing as you: no token, no calls', async () =
     const ua = createUserAuth({ appId: 'cli_test', appSecret: 'secret' }, dir);
     assert.equal(await ua.allowed(), false);
     assert.equal(await ua.setMuted(['oc_x'], true), null);
-    assert.equal(await ua.pin('oc_x'), null);
+    assert.equal(await ua.unpin('oc_x'), null);
     assert.equal(await ua.addToFeedGroup('ofg_x', ['oc_x']), null);
   } finally {
     fs.rmSync(dir, { recursive: true, force: true });

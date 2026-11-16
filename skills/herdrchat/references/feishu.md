@@ -138,7 +138,7 @@ bot needs no restart: it always listens for the menu's event.
    | Overview | `ls` | a new overview of every terminal at the bottom of the chat (`/ls`) |
    | Usage | `usage` | every account's limits on every machine (`/usage`) |
    | Help | `help` | every command, for the direct chat and for a terminal's group |
-   | Act as me | `auth` | lets the bot mute, label and pin its groups in your chat list (`/auth`) |
+   | Act as me | `auth` | lets the bot mute and label its groups in your chat list (`/auth`) |
 3. Read each item back before 保存: click it in the phone preview and check its name,
    that 推送事件 is checked, and its key. On a new item the radio can show 推送事件 while
    the link fields are still there; click 跳转至指定链接, then 推送事件 again, and the
@@ -171,7 +171,6 @@ Bot identity (the bot itself) and user identity (only for `/auth`, acting as the
       "im:chat.user_setting:write",
       "im:feed_group_v1:read",
       "im:feed_group_v1:write",
-      "im:feed.shortcut:write",
       "offline_access"
     ]
   }

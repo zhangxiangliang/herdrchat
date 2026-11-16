@@ -180,6 +180,21 @@ test('acting as you, every group is in "herdr", an ended one in "herdr-ended" to
   assert.deepEqual([off.get().label, off.get().inAll], [null, false]);
 });
 
+test('acting as you, no group is pinned (a pin is yours); a pin an older version left is taken off', async () => {
+  const { createGroups } = await import('../lib/chats/feishu/rooms/groups.mjs');
+  const calls = [];
+  const userAuth = new Proxy({}, { get: (_, name) => async (...a) => { calls.push([name, ...a]); } });
+  let state = { chats: { 's|t1': { chat: 'oc_1' }, 's|t2': { chat: 'oc_2' } }, pinned: { 's|t2': 'oc_2' } };
+  const store = { read: () => JSON.parse(JSON.stringify(state)), write: (s) => { state = JSON.parse(JSON.stringify(s)); } };
+  const groups = createGroups({ client: {}, cfg: {}, store, logError: (...a) => { throw new Error(a.join(' ')); }, lane: () => {}, userAuth, asYou: async () => true, decor: {} });
+  await groups.pin('s|t1', 'oc_1', 'om_1');
+  assert.deepEqual(calls, [], 'nothing pinned');
+  assert.deepEqual(groups.pinned(), ['s|t2']);
+  await groups.unpin('s|t2');
+  assert.deepEqual(calls, [['unpin', 'oc_2']]);
+  assert.deepEqual(groups.pinned(), []);
+});
+
 test('a post\'s blocks as a Feishu card\'s markdown: a screen in a code block', () => {
   assert.equal(markdownOf([{ kind: 'text', markdown: 'Esc pressed.' }, { kind: 'screen', text: '$ ls\nREADME.md' }]), 'Esc pressed.\n\n```\n$ ls\nREADME.md\n```');
   assert.equal(markdownOf('as it is'), 'as it is');

@@ -68,7 +68,7 @@ Both do the same things; where an app cannot, something stands in.
 | the direct chat | the overview card (sent anew when something rings), commands typed or from the bot menu (set in the console) | the `📋 herdr` topic: the overview, commands with the `/` list (one sent outside any topic is answered in `📋 herdr`; one Telegram made a new topic of is answered there). A topic you deleted is made again. Pin it in Telegram to keep it on top (a bot cannot) |
 | what it says while working | one live card per turn, edited | one live message per turn, edited |
 | a dialog | a card with buttons, a text box for its own words | a message with buttons; its own words are typed in the topic |
-| needs you | the group pinned (after `/auth`), the overview sent anew | the dialog card pinned in its topic, the overview sent anew |
+| needs you | the overview sent anew, the group on top of it | the dialog card pinned in its topic, the overview sent anew |
 | the overview | "waiting for you" and a table per machine, each Room / State / Latest | the same as lists: a line per note, a bullet per space and a line per tab, each with its topic (a link), state and latest |
 | what rang | the card's summary (the lock screen) and the "waiting for you" table | the "waiting for you" lines, just under the title (a notification shows a message's first lines) |
 | an overview a newer one replaced | edited into the record of what it rang for, in full, never recalled | edited into the record of what it rang for, in full, never deleted |
@@ -79,7 +79,7 @@ Both do the same things; where an app cannot, something stands in.
 | your message marked | a reaction, then OK | 👀, then 👌 |
 | tags and labels (`HERDR_BOT_TAGS`, `HERDR_USER_TAGS`) | yes | none in Telegram |
 | messages while the bot is away | looked for and handled when it connects | kept by Telegram for 24 hours, handled when it connects |
-| acting as you (`/auth`) | mute, labels, pins | not needed: posts are silent by themselves |
+| acting as you (`/auth`) | mute, labels | not needed: posts are silent by themselves |
 
 ## Settings
 
@@ -367,7 +367,8 @@ was, the agent itself sees everything, and what you type in a room goes to it as
 - What does not get through (the network, a timeout, the service's own error) is never
   taken for a refusal: a live card is edited again with what came meanwhile, not sent a
   second time; closing it is tried again; the overview is shown again 30 seconds later;
-  a pin whose unpin did not get through is taken off at the next minute's look.
+  a pin whose unpin did not get through is taken off at the next minute's look
+  (Telegram's dialog card; a group an older version pinned on Feishu).
 - After a turn ends the bot waits for the agent's last answer (for Claude,
   `stop_reason: end_turn`); hc reports the end before the agent writes it.
 - Idle terminals with a reader are checked again at start, after every event snapshot and
@@ -530,11 +531,14 @@ Then:
   group cannot leave the message list. The bot's tags show next to a group's name, with
   `/auth` or without. Either can be turned off: `HERDR_USER_TAGS=off` takes the
   groups out of your labels (the labels stay), `HERDR_BOT_TAGS=off` takes the bot's tags
-  off (they are tenant tags, visible to the whole tenant);
-- the group that needs you is pinned until it no longer does.
+  off (they are tenant tags, visible to the whole tenant).
+
+No group is pinned: a pin is yours, and Feishu does not tell the bot's from yours, so
+the bot would take yours off with its own. Pin what you like; the bot leaves it. Pins
+an older version made are taken off once.
 
 The app needs these user scopes: `im:chat.user_setting:write`, `im:feed_group_v1:read`,
-`im:feed_group_v1:write`, `im:feed.shortcut:write`, `offline_access`. Without `/auth`
+`im:feed_group_v1:write`, `offline_access`. Without `/auth`
 none of this happens and everything else works the same. If the token can no longer be
 refreshed, the bot says so once and falls back.
 
