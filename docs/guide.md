@@ -226,7 +226,8 @@ same three columns:
 | State | a colored tag: needs you (orange), working (blue), done (green), error (red), idle (grey); with no agent, the program it runs |
 | Latest | the time and the first line of what it last said: `11:49: Fixed it.` (cut to fit; a tap shows it whole) |
 
-First "waiting for you" (the notes not handled yet), then a heading per machine and its
+First "waiting for you" (what asks you something and is not answered yet; the overview
+that rings for a "done" shows it there too, once), then a heading per machine and its
 table. A room's latest is kept from what it says; one with none yet gets the last answer
 in its agent's own records. A table shows ten rows a page; a card holds five tables, so a
 machine past them is a list. Telegram has no tables: the same as lists, each line its
@@ -239,11 +240,13 @@ mark, its topic (a link), its state and its latest.
   the chat keeps a history of what rang.
 - **needs you** rings at once: a dialog, or a message it did not start working on.
 - **done** waits `HERDR_DONE_WAIT` seconds (60 by default). If you send a message in that
-  room meanwhile, or the terminal works again, you were watching, and nothing rings.
+  room meanwhile, or the terminal works again, you were watching, and nothing rings. It
+  asks nothing of you, so it rings once and is not kept waiting for you: the room shows
+  done in its machine's table, with what it said.
 - **While you are in a room** (you wrote or tapped a card there in the last
   `HERDR_DONE_WAIT` seconds), a "needs you" from it waits the same way, and rings nothing
   if you answer meanwhile: answering one question after another does not ring each time.
-- A note is handled when the dialog is answered (from the card, the group or the
+- A "needs you" is handled when the dialog is answered (from the card, the group or the
   terminal), you send a message in its room, the terminal works again, or it ends. Its
   room leaves "waiting for you" (an edit, no ring). A room has one note at most: a newer
   one takes its place. Several notes within two seconds ring once.

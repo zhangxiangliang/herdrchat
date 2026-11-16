@@ -1311,7 +1311,7 @@ test('a "done" note waits HERDR_DONE_WAIT: your next message in its room meanwhi
   done();
 });
 
-test('a note sends the overview anew, which rings; the one before becomes the record of what it rang for, never recalled', async () => {
+test('a note sends the overview anew, which rings; the one before becomes the record of what it rang for, never recalled; a "done" rings once', async () => {
   const t = terminal('t1', { program: 'fake', agent: true });
   const { chat, hc, store, engine, r, done } = await setup([t], { cfg: { doneWaitMs: 100 } });
   const room = rooms(store)['s|t1'].chat;
@@ -1320,37 +1320,25 @@ test('a note sends the overview anew, which rings; the one before becomes the re
   await pause(200);
   await settle(engine);
   assert.deepEqual(rung(chat), ['done']);
-  assert.deepEqual(marked(chat), [['proj / master', 'done', 'Fixed it.']]);
+  assert.deepEqual(rang(chat)[0].args[0].filter((x) => x.note).map((x) => [x.note.kind, x.note.line]), [['done', 'Fixed it.']], 'the overview that rang says what for');
+  assert.deepEqual(marked(chat), [], 'a "done" asks nothing of you: it is not kept waiting');
+  assert.equal(store.read().notes?.['s|t1'], undefined);
   assert.deepEqual(records(chat), [[first, []]], 'the first overview rang for nothing: it says it is old');
   const ringing = chat.overview;
-  t.status = { ...t.status, state: 'working' };
-  hc.change('s', 'status', t);
-  await settle(engine);
-  assert.deepEqual(marked(chat), []);
-  assert.equal(rang(chat).length, 1, 'handled: an edit, no ring');
-  assert.equal(chat.overview, ringing);
-  t.status = { ...t.status, state: 'idle' };
-  hc.change('s', 'status', t);
   answer(r, hc, 'Done again.', 2);
   await pause(200);
   await settle(engine);
   assert.deepEqual(rung(chat), ['done', 'done']);
-  assert.deepEqual(records(chat).at(-1), [ringing, [['done', 'Fixed it.', 'working']]], 'the overview it replaced: what it rang for, handled');
+  assert.deepEqual(records(chat).at(-1), [ringing, [['done', 'Fixed it.', null]]], 'the overview it replaced: what it rang for');
   const newest = chat.overview;
-  await engine.onMessage({ room, where: room, message: 'm-2', text: 'ok', images: [] });
-  t.status = { ...t.status, state: 'working' }; // it took it (else its screen would ring)
-  hc.change('s', 'status', t);
-  await settle(engine);
-  assert.deepEqual(marked(chat), []);
-  assert.equal(chat.overview, newest);
-  assert.equal(records(chat).length, 2, 'the newest overview is not a record: its marks say it');
   await engine.onMessage({ room: null, where: 'dm', message: 'm-3', text: '/ls', images: [] });
   await settle(engine);
-  assert.deepEqual(records(chat).at(-1), [newest, [['done', 'Done again.', 'replied']]]);
+  assert.deepEqual(records(chat).at(-1), [newest, [['done', 'Done again.', null]]]);
+  void room;
   done();
 });
 
-test('a dialog rings at once and takes the place of the room\'s "done"; answered, its mark goes; a silent space rings nothing', async () => {
+test('a dialog rings at once; answered, its mark goes; a silent space rings nothing', async () => {
   const t = terminal('t1', { program: 'fake', agent: true });
   const { chat, hc, engine, r, done } = await setup([t]);
   answer(r, hc, 'Fixed it.', 1);
@@ -1361,7 +1349,7 @@ test('a dialog rings at once and takes the place of the room\'s "done"; answered
   await settle(engine);
   assert.deepEqual(rung(chat), ['done', 'needs']);
   assert.deepEqual(marked(chat), [['proj / master', 'needs', 'Allow ls?']]);
-  assert.deepEqual(records(chat).at(-1)[1], [['done', 'Fixed it.', 'replaced']]);
+  assert.deepEqual(records(chat).at(-1)[1], [['done', 'Fixed it.', null]]);
   t.status = { app: 'fake-agent', state: 'idle' }; // answered in the terminal
   hc.change('s', 'status', t);
   await settle(engine);
@@ -1457,7 +1445,7 @@ test('after a restart, a note that waited rings, a "needs you" whose terminal mo
   await pause(60);
   await settle(engine);
   assert.deepEqual(rung(chat), ['done']);
-  assert.deepEqual(marked(chat).map(([, kind, line]) => [kind, line]), [['done', 'waited']]);
+  assert.deepEqual(marked(chat), [], 'it rang; a "done" is not kept waiting');
   const made = records(chat);
   assert.deepEqual(made.find(([m]) => m === 'o-old'), ['o-old', [['needs', 'Allow?', 'answered']]]);
   assert.deepEqual(made.find(([m]) => m === 'o-older'), ['o-older', []]);
@@ -1613,4 +1601,27 @@ test('Telegram: herdr\'s own topic is the direct chat, a command from outside an
     await new Promise((r) => setTimeout(r, 120)); // the poll in flight comes back once more
     globalThis.fetch = realFetch;
   }
+});
+
+test('a "done" kept waiting from before is let go at start, with nothing rung', async () => {
+  const t1 = terminal('t1', { program: 'fake', agent: true });
+  const first = await setup([t1]);
+  first.done();
+  const state = first.store.read();
+  state.notes = { 's|t1': { kind: 'done', name: state.chats['s|t1'].name, line: 'seen long ago', at: 1, out: true } };
+  first.store.write(state);
+  const chat = fakeChat();
+  const hc = fakeHc();
+  const r = fakeReaders();
+  const engine = createEngine({ cfg: { sessions: ['s'], doneWaitMs: 0 }, chat, hc, readers: r.readers, store: first.store, log: quiet, logWarn: quiet, logError: quiet, startedAt: '2026-01-01T00:00:00.000Z', inbox: os.tmpdir(), quick: true });
+  running.add(engine);
+  const started = engine.start();
+  hc.snapshot('s', [t1]);
+  await started;
+  await pause(60);
+  await settle(engine);
+  assert.equal(first.store.read().notes?.['s|t1'], undefined);
+  assert.deepEqual(marked(chat), []);
+  assert.equal(rang(chat).length, 0);
+  engine.stop();
 });

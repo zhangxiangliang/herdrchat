@@ -44,7 +44,8 @@ Do these in order; the user does the Telegram steps, you check each one.
 The same settings as Feishu, in the Telegram profile's own config.env:
 
 - "⚠️ needs you" and "✅ done" ring by sending the overview anew in the bot's own topic,
-  `📋 herdr`, what rang under "waiting for you", just below its title (one line each: topic, state, the
+  `📋 herdr`, what rang under "waiting for you", just below its title (a "done" only in
+  the overview that rings for it; a "needs you" until answered; one line each: topic, state, the
   time and its first line); the overview before it is edited into the record of what it
   rang for (never deleted), each note in full and "handled" once dealt with. Below,
   each machine lists its spaces and tabs the same way (Telegram has no tables). "done" (and "needs you" while the user is in that topic) waits `HERDR_DONE_WAIT`
