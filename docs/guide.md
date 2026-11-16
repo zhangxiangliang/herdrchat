@@ -495,7 +495,12 @@ Then:
   overview in the direct chat rings ("What rings: the overview, sent anew" above;
   `HERDR_SILENT_SPACES` rings nothing);
 - each group is also in one of your own labels (the session or machine; `ended` once
-  the terminal is gone), to filter the chat list by; the bot tags stay, since only they
+  the terminal is gone), to filter the chat list by, and in one label for all of them,
+  `herdr`. To keep the bot's groups out of the message list, so it holds only the direct
+  chat (which rings for what needs you) and your other chats: right click `herdr` >
+  消息展示设置 > 始终不展示 (or 有新消息时展示), once; new groups go into it by themselves
+  (Feishu 5.29 or later; a bot cannot set this). Your labels need `/auth`: without it a
+  group cannot leave the message list. The bot tags stay, since only they
   show next to a group's name, and an ended group keeps its `ended` tag too (the tag is
   what shows without `/auth`). Either can be turned off: `HERDR_USER_TAGS=off` takes the
   groups out of your labels (the labels stay), `HERDR_BOT_TAGS=off` takes the bot's tags

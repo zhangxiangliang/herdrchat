@@ -140,6 +140,36 @@ test('an ended group gets the "ended" tag, in your "ended" label or not', async 
   assert.deepEqual(calls, [['bind', 'tag-ended']]);
 });
 
+test('acting as you, every group is in its own label and in "herdr" too, ended or not; off takes it out of both', async () => {
+  const { createDecor } = await import('../lib/chats/feishu/rooms/decor.mjs');
+  const calls = [];
+  const labels = { herdrchat: 'ofg_s', ended: 'ofg_e', herdr: 'ofg_all' };
+  const userAuth = {
+    feedGroups: async () => ({ groups: Object.entries(labels).map(([name, group_id]) => ({ name, group_id })) }),
+    createFeedGroup: async () => { throw new Error('none made: all are there'); },
+    addToFeedGroup: async (id, chats) => { calls.push(['add', id, ...chats]); },
+    removeFromFeedGroup: async (id, chats) => { calls.push(['remove', id, ...chats]); },
+  };
+  let state = { chats: {} };
+  const store = { read: () => JSON.parse(JSON.stringify(state)), write: (s) => { state = JSON.parse(JSON.stringify(s)); } };
+  const entryFor = (record) => { let r = record; return { get: () => r, set: (f) => { r = { ...r, ...f }; } }; };
+  const quiet = () => {};
+  const cfg = { botTags: false, userTags: true };
+  const decor = createDecor({ client: {}, cfg, store, log: quiet, logError: (...a) => { throw new Error(a.join(' ')); }, userAuth, asYou: async () => true });
+  const live = entryFor({ chat: 'oc_1', name: 'herdrchat / x' });
+  await decor.userLabel(live, 'herdrchat');
+  assert.deepEqual(calls, [['add', 'ofg_s', 'oc_1'], ['add', 'ofg_all', 'oc_1']]);
+  calls.length = 0;
+  await decor.userLabel(entryFor({ ...live.get(), ended: true }), 'herdrchat');
+  assert.deepEqual(calls, [['remove', 'ofg_s', 'oc_1'], ['add', 'ofg_e', 'oc_1']], 'ended: its own label changes, "herdr" stays');
+  calls.length = 0;
+  cfg.userTags = false;
+  const off = entryFor({ ...live.get() });
+  await decor.userLabel(off, 'herdrchat');
+  assert.deepEqual(calls, [['remove', 'ofg_s', 'oc_1'], ['remove', 'ofg_all', 'oc_1']]);
+  assert.deepEqual([off.get().label, off.get().inAll], [null, false]);
+});
+
 test('a post\'s blocks as a Feishu card\'s markdown: a screen in a code block', () => {
   assert.equal(markdownOf([{ kind: 'text', markdown: 'Esc pressed.' }, { kind: 'screen', text: '$ ls\nREADME.md' }]), 'Esc pressed.\n\n```\n$ ls\nREADME.md\n```');
   assert.equal(markdownOf('as it is'), 'as it is');
