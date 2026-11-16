@@ -1,3 +1,10 @@
+## [1.16.1](https://github.com/zhangxiangliang/herdrchat/compare/v1.16.0...v1.16.1) (2026-11-16)
+
+
+### Bug Fixes
+
+* an ended group always gets the bot's "ended" tag ([d7dfe27](https://github.com/zhangxiangliang/herdrchat/commit/d7dfe2714131cf6199a289bacd63bd247a274146))
+
 # [1.16.0](https://github.com/zhangxiangliang/herdrchat/compare/v1.15.2...v1.16.0) (2026-11-16)
 
 
