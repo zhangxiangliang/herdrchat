@@ -1,3 +1,18 @@
+# [1.16.0](https://github.com/zhangxiangliang/herdrchat/compare/v1.15.2...v1.16.0) (2026-11-16)
+
+
+### Bug Fixes
+
+* a "done" rings once, and is not kept waiting for you ([33d572b](https://github.com/zhangxiangliang/herdrchat/commit/33d572b91c80830cced42a04cfe2cf3b1479a55c))
+* a log on another machine is read in pieces, so its newest lines are not cut ([5470bd2](https://github.com/zhangxiangliang/herdrchat/commit/5470bd2124c5b09e94b13b0be615711a659c5357))
+* a read that fails on another machine posts no screen ([ea5b2f5](https://github.com/zhangxiangliang/herdrchat/commit/ea5b2f5db9f7eae3e49bcbd0a8ce1df04bb892da))
+* what the bot sends to another machine is yours, not "From m1/ppid" ([c63c019](https://github.com/zhangxiangliang/herdrchat/commit/c63c0195c016908b56d94f7b68e96506a4ff8ae9))
+
+
+### Features
+
+* the overview rings for what needs you, and shows every room in a table ([ad2df49](https://github.com/zhangxiangliang/herdrchat/commit/ad2df498dd3c6c48e86c8fcc538c4ca8a264542a))
+
 ## [1.15.2](https://github.com/zhangxiangliang/herdrchat/compare/v1.15.1...v1.15.2) (2026-11-15)
 
 
