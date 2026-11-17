@@ -733,7 +733,8 @@ test('/new alone sends the form: every space there is (each machine\'s by name),
   await settle(engine);
   const [where, form] = chat.of('showForm').at(-1).args;
   assert.equal(where, 'dm', 'where /new came from');
-  assert.deepEqual(form.fields.map((f) => [f.name, f.kind, Boolean(f.optional)]), [['space', 'pick', false], ['name', 'text', true], ['agent', 'pick', false], ['tab', 'text', true], ['folder', 'text', true]]);
+  assert.deepEqual(form.fields.map((f) => [f.name, f.kind, Boolean(f.optional)]), [['space', 'pick', false], ['name', 'text', true], ['agent', 'pick', false], ['tab', 'text', true], ['folder', 'pick', false], ['path', 'text', true]]);
+  assert.deepEqual(form.fields[5].when, { field: 'folder', values: ['other'] });
   assert.deepEqual(form.fields[0].options.map((o) => o.label), ['docs · This computer', 'proj · This computer', '＋ New space on This computer', '＋ New space on box'], 'a machine not connected is not offered');
   assert.deepEqual(form.fields[1].when, { field: 'space', values: ['n0', 'n1'] });
   assert.deepEqual(form.fields[2].options.map((o) => o.value), ['claude', 'codex', 'opencode', 'pi', 'shell']);
@@ -782,13 +783,61 @@ test('a new space on a machine reached over a link: hc runs it there, through th
   assert.deepEqual([missing.toast.type, missing.card], ['error', undefined], 'a new space needs a name; the form stays to fix');
   const slash = await engine.onAction({ value: { form: form.id }, message: 'f1', form: { space: onBox, name: 'a / b', agent: 'codex' } });
   assert.equal(slash.toast.type, 'error');
-  await engine.onAction({ value: { form: form.id }, message: 'f1', form: { space: onBox, name: 'api', agent: 'codex', folder: '~/work/my app' } });
+  const noPath = await engine.onAction({ value: { form: form.id }, message: 'f1', form: { space: onBox, name: 'api', agent: 'codex', folder: 'other' } });
+  assert.equal(noPath.toast.type, 'error', 'another folder needs its path');
+  await engine.onAction({ value: { form: form.id }, message: 'f1', form: { space: onBox, name: 'api', agent: 'codex', folder: 'other', path: '~/work/my app' } });
   await settle(engine);
   assert.equal(hc.ran.on, 'box');
   assert.equal(hc.ran.cwd, null, 'no folder of this computer\'s');
   assert.equal(hc.ran.labels.where, 'api / codex');
   assert.match(hc.ran.labels['herdr.space'], /^sp[0-9a-f]{32}$/, 'a new space has an id of its own');
   assert.deepEqual(hc.ran.argv, ['sh', '-c', 'cd ~/\'work/my app\' && exec "${SHELL:-sh}" -lc "$0"', 'exec codex']);
+  done();
+});
+
+test('the form\'s folder: picked from the ones your terminals use (this computer\'s home as ~), each on its machine; one on another machine than the space is refused', async () => {
+  const here = terminal('t1', { space: 'proj', program: 'fake', agent: true });
+  here.foreground.cwd = `${os.homedir()}/Code/proj`;
+  here.cwd = '/srv/data';
+  const there = { ...terminal('box/t2', { space: 'srv', tabId: 'tb2', program: 'fake', agent: true }), cwd: '/home/me/app' };
+  there.foreground.cwd = '/home/me/app';
+  const { chat, hc, engine, done } = await setup([here, there]);
+  hc.cores = async () => ({ self: 'core-s', links: [{ name: 'box', id: 'core-box', state: 'connected' }] });
+  await engine.onMessage({ room: null, where: 'dm', message: 'm-in', text: '/new', images: [] });
+  const form = formOf(chat);
+  assert.deepEqual(form.fields.find((f) => f.name === 'folder').options.map((o) => o.label), [
+    'The space\'s folder (a new space: home)', '/srv/data · This computer', '~/Code/proj · This computer', '/home/me/app · box', 'Another folder…',
+  ]);
+  const wrong = await engine.onAction({ value: { form: form.id }, message: 'f1', form: { space: optionOf(form, 'space', 'proj · This computer'), folder: optionOf(form, 'folder', '/home/me/app · box') } });
+  assert.match(wrong.toast.text, /That folder is on box, the space on This computer/);
+  await engine.onAction({ value: { form: form.id }, message: 'f1', form: { space: optionOf(form, 'space', 'proj · This computer'), folder: optionOf(form, 'folder', '/srv/data · This computer') } });
+  await settle(engine);
+  assert.equal(hc.ran.cwd, '/srv/data');
+  done();
+});
+
+test('a pick changed on the card (Feishu) draws it again: a folder on another machine than the new space goes back to the space\'s own; Start takes the picks', async () => {
+  const here = terminal('t1', { space: 'proj', program: 'fake', agent: true });
+  here.foreground.cwd = '/work/proj';
+  const there = { ...terminal('box/t2', { space: 'srv', tabId: 'tb2', program: 'fake', agent: true }), cwd: '/home/me/app' };
+  there.foreground.cwd = '/home/me/app';
+  const { chat, hc, engine, done } = await setup([here, there]);
+  hc.cores = async () => ({ self: 'core-s', links: [{ name: 'box', id: 'core-box', state: 'connected' }] });
+  await engine.onMessage({ room: null, where: 'dm', message: 'm-in', text: '/new', images: [] });
+  const form = formOf(chat);
+  const { holds } = await import('../lib/chats/form.mjs');
+  const folders = (values) => form.fields.find((f) => f.name === 'folder').options.filter((o) => holds(o.when, values)).map((o) => o.label);
+  const proj = optionOf(form, 'space', 'proj · This computer');
+  assert.deepEqual(folders({ space: proj }), ['The space\'s folder (a new space: home)', '/work/proj · This computer', 'Another folder…'], 'only this computer\'s folders for a space here');
+  let out = await engine.onAction({ value: { form: form.id, field: 'folder' }, message: 'f1', option: optionOf(form, 'folder', '/work/proj · This computer') });
+  assert.equal(out.card.kind, 'form');
+  assert.equal(out.card.picks.folder, optionOf(form, 'folder', '/work/proj · This computer'));
+  out = await engine.onAction({ value: { form: form.id, field: 'space' }, message: 'f1', option: optionOf(form, 'space', '＋ New space on box') });
+  assert.equal(out.card.picks.folder, 'space', 'a folder of this computer\'s does not go with a space on box');
+  out = await engine.onAction({ value: { form: form.id, field: 'folder' }, message: 'f1', option: optionOf(form, 'folder', '/home/me/app · box') });
+  await engine.onAction({ value: { form: form.id }, message: 'f1', form: { name: 'web' } });
+  await settle(engine);
+  assert.deepEqual([hc.ran.on, hc.ran.cwd, hc.ran.labels.where], ['box', '/home/me/app', 'web / claude']);
   done();
 });
 

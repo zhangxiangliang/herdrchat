@@ -2368,40 +2368,221 @@
           "content": "Where it goes and what runs in it."
         },
         {
+          "tag": "markdown",
+          "content": "**Space**"
+        },
+        {
+          "tag": "select_static",
+          "name": "pick_space",
+          "width": "fill",
+          "placeholder": {
+            "tag": "plain_text",
+            "content": "Space"
+          },
+          "initial_option": "s0",
+          "options": [
+            {
+              "text": {
+                "tag": "plain_text",
+                "content": "alpha · This computer"
+              },
+              "value": "s0"
+            },
+            {
+              "text": {
+                "tag": "plain_text",
+                "content": "＋ New space on box"
+              },
+              "value": "n1"
+            }
+          ],
+          "behaviors": [
+            {
+              "type": "callback",
+              "value": {
+                "form": "f1",
+                "field": "space"
+              }
+            }
+          ]
+        },
+        {
+          "tag": "markdown",
+          "content": "**Agent**"
+        },
+        {
+          "tag": "select_static",
+          "name": "pick_agent",
+          "width": "fill",
+          "placeholder": {
+            "tag": "plain_text",
+            "content": "Agent"
+          },
+          "initial_option": "claude",
+          "options": [
+            {
+              "text": {
+                "tag": "plain_text",
+                "content": "Claude Code"
+              },
+              "value": "claude"
+            },
+            {
+              "text": {
+                "tag": "plain_text",
+                "content": "Shell"
+              },
+              "value": "shell"
+            }
+          ],
+          "behaviors": [
+            {
+              "type": "callback",
+              "value": {
+                "form": "f1",
+                "field": "agent"
+              }
+            }
+          ]
+        },
+        {
           "tag": "form",
           "name": "new",
           "elements": [
             {
-              "tag": "markdown",
-              "content": "**Space**"
+              "tag": "button",
+              "type": "primary_filled",
+              "width": "default",
+              "size": "medium",
+              "text": {
+                "tag": "plain_text",
+                "content": "Start"
+              },
+              "hover_tips": {
+                "tag": "plain_text",
+                "content": "Start"
+              },
+              "behaviors": [
+                {
+                  "type": "callback",
+                  "value": {
+                    "form": "f1"
+                  }
+                }
+              ],
+              "name": "submit",
+              "form_action_type": "submit"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "feishu.formCard.newSpace": {
+    "schema": "2.0",
+    "config": {
+      "update_multi": true
+    },
+    "header": {
+      "title": {
+        "tag": "plain_text",
+        "content": "＋ New terminal"
+      },
+      "template": "blue",
+      "icon": {
+        "tag": "standard_icon",
+        "token": "loading_outlined",
+        "color": "blue"
+      }
+    },
+    "body": {
+      "elements": [
+        {
+          "tag": "markdown",
+          "content": "Where it goes and what runs in it."
+        },
+        {
+          "tag": "markdown",
+          "content": "**Space**"
+        },
+        {
+          "tag": "select_static",
+          "name": "pick_space",
+          "width": "fill",
+          "placeholder": {
+            "tag": "plain_text",
+            "content": "Space"
+          },
+          "initial_option": "n1",
+          "options": [
+            {
+              "text": {
+                "tag": "plain_text",
+                "content": "alpha · This computer"
+              },
+              "value": "s0"
             },
             {
-              "tag": "select_static",
-              "name": "space",
-              "width": "fill",
-              "required": true,
-              "placeholder": {
+              "text": {
                 "tag": "plain_text",
-                "content": "Space"
+                "content": "＋ New space on box"
               },
-              "initial_option": "s0",
-              "options": [
-                {
-                  "text": {
-                    "tag": "plain_text",
-                    "content": "alpha · This computer"
-                  },
-                  "value": "s0"
-                },
-                {
-                  "text": {
-                    "tag": "plain_text",
-                    "content": "＋ New space on box"
-                  },
-                  "value": "n1"
-                }
-              ]
+              "value": "n1"
+            }
+          ],
+          "behaviors": [
+            {
+              "type": "callback",
+              "value": {
+                "form": "f1",
+                "field": "space"
+              }
+            }
+          ]
+        },
+        {
+          "tag": "markdown",
+          "content": "**Agent**"
+        },
+        {
+          "tag": "select_static",
+          "name": "pick_agent",
+          "width": "fill",
+          "placeholder": {
+            "tag": "plain_text",
+            "content": "Agent"
+          },
+          "initial_option": "claude",
+          "options": [
+            {
+              "text": {
+                "tag": "plain_text",
+                "content": "Claude Code"
+              },
+              "value": "claude"
             },
+            {
+              "text": {
+                "tag": "plain_text",
+                "content": "Shell"
+              },
+              "value": "shell"
+            }
+          ],
+          "behaviors": [
+            {
+              "type": "callback",
+              "value": {
+                "form": "f1",
+                "field": "agent"
+              }
+            }
+          ]
+        },
+        {
+          "tag": "form",
+          "name": "new",
+          "elements": [
             {
               "tag": "markdown",
               "content": "**New space's name**"
@@ -2415,37 +2596,6 @@
                 "tag": "plain_text",
                 "content": "only for a new space"
               }
-            },
-            {
-              "tag": "markdown",
-              "content": "**Agent**"
-            },
-            {
-              "tag": "select_static",
-              "name": "agent",
-              "width": "fill",
-              "required": true,
-              "placeholder": {
-                "tag": "plain_text",
-                "content": "Agent"
-              },
-              "initial_option": "claude",
-              "options": [
-                {
-                  "text": {
-                    "tag": "plain_text",
-                    "content": "Claude Code"
-                  },
-                  "value": "claude"
-                },
-                {
-                  "text": {
-                    "tag": "plain_text",
-                    "content": "Shell"
-                  },
-                  "value": "shell"
-                }
-              ]
             },
             {
               "tag": "button",

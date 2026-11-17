@@ -70,6 +70,7 @@ test('Feishu: every kind of card', async () => {
   same('feishu.ownerCard', ownerCard({ title: '⬆️ herdrchat 9.9.9 is out', tone: 'working', markdown: 'You run 1.0.0.', buttons: [{ label: 'Update to 9.9.9', value: { update: '9.9.9' } }] }));
   same('feishu.foldedCard', foldedCard('📜 Before this room', '**You:**\n> hi\n\nHello.'));
   same('feishu.formCard', formCard(FORM));
+  same('feishu.formCard.newSpace', formCard(FORM, { space: 'n1' }));
   same('feishu.overview', { text: overviewText(ROWS), card: overviewCard(ROWS, Date.UTC(2026, 0, 1, 10, 0)) });
   const note = { kind: 'needs', name: 'beta / T1_ABC-2', room: 'oc_b', line: 'Run *ls* <now>?', at: Date.UTC(2026, 0, 1, 10, 0) };
   same('feishu.recordCard', [recordCard([note, { ...note, kind: 'done', line: '', room: null, handled: { how: 'answered', at: Date.UTC(2026, 0, 1, 10, 3) } }]), recordCard([])]);

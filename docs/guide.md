@@ -445,9 +445,15 @@ is never updated from here: pull it, and the running bots follow the version in 
   Feishu's bot menu item `new`): the **space** (one there is, each machine's by name, or
   a new space on this computer or on a machine reached over a link, which then needs a
   name), the **agent** (Claude Code, Codex, OpenCode, Pi, or a shell), the **tab** (empty:
-  the agent's name, numbered past the tabs the space has) and the **folder** (empty: the
-  space's, a new space's home). Feishu shows it as one form on a card; Telegram, a field
-  at a time: buttons for a pick, your next message in its topic for a text, with Skip. hc
+  the agent's name, numbered past the tabs the space has) and the **folder**, picked: the
+  space's own (the default; a new space's: home), one your terminals already work in
+  (each with its machine; one on another machine than the space is refused), or another
+  folder, whose path you then type. Only what applies shows: a folder on the space's machine, a
+  new space's name once you pick a new space, a path once you pick another folder. In
+  Feishu a card: each pick a drop-down that redraws the card the moment it changes, then
+  the text boxes and Start (pick first, then type: a box is not kept when a pick changes);
+  in Telegram a field at a time: buttons for a pick, your next message in its topic for a
+  text, with Skip. hc
   starts it (`hc run`, `--on` for another machine, through that machine's own login
   shell) with the labels that say where it is (herdr-app reads them too, and numbers the
   tab in its sidebar), so it needs nothing but hc. The card then says it started, or why not.
