@@ -124,6 +124,18 @@ test('a terminal no agent ever ran in gets no room: its title (the command it ru
   done();
 });
 
+test('with hc alone (no `where` label: no herdr-app): an agent no other terminal started gets a room, named by its folder and its title or hc name; an agent\'s helper (hc\'s parent) gets none', async () => {
+  const bare = (address, more) => ({ ...terminal(address, AGENT), labels: {}, cwd: '/srv/api', ...more });
+  const { chat, store, done } = await setup([
+    bare('t1', { title: '✳ Fix the login' }),
+    bare('t2', { name: 'coordinator', title: '' }),
+    bare('t3', { parent: 't1' }),
+  ]);
+  assert.deepEqual(chat.of('openRoom').map((c) => c.args[0].name).sort(), ['api / Fix the login', 'api / coordinator']);
+  assert.equal(rooms(store)['s|t3'], undefined, 'a helper is the agent\'s, not yours');
+  done();
+});
+
 test('a room whose agent quit stays, keeps its name while the shell runs, and answers what you type with the tidy screen', async () => {
   const { chat, hc, store, engine, done } = await setup([terminal('t1', AGENT)]);
   const room = rooms(store)['s|t1'];
@@ -696,12 +708,13 @@ test('Telegram pins the waiting dialog card and unpins it once answered', async 
   }
 });
 
-test('/new names the new tab in herdr-app as asked, by the tab id it gave the terminal', async () => {
+test('/new with words starts it with the labels that say where it is, in the space\'s own id; nothing but hc is run', async () => {
   const { chat, hc, engine, done } = await setup([terminal('t1', { space: 'proj' })]);
   await engine.onMessage({ room: null, where: 'dm', message: 'm-in', text: '/new s proj/daily', images: [] });
   await settle(engine);
   assert.equal(hc.ran.labels.where, 'proj / daily');
-  assert.deepEqual(hc.named, [{ tabId: hc.ran.labels['herdr.tab'], name: 'daily' }]);
+  assert.equal(hc.ran.labels['herdr.space'], 'sp1');
+  assert.match(hc.ran.labels['herdr.tab'], /^tb[0-9a-f]{32}$/);
   assert.match(chat.of('reply').at(-1).args[1], /Started `claude` as `t99`.*Its room appears/);
   done();
 });

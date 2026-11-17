@@ -10,7 +10,7 @@ import { STATE_DIR, chatOf, loadConfig, makeDirs, readState, setConfigValue, wri
 import { tryPairing } from '../lib/core/pairing.mjs';
 import { createEngine } from '../lib/core/engine.mjs';
 import { followEvents } from '../lib/core/events.mjs';
-import { cores, getTerminal, hc, keys, label, machines, nameTab, put, run, screenTail, send } from '../lib/core/hc.mjs';
+import { cores, getTerminal, hc, keys, label, machines, put, run, screenTail, send } from '../lib/core/hc.mjs';
 import { refreshHook } from '../lib/core/hooks.mjs';
 import { createLog } from '../lib/core/log.mjs';
 import { createUpdater } from '../lib/core/updater.mjs';
@@ -87,7 +87,7 @@ let updaterStarted = false;
 engine = createEngine({
   cfg,
   chat,
-  hc: { followEvents, cores, machines, getTerminal, screenTail, send, keys, label, put, run, nameTab, kill: (session, address) => hc(session, ['kill', address]) },
+  hc: { followEvents, cores, machines, getTerminal, screenTail, send, keys, label, put, run, kill: (session, address) => hc(session, ['kill', address]) },
   readers,
   store,
   log,

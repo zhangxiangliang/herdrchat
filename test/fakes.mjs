@@ -97,9 +97,7 @@ export function fakeHc() {
       sessions.get(session).handlers.onChange({ type: 'labels', address, record, data: { labels: next } });
     },
     put: async (session, address, file) => `/remote/${file.split('/').pop()}`,
-    named: [],
     run: async (session, opts) => { hc.ran = opts; return JSON.stringify({ address: 't99' }); },
-    nameTab: async (tabId, name) => { hc.named.push({ tabId, name }); return true; },
     killed: [],
     kill: async (session, address) => { hc.killed.push({ session, address }); },
     // test side

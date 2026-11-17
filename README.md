@@ -21,8 +21,8 @@ reach the machine that runs hc, so you first need a VPN or a private network, an
 with an agent on a small phone screen is clumsy.
 
 herdrchat shows the same terminals in a chat app you already have on your phone. It connects out to Feishu or Telegram by
-itself, so there is nothing to set up on your network: no public IP, no VPN. Each
-herdr-app tab gets its own Feishu group, or a topic in your private chat with the
+itself, so there is nothing to set up on your network: no public IP, no VPN. It needs
+only hc, so it works on a server with no herdr-app too. Each tab an agent runs in gets its own Feishu group, or a topic in your private chat with the
 Telegram bot. You read what the agent says while it works, tap buttons to answer its
 questions, send and receive images, and see all terminals in one overview. A new group or
 topic starts with the conversation so far. The groups and topics stay quiet: when an agent

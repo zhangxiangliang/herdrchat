@@ -1625,7 +1625,7 @@
       "path": "/open-apis/im/v1/messages/om_21",
       "params": {},
       "data": {
-        "content": "{\"schema\":\"2.0\",\"config\":{\"update_multi\":true,\"summary\":{\"content\":\"herdrchat · 0 terminals\"}},\"header\":{\"title\":{\"tag\":\"plain_text\",\"content\":\"herdrchat · 0 terminals\"},\"template\":\"green\",\"icon\":{\"tag\":\"standard_icon\",\"token\":\"done_outlined\",\"color\":\"green\"}},\"body\":{\"elements\":[{\"tag\":\"markdown\",\"content\":\"No terminal is shown in herdr-app.\"},{\"tag\":\"column_set\",\"flex_mode\":\"flow\",\"horizontal_spacing\":\"small\",\"columns\":[{\"tag\":\"column\",\"width\":\"auto\",\"elements\":[{\"tag\":\"button\",\"type\":\"default\",\"width\":\"default\",\"size\":\"medium\",\"text\":{\"tag\":\"plain_text\",\"content\":\"＋ New terminal\"},\"hover_tips\":{\"tag\":\"plain_text\",\"content\":\"＋ New terminal\"},\"behaviors\":[{\"type\":\"callback\",\"value\":{\"open\":\"new\"}}]}]}]},{\"tag\":\"markdown\",\"content\":\"Updated <time>\",\"text_size\":\"notation\"},{\"tag\":\"markdown\",\"content\":\"Your groups ring on every post too: send /auth, so herdrchat mutes them and only this chat rings.\",\"text_size\":\"notation\"}]}}"
+        "content": "{\"schema\":\"2.0\",\"config\":{\"update_multi\":true,\"summary\":{\"content\":\"herdrchat · 0 terminals\"}},\"header\":{\"title\":{\"tag\":\"plain_text\",\"content\":\"herdrchat · 0 terminals\"},\"template\":\"green\",\"icon\":{\"tag\":\"standard_icon\",\"token\":\"done_outlined\",\"color\":\"green\"}},\"body\":{\"elements\":[{\"tag\":\"markdown\",\"content\":\"No agent runs in a terminal yet. /new starts one.\"},{\"tag\":\"column_set\",\"flex_mode\":\"flow\",\"horizontal_spacing\":\"small\",\"columns\":[{\"tag\":\"column\",\"width\":\"auto\",\"elements\":[{\"tag\":\"button\",\"type\":\"default\",\"width\":\"default\",\"size\":\"medium\",\"text\":{\"tag\":\"plain_text\",\"content\":\"＋ New terminal\"},\"hover_tips\":{\"tag\":\"plain_text\",\"content\":\"＋ New terminal\"},\"behaviors\":[{\"type\":\"callback\",\"value\":{\"open\":\"new\"}}]}]}]},{\"tag\":\"markdown\",\"content\":\"Updated <time>\",\"text_size\":\"notation\"},{\"tag\":\"markdown\",\"content\":\"Your groups ring on every post too: send /auth, so herdrchat mutes them and only this chat rings.\",\"text_size\":\"notation\"}]}}"
       }
     },
     {
@@ -2036,7 +2036,7 @@
       "body": {
         "chat_id": "42",
         "message_id": 22,
-        "text": "<b>herdrchat · 0 terminals</b>\n\nNo terminal is shown in herdr-app.",
+        "text": "<b>herdrchat · 0 terminals</b>\n\nNo agent runs in a terminal yet. /new starts one.",
         "parse_mode": "HTML",
         "link_preview_options": {
           "is_disabled": true

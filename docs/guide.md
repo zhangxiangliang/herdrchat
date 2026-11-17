@@ -3,7 +3,8 @@
 How herdrchat works and every setting, for when the README is not enough.
 
 herdrchat is hc's chat client, as herdr-app is its desktop and phone client: every
-herdr-app tab, followed and answered in a chat app, Feishu or Telegram. Both sit on the same core (hc events, a reader per agent,
+tab an agent runs in, followed and answered in a chat app, Feishu or Telegram. It needs
+hc alone; herdr-app is never run, and where it is used, the two go by the same labels. Both sit on the same core (hc events, a reader per agent,
 dialogs, the overview), each behind one contract (`docs/architecture.md`); Slack and
 Discord may follow the same way. A profile is one chat app (`HERDRCHAT_CHAT`); to use
 both, run a profile each.
@@ -117,8 +118,16 @@ setting changed in `config.env` takes effect at the next `herdrchat start`.
 
 **hc is the backbone.** The bot follows `hc events --json` for each session (its format:
 `hc schema`). From hc it learns which terminals exist, where
-herdr-app shows them, their status, and when a turn ends (`turn` event: the status left
-`working`). Typing from a group goes through `hc send`.
+they are (labels), their status, and when a turn ends (`turn` event: the status left
+`working`). Typing from a group goes through `hc send`. Nothing else is run: herdr-app
+is a client of hc as herdrchat is, and they meet only in hc's labels.
+
+**Which terminals count, from hc alone.** A terminal with a `where` label (`<space> /
+<tab>`: herdr-app writes it on every terminal it shows, the new-terminal form writes it
+too) is where it says. One without it counts when no other terminal started it (hc's
+`parent`: an agent's helpers have one) and an agent runs in it, named by its folder and
+its title or hc name (`api / Fix the login`): `hc run claude` on a server with no
+herdr-app gets its room. Either way a room is an agent's (below).
 
 **A reader gives the conversation.** hc can show only the screen, and the screen is a
 picture: long output is folded, and you cannot tell your words from the agent's. So for
@@ -397,7 +406,7 @@ quits, its room stays and keeps its name while the shell runs; what you type the
 one reply, the screen a moment later, without blank lines. A group made by an older
 version for a terminal no agent ran in is ended (tagged `herdr-ended`), never deleted.
 
-A group belongs to its herdr-app tab (by the tab's id): when the tab's terminal is
+A group belongs to its tab (by the tab's id, `herdr.tab`, when it has one): when the tab's terminal is
 replaced, the new terminal carries on in the same group. A message that cannot be
 delivered (the terminal has ended) says so plainly.
 
@@ -440,8 +449,8 @@ is never updated from here: pull it, and the running bots follow the version in 
   space's, a new space's home). Feishu shows it as one form on a card; Telegram, a field
   at a time: buttons for a pick, your next message in its topic for a text, with Skip. hc
   starts it (`hc run`, `--on` for another machine, through that machine's own login
-  shell) with the labels herdr-app reads, so it works on a server with no herdr-app;
-  herdr-app, when it runs here, names the tab. The card then says it started, or why not.
+  shell) with the labels that say where it is (herdr-app reads them too, and numbers the
+  tab in its sidebar), so it needs nothing but hc. The card then says it started, or why not.
   A form is used once; one from before a restart says it is old.
 - In a terminal's room: any text goes to it (marked once typed in, and again when the
   turn that took it is over); an image (alone or in a rich text message) is sent
