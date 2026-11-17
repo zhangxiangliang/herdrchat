@@ -1,3 +1,10 @@
+# [1.24.0](https://github.com/zhangxiangliang/herdrchat/compare/v1.23.0...v1.24.0) (2026-11-17)
+
+
+### Features
+
+* the overview leaves out a terminal with no agent ([5313ab4](https://github.com/zhangxiangliang/herdrchat/commit/5313ab4ab9c30518cef580aec40193447f9f5850))
+
 # [1.23.0](https://github.com/zhangxiangliang/herdrchat/compare/v1.22.0...v1.23.0) (2026-11-17)
 
 
