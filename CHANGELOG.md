@@ -1,3 +1,10 @@
+# [1.27.0](https://github.com/zhangxiangliang/herdrchat/compare/v1.26.0...v1.27.0) (2026-11-17)
+
+
+### Features
+
+* an agent starts through the project's own launcher ([a296889](https://github.com/zhangxiangliang/herdrchat/commit/a296889ac1e89f065cdc677e8fa10973a31a230a))
+
 # [1.26.0](https://github.com/zhangxiangliang/herdrchat/compare/v1.25.1...v1.26.0) (2026-11-17)
 
 
