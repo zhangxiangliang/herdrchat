@@ -1,3 +1,10 @@
+# [1.21.0](https://github.com/zhangxiangliang/herdrchat/compare/v1.20.1...v1.21.0) (2026-11-17)
+
+
+### Features
+
+* the overview is grouped by session ([c7d3502](https://github.com/zhangxiangliang/herdrchat/commit/c7d35029dbfca31742a17e0ed6d25588864a2837))
+
 ## [1.20.1](https://github.com/zhangxiangliang/herdrchat/compare/v1.20.0...v1.20.1) (2026-11-17)
 
 
