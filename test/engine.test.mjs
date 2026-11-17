@@ -1110,6 +1110,7 @@ test('an agent that asks before it starts (trust this folder) gets a card; a tap
   assert.deepEqual(dialog.menu.options.map((o) => o.label), ['No, exit', 'Yes, I trust this folder']);
   assert.match(said(dialog.body), /Quick safety check/);
   assert.equal(rung(chat).at(-1), 'needs');
+  assert.equal(chat.of('showOverview').at(-1).args[0].find((r) => r.address === 't1').state, 'blocked', 'the overview says it needs you, not the program it runs');
   const out = await engine.onAction({ value: { ...value, pick: 2, label: 'Yes, I trust this folder' }, message });
   assert.deepEqual(hc.pressed.at(-1).names, ['down', 'enter']);
   assert.match(out.toast.text, /Yes, I trust this folder/);

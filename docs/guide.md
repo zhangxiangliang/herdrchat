@@ -225,7 +225,7 @@ same three columns:
 | Column | What it holds |
 |---|---|
 | Room | the space and tab (`herdrchat / master`), a link that opens its group |
-| State | a colored tag: needs you (orange), working (blue), done (green), error (red), idle (grey); with no agent, the program it runs |
+| State | a colored tag: needs you (orange; also while its card waits for you, whatever hc says), working (blue), done (green), error (red), idle (grey); with no agent, the program it runs |
 | Latest | the time and the first line of what it last said: `11:49: Fixed it.` (cut to fit; a tap shows it whole) |
 
 First "waiting for you" (what asks you something and is not answered yet; the overview
@@ -235,8 +235,10 @@ link is a heading of its own, after them) and its table, what needs you first: n
 with no agent; within one state the one that spoke last first. (Telegram's lists order
 their spaces and tabs the same way.) A room's latest is kept from what it says; one with none yet gets the last answer
 in its agent's own records. In a space named as its session, a room is called by its tab
-alone (`master` under `takewalks`). A table shows ten rows a page; a card holds five
-tables, so with more sessions than that the smallest are lists. Telegram has no tables: the same as lists, each line its
+alone (`master` under `takewalks`). A table shows ten rows a page, and a cell wraps to a
+second line (a phone shows a third of a narrow card a column). A card holds five tables,
+so with more groups than that the smallest share one, its heading naming them all
+(`yiquiz · babyagecalculator`), its rooms by their whole names. Telegram has no tables: the same as lists, each line its
 mark, its topic (a link), its state and its latest.
 
 - The overview before it is never taken back (in Feishu a recall leaves a "recalled a

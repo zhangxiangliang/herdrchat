@@ -77,28 +77,28 @@ test('the Feishu overview: what waits for you, then a heading and a table per ma
   assert.equal(card.header.icon.token, 'warning_outlined', 'an icon says what it is, not an emoji');
 });
 
-test('a card holds five tables at most, "waiting for you" first: past them the smallest groups are lists, each where it is', () => {
+test('a card holds five tables at most, "waiting for you" first: past them the smallest groups share one table, where the first of them is', () => {
   const rows = [['a', 3], ['b', 1], ['c', 4], ['d', 2], ['e', 5], ['f', 1]].flatMap(([s, n]) => Array.from({ length: n }, (_, i) => ({ name: `${s} / t${i}`, address: `${s} t${i}`, session: s, state: 'idle', room: `oc_${s}${i}` })));
-  const kinds = (elements) => elements.filter((e) => e.tag === 'table' || !e.content.startsWith('###')).map((e) => e.tag);
+  const heads = (elements) => elements.filter((e) => e.tag === 'markdown').map((e) => e.content);
+  const roomsOf = (table) => table.rows.map((r) => r.room.slice(1, r.room.indexOf(']')));
   let elements = overviewElements(rows);
-  assert.deepEqual(elements.filter((e) => e.content?.startsWith('###')).map((e) => e.content), ['### a', '### b', '### c', '### d', '### e', '### f']);
-  assert.deepEqual(kinds(elements), ['table', 'table', 'table', 'table', 'table', 'markdown'], 'f (1 tab, after b) is the list');
+  assert.ok(elements.every((e) => e.tag === 'table' || e.content.startsWith('###')), 'tables only');
+  assert.deepEqual(heads(elements), ['### a', '### b · f', '### c', '### d', '### e'], 'b and f (one tab each) share one, where b is');
+  assert.deepEqual(roomsOf(elements[3]), ['b / t0', 'f / t0'], 'by their whole names');
+  assert.deepEqual(roomsOf(elements[1]), ['t0', 't1', 't2'], 'in a space named as its session, the tab alone');
   rows[0].note = { kind: 'done', line: 'x', at: 1 };
   elements = overviewElements(rows);
-  assert.deepEqual(kinds(elements).slice(1), ['table', 'markdown', 'table', 'table', 'table', 'markdown'], 'and b too, with "waiting for you"');
+  assert.deepEqual(heads(elements), ['### Waiting for you', '### a', '### b · d · f', '### c', '### e']);
   assert.equal(elements.filter((e) => e.tag === 'table').length, 5);
-  assert.deepEqual(elements.find((e) => e.content === '### a') && elements[elements.findIndex((e) => e.content === '### a') + 1].rows.map((r) => r.room.split(']')[0]), ['[t0', '[t1', '[t2'], 'in a space named as its session, the tab alone');
+  for (const table of elements.filter((e) => e.tag === 'table')) assert.deepEqual([table.row_height, table.row_max_height], ['auto', '64px'], 'a cell wraps to two lines');
 });
 
-test('a card holds five tables at most: machines past them are lists too', () => {
+test('machines past the tables share one too', () => {
   const rows = ['a', 'b', 'c', 'd', 'e', 'f'].map((m) => ({ name: `s${m} / t`, address: `${m}/t1`, state: 'idle', room: `oc_${m}` }));
-  let elements = overviewElements(rows);
+  const elements = overviewElements(rows);
   assert.equal(elements.filter((e) => e.tag === 'table').length, 5);
-  assert.equal(elements.at(-1).content, '- **sf**\n    - [t](https://applink.feishu.cn/client/chat/open?openChatId=oc_f)');
-  rows[0].note = { kind: 'done', line: 'x', at: 1 };
-  elements = overviewElements(rows);
-  assert.equal(elements.filter((e) => e.tag === 'table').length, 5);
-  assert.equal(elements.at(-3).content, '- **se**\n    - [t](https://applink.feishu.cn/client/chat/open?openChatId=oc_e)');
+  assert.deepEqual(elements.at(-2).content, '### e · f');
+  assert.deepEqual(elements.at(-1).rows.map((r) => r.room.slice(1, r.room.indexOf(']'))), ['se / t', 'sf / t']);
 });
 
 test('an old overview\'s record is the history, in full: a few lines a note, how and when each was handled; with nothing, it says it is old', async () => {
