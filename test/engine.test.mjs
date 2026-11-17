@@ -1268,11 +1268,11 @@ test('a live card edit that did not get through (the network) sends no second ca
 });
 
 test('an overview that did not get through is shown again later, not left behind', async () => {
-  const { chat, hc, engine, done } = await setup([terminal('t1')], { logError: () => {} });
+  const { chat, hc, engine, done } = await setup([terminal('t1', { agent: true })], { logError: () => {} });
   let down = 1;
   const shown = [];
   chat.showOverview = async (rows) => { if (down > 0) { down -= 1; throw Object.assign(new Error('fetch failed'), { unreached: true }); } shown.push(rows.length); };
-  hc.change('s', 'title', { ...terminal('t1'), title: 'x' });
+  hc.change('s', 'title', { ...terminal('t1', { agent: true }), title: 'x' });
   await pause(200);
   await settle(engine);
   assert.deepEqual(shown, [1], 'shown once the line is back');
@@ -1496,6 +1496,17 @@ test('the overview shows each room\'s latest line, in a silent space too', async
   const row = () => chat.of('showOverview').at(-1).args[0].find((x) => x.address === 't1');
   assert.equal(row().latest, 'Fixed it.');
   assert.equal(rang(chat).length, 0, 'silent: nothing rings');
+  done();
+});
+
+test('the overview leaves out a terminal with no agent (a shell, a server); one with an agent stays', async () => {
+  const shell = terminal('t1', { space: 'a', program: 'bash' });
+  const server = terminal('t2', { space: 'b', tabId: 'tb2', program: 'node' });
+  const agent = terminal('t3', { space: 'c', tabId: 'tb3', program: 'fake', agent: true });
+  const { chat, engine, done } = await setup([shell, server, agent]);
+  engine.tick.sweep();
+  await settle(engine);
+  assert.deepEqual(chat.of('showOverview').at(-1).args[0].map((x) => x.address), ['t3']);
   done();
 });
 

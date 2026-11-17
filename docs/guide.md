@@ -225,14 +225,15 @@ same three columns:
 | Column | What it holds |
 |---|---|
 | Room | the space and tab (`herdrchat / master`), a link that opens its group |
-| State | a colored tag: needs you (orange; also while its card waits for you, whatever hc says), working (blue), done (green), error (red), idle (grey); with no agent, the program it runs |
+| State | a colored tag: needs you (orange; also while its card waits for you, whatever hc says), working (blue), done (green), error (red), idle (grey); an agent still starting, with no status yet, the program it runs |
 | Latest | the time and the first line of what it last said: `11:49: Fixed it.` (cut to fit; a tap shows it whole) |
 
 First "waiting for you" (what asks you something and is not answered yet; the overview
 that rings for a "done" shows it there too, once), then a heading per machine ("This
 computer" first, every session in `HERDR_SESSIONS` in one table; then each machine reached
-over a link, by name) and its table, what needs you first: needs you, error, working, done, then idle and terminals
-with no agent; within one state the one that spoke last first. (Telegram's lists order
+over a link, by name) and its table, what needs you first: needs you, error, working, done, then idle;
+within one state the one that spoke last first. A terminal with no agent (a shell, a
+server such as `node`) is left out: it has nothing to tell you; its group stays. (Telegram's lists order
 their spaces and tabs the same way.) A room's latest is kept from what it says; one with none yet gets the last answer
 in its agent's own records. A table shows ten rows a page, and a cell wraps to a
 second line (a phone shows a third of a narrow card a column). A card holds five tables,
