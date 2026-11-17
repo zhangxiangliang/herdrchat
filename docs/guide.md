@@ -444,7 +444,7 @@ is never updated from here: pull it, and the running bots follow the version in 
 - The new-terminal form (`/new` alone, the overview's **＋ New terminal** button, or
   Feishu's bot menu item `new`): the **space** (one there is, each machine's by name, or
   a new space on this computer or on a machine reached over a link, which then needs a
-  name), the **agent** (Claude Code, Codex, OpenCode, Pi, or a shell), the **tab** (empty:
+  name), the **agent** (Claude Code, Codex, OpenCode or Pi; no shell: it would get no room), the **tab** (empty:
   the agent's name, numbered past the tabs the space has) and the **folder**, picked: the
   space's own (the default; a new space's: home), one your terminals already work in
   (each with its machine; one on another machine than the space is refused), or another

@@ -737,7 +737,7 @@ test('/new alone sends the form: every space there is (each machine\'s by name),
   assert.deepEqual(form.fields[5].when, { field: 'folder', values: ['other'] });
   assert.deepEqual(form.fields[0].options.map((o) => o.label), ['docs · This computer', 'proj · This computer', '＋ New space on This computer', '＋ New space on box'], 'a machine not connected is not offered');
   assert.deepEqual(form.fields[1].when, { field: 'space', values: ['n0', 'n1'] });
-  assert.deepEqual(form.fields[2].options.map((o) => o.value), ['claude', 'codex', 'opencode', 'pi', 'shell']);
+  assert.deepEqual(form.fields[2].options.map((o) => o.value), ['claude', 'codex', 'opencode', 'pi'], 'no shell: it would get no room');
   // the overview's button: the form in the direct chat
   const out = await engine.onAction({ value: { open: 'new' }, message: 'o1', where: null });
   assert.equal(out.toast.type, 'info');
@@ -806,8 +806,8 @@ test('the form\'s folder: picked from the ones your terminals use (this computer
   await engine.onMessage({ room: null, where: 'dm', message: 'm-in', text: '/new', images: [] });
   const form = formOf(chat);
   assert.deepEqual(form.fields.find((f) => f.name === 'folder').options.map((o) => o.label), [
-    'The space\'s folder (a new space: home)', '/srv/data · This computer', '~/Code/proj · This computer', '/home/me/app · box', 'Another folder…',
-  ]);
+    'The space\'s folder (a new space: home)', '~/Code/proj · This computer', '/srv/data · This computer', '/home/me/app · box', 'Another folder…',
+  ], 'under home first, whatever the home is');
   const wrong = await engine.onAction({ value: { form: form.id }, message: 'f1', form: { space: optionOf(form, 'space', 'proj · This computer'), folder: optionOf(form, 'folder', '/home/me/app · box') } });
   assert.match(wrong.toast.text, /That folder is on box, the space on This computer/);
   await engine.onAction({ value: { form: form.id }, message: 'f1', form: { space: optionOf(form, 'space', 'proj · This computer'), folder: optionOf(form, 'folder', '/srv/data · This computer') } });
@@ -841,13 +841,13 @@ test('a pick changed on the card (Feishu) draws it again: a folder on another ma
   done();
 });
 
-test('the form: Shell starts the login shell; a start that fails says why on the card', async () => {
+test('the form: the tab as named; a start that fails says why on the card', async () => {
   const { chat, hc, engine, done } = await setup([terminal('t1', { space: 'proj' })], { logError: () => {} });
   await engine.onMessage({ room: null, where: 'dm', message: 'm-in', text: '/new', images: [] });
   let form = formOf(chat);
-  await engine.onAction({ value: { form: form.id }, message: 'f1', form: { space: optionOf(form, 'space', 'proj'), agent: 'shell', tab: 'logs' } });
+  await engine.onAction({ value: { form: form.id }, message: 'f1', form: { space: optionOf(form, 'space', 'proj'), agent: 'pi', tab: 'logs' } });
   await settle(engine);
-  assert.deepEqual(hc.ran.argv, ['/bin/zsh', '-l']);
+  assert.deepEqual(hc.ran.argv, ['/bin/zsh', '-lc', 'exec pi']);
   assert.equal(hc.ran.labels.where, 'proj / logs');
   hc.run = async () => { throw new Error('hc run: no such folder'); };
   await engine.onMessage({ room: null, where: 'dm', message: 'm-in2', text: '/new', images: [] });

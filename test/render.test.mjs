@@ -57,7 +57,7 @@ const FORM = {
   fields: [
     { name: 'space', label: 'Space', kind: 'pick', options: [{ label: 'alpha · This computer', value: 's0' }, { label: '＋ New space on box', value: 'n1' }], initial: 's0' },
     { name: 'name', label: 'New space\'s name', kind: 'text', optional: true, placeholder: 'only for a new space', when: { field: 'space', values: ['n1'] } },
-    { name: 'agent', label: 'Agent', kind: 'pick', options: [{ label: 'Claude Code', value: 'claude' }, { label: 'Shell', value: 'shell' }], initial: 'claude' },
+    { name: 'agent', label: 'Agent', kind: 'pick', options: [{ label: 'Claude Code', value: 'claude' }, { label: 'Codex', value: 'codex' }], initial: 'claude' },
   ],
 };
 
