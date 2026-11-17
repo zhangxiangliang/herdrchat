@@ -663,6 +663,98 @@ test('/new names the new tab in herdr-app as asked, by the tab id it gave the te
   done();
 });
 
+// the new-terminal form (engine/create.mjs): the core's side, any app
+const formOf = (chat) => chat.of('showForm').at(-1).args[1];
+const optionOf = (form, field, label) => form.fields.find((f) => f.name === field).options.find((o) => o.label === label).value;
+
+test('/new alone sends the form: every space there is (each machine\'s by name), a new space on each machine, the agents', async () => {
+  const { chat, hc, engine, done } = await setup([
+    terminal('t1', { space: 'proj', program: 'fake', agent: true }),
+    terminal('t2', { space: 'docs', tabId: 'tb2' }),
+  ]);
+  hc.cores = async () => ({ self: 'core-s', links: [{ name: 'box', id: 'core-box', state: 'connected' }, { name: 'gone', id: 'core-gone', state: 'connecting' }] });
+  await engine.onMessage({ room: null, where: 'dm', message: 'm-in', text: '/new', images: [] });
+  await settle(engine);
+  const [where, form] = chat.of('showForm').at(-1).args;
+  assert.equal(where, 'dm', 'where /new came from');
+  assert.deepEqual(form.fields.map((f) => [f.name, f.kind, Boolean(f.optional)]), [['space', 'pick', false], ['name', 'text', true], ['agent', 'pick', false], ['tab', 'text', true], ['folder', 'text', true]]);
+  assert.deepEqual(form.fields[0].options.map((o) => o.label), ['docs · This computer', 'proj · This computer', '＋ New space on This computer', '＋ New space on box'], 'a machine not connected is not offered');
+  assert.deepEqual(form.fields[1].when, { field: 'space', values: ['n0', 'n1'] });
+  assert.deepEqual(form.fields[2].options.map((o) => o.value), ['claude', 'codex', 'opencode', 'pi', 'shell']);
+  // the overview's button: the form in the direct chat
+  const out = await engine.onAction({ value: { open: 'new' }, message: 'o1', where: null });
+  assert.equal(out.toast.type, 'info');
+  await settle(engine);
+  assert.equal(chat.of('showForm').at(-1).args[0], null);
+  done();
+});
+
+test('the form sent back starts the terminal: in a space there is, as its other tabs (its id, its folder), the tab named after the agent past the ones it has', async () => {
+  const t1 = terminal('t1', { space: 'proj', tab: 'claude', program: 'fake', agent: true });
+  t1.foreground.cwd = '/work/proj';
+  const { chat, hc, engine, done } = await setup([t1]);
+  await engine.onMessage({ room: null, where: 'dm', message: 'm-in', text: '/new', images: [] });
+  const form = formOf(chat);
+  const out = await engine.onAction({ value: { form: form.id }, message: 'f1', form: { space: optionOf(form, 'space', 'proj'), agent: 'claude', tab: '', folder: '' } });
+  assert.deepEqual(out.card.kind, 'look', 'the card says it is starting');
+  await settle(engine);
+  assert.equal(hc.ran.labels.where, 'proj / claude-2');
+  assert.equal(hc.ran.labels['herdr.space'], 'sp1');
+  assert.equal(hc.ran.cwd, '/work/proj');
+  assert.equal(hc.ran.on, null);
+  assert.deepEqual(hc.ran.argv, ['/bin/zsh', '-lc', 'exec claude']);
+  const [message, look] = chat.of('editCard').at(-1).args;
+  assert.equal(message, 'f1');
+  assert.match(look.markdown, /Started `claude` as `t99` in s \/ proj \/ claude-2/);
+  const again = await engine.onAction({ value: { form: form.id }, message: 'f1', form: { space: optionOf(form, 'space', 'proj'), agent: 'claude' } });
+  assert.equal(again.toast.type, 'warning', 'a form is used once');
+  // picks never touched are not sent back by Feishu: their first option
+  await engine.onMessage({ room: null, where: 'dm', message: 'm-in2', text: '/new', images: [] });
+  await engine.onAction({ value: { form: formOf(chat).id }, message: 'f2', form: { tab: 'x' } });
+  await settle(engine);
+  assert.deepEqual([hc.ran.labels.where, hc.ran.argv.at(-1)], ['proj / x', 'exec claude']);
+  done();
+});
+
+test('a new space on a machine reached over a link: hc runs it there, through that machine\'s own shell; a folder under ~ is reached by cd', async () => {
+  const { chat, hc, engine, done } = await setup([terminal('t1')]);
+  hc.cores = async () => ({ self: 'core-s', links: [{ name: 'box', id: 'core-box', state: 'connected' }] });
+  await engine.onMessage({ room: null, where: 'dm', message: 'm-in', text: '/new', images: [] });
+  const form = formOf(chat);
+  const onBox = optionOf(form, 'space', '＋ New space on box');
+  const missing = await engine.onAction({ value: { form: form.id }, message: 'f1', form: { space: onBox, agent: 'codex' } });
+  assert.deepEqual([missing.toast.type, missing.card], ['error', undefined], 'a new space needs a name; the form stays to fix');
+  const slash = await engine.onAction({ value: { form: form.id }, message: 'f1', form: { space: onBox, name: 'a / b', agent: 'codex' } });
+  assert.equal(slash.toast.type, 'error');
+  await engine.onAction({ value: { form: form.id }, message: 'f1', form: { space: onBox, name: 'api', agent: 'codex', folder: '~/work/my app' } });
+  await settle(engine);
+  assert.equal(hc.ran.on, 'box');
+  assert.equal(hc.ran.cwd, null, 'no folder of this computer\'s');
+  assert.equal(hc.ran.labels.where, 'api / codex');
+  assert.match(hc.ran.labels['herdr.space'], /^sp[0-9a-f]{32}$/, 'a new space has an id of its own');
+  assert.deepEqual(hc.ran.argv, ['sh', '-c', 'cd ~/\'work/my app\' && exec "${SHELL:-sh}" -lc "$0"', 'exec codex']);
+  done();
+});
+
+test('the form: Shell starts the login shell; a start that fails says why on the card', async () => {
+  const { chat, hc, engine, done } = await setup([terminal('t1', { space: 'proj' })], { logError: () => {} });
+  await engine.onMessage({ room: null, where: 'dm', message: 'm-in', text: '/new', images: [] });
+  let form = formOf(chat);
+  await engine.onAction({ value: { form: form.id }, message: 'f1', form: { space: optionOf(form, 'space', 'proj'), agent: 'shell', tab: 'logs' } });
+  await settle(engine);
+  assert.deepEqual(hc.ran.argv, ['/bin/zsh', '-l']);
+  assert.equal(hc.ran.labels.where, 'proj / logs');
+  hc.run = async () => { throw new Error('hc run: no such folder'); };
+  await engine.onMessage({ room: null, where: 'dm', message: 'm-in2', text: '/new', images: [] });
+  form = formOf(chat);
+  await engine.onAction({ value: { form: form.id }, message: 'f2', form: { space: optionOf(form, 'space', 'proj'), agent: 'claude' } });
+  await settle(engine);
+  const look = chat.of('editCard').at(-1).args[1];
+  assert.equal(look.tone, 'bad');
+  assert.match(look.markdown, /no such folder/);
+  done();
+});
+
 test('/usage in the direct chat: the accounts on every machine', async () => {
   const shell = async (s, m, script) => (m === 'box' && /hostname/.test(script) ? 'box\n/home/me' : '');
   const { chat, hc, engine, r, done } = await setup([terminal('t1')], { shell });
@@ -1611,6 +1703,90 @@ test('Telegram: herdr\'s own topic is the direct chat, a command from outside an
   } finally {
     stopped = true;
     await new Promise((r) => setTimeout(r, 120)); // the poll in flight comes back once more
+    globalThis.fetch = realFetch;
+  }
+});
+
+test('Telegram: the new-terminal form a field at a time: buttons for a pick, your next words in its topic for a text, a field that does not apply skipped; a mistake starts it again', async () => {
+  const telegram = await import('../lib/chats/telegram/index.mjs');
+  const store = fakeStore();
+  const state = store.read();
+  state.homeTopic = '900';
+  store.write(state);
+  const cfg = { env: { TELEGRAM_BOT_TOKEN: '1:test', TELEGRAM_OWNER_ID: '42' }, sessions: ['a'], muted: { all: true, spaces: [] }, silent: { all: false, spaces: [] } };
+  const sent = [];
+  const realFetch = globalThis.fetch;
+  let stopped = false;
+  let updates = [];
+  globalThis.fetch = async (url, opts) => {
+    const method = url.split('/').pop();
+    const body = JSON.parse(opts.body);
+    sent.push({ method, body });
+    if (method === 'getMe') return { ok: true, json: async () => ({ ok: true, result: { username: 'bot', has_topics_enabled: true } }) };
+    if (method === 'getUpdates') {
+      if (stopped) return new Promise(() => {});
+      const u = updates;
+      updates = [];
+      if (!u.length) await new Promise((r) => setTimeout(r, 20));
+      return { ok: true, json: async () => ({ ok: true, result: u }) };
+    }
+    return { ok: true, json: async () => ({ ok: true, result: { message_id: 70 } }) };
+  };
+  const form = {
+    id: 'f1',
+    title: 'New',
+    markdown: 'Where.',
+    submit: 'Start',
+    fields: [
+      { name: 'space', label: 'Space', kind: 'pick', options: [{ label: 'proj', value: 's0' }, { label: '＋ New space', value: 'n0' }] },
+      { name: 'name', label: 'Name', kind: 'text', optional: true, when: { field: 'space', values: ['n0'] } },
+      { name: 'agent', label: 'Agent', kind: 'pick', options: [{ label: 'Claude Code', value: 'claude' }] },
+      { name: 'tab', label: 'Tab', kind: 'text', optional: true },
+    ],
+  };
+  let n = 0;
+  const send = async (u) => { updates.push({ update_id: (n += 1), ...u }); const before = sent.length; for (let i = 0; i < 100 && !sent.slice(before).some((x) => x.method === 'answerCallbackQuery' || x.method === 'editMessageText'); i += 1) await new Promise((r) => setTimeout(r, 10)); };
+  const tap = (data) => send({ callback_query: { id: `q${n}`, from: { id: 42 }, data, message: { message_id: 70 } } });
+  const say = (text) => send({ message: { message_id: 100 + n, from: { id: 42 }, chat: { id: 42, type: 'private' }, is_topic_message: true, message_thread_id: 900, text } });
+  const lastEdit = () => sent.filter((x) => x.method === 'editMessageText').at(-1).body;
+  const datas = (body) => body.reply_markup.inline_keyboard.flat().map((b) => b.callback_data);
+  try {
+    const chat = telegram.create({ cfg, store, log: quiet, logWarn: quiet, logError: quiet, stateDir: os.tmpdir(), lane: () => {}, scopeOf: () => 'a' });
+    const back = [];
+    let answer = { toast: { type: 'error', text: 'A new space needs a name.' } };
+    const got = [];
+    chat.start({ onMessage: async (m) => { got.push(m); }, onAction: async (a) => { back.push(a); return answer; } });
+    await chat.showForm(null, form);
+    const first = sent.filter((x) => x.method === 'sendMessage').at(-1).body;
+    assert.equal(first.message_thread_id, 900, 'in herdr\'s topic');
+    assert.deepEqual(datas(first), ['#f1:0', '#f1:1']);
+    // a space there is: its name is not asked
+    await tap('#f1:0');
+    assert.match(lastEdit().text, /Space: <b>proj<\/b>[\s\S]*Agent\?/);
+    await tap('#f1:0');
+    assert.match(lastEdit().text, /Send the tab/);
+    assert.deepEqual(datas(lastEdit()), ['#f1:skip']);
+    await say('logs');
+    assert.deepEqual(back.at(-1).form, { space: 's0', agent: 'claude', tab: 'logs' });
+    assert.equal(got.length, 0, 'the text was the form\'s, not a message to the bot');
+    assert.match(lastEdit().text, /⚠️ A new space needs a name\.[\s\S]*Space\?/, 'a mistake: from the start, saying what');
+    // a new space: its name is asked; Skip leaves a text empty
+    await tap('#f1:1');
+    assert.match(lastEdit().text, /Send the name/);
+    await say('api');
+    await tap('#f1:0');
+    answer = { toast: { type: 'info', text: 'Starting…' }, card: { kind: 'look', look: { title: 'Starting…', tone: 'working', markdown: 'api / claude' } } };
+    await tap('#f1:skip');
+    assert.deepEqual(back.at(-1).form, { space: 'n0', name: 'api', agent: 'claude', tab: '' });
+    assert.match(lastEdit().text, /Starting…[\s\S]*api \/ claude/);
+    assert.deepEqual(lastEdit().reply_markup.inline_keyboard, []);
+    await tap('#f1:0');
+    assert.equal(sent.filter((x) => x.method === 'answerCallbackQuery').at(-1).body.text, 'This form is old (the bot restarted, or it was used). Send /new for a new one.');
+    await say('hello');
+    assert.deepEqual(got.map((m) => m.text), ['hello'], 'once it is done, your words are yours again');
+  } finally {
+    stopped = true;
+    await new Promise((r) => setTimeout(r, 120));
     globalThis.fetch = realFetch;
   }
 });

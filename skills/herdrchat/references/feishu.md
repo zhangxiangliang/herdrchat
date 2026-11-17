@@ -121,7 +121,7 @@ then delete it in the developer console. Ask before each of the two steps.
 
 ### The bot menu
 
-Four buttons in the direct chat with the bot, so the commands are a tap away (Feishu has
+Five buttons in the direct chat with the bot, so the commands are a tap away (Feishu has
 no `/` list as Telegram does). Set it at first setup, with the events, so one version
 publishes both. Feishu sets it only in the developer console (no API, so each user's
 app needs its own), shows it in the direct chat only (not in groups), and it works
@@ -136,6 +136,7 @@ bot needs no restart: it always listens for the menu's event.
    | Item | Event key | What it does |
    |---|---|---|
    | Overview | `ls` | a new overview of every terminal at the bottom of the chat (`/ls`) |
+   | New | `new` | the form that starts a terminal: where, which agent, its tab and folder (`/new`) |
    | Usage | `usage` | every account's limits on every machine (`/usage`) |
    | Help | `help` | every command, for the direct chat and for a terminal's group |
    | Act as me | `auth` | lets the bot mute and label its groups in your chat list (`/auth`) |
@@ -146,7 +147,7 @@ bot needs no restart: it always listens for the menu's event.
 4. Events: `application.bot.menu_v6` ("Events and card callbacks" above).
 5. Publish a version. Ask before publishing.
 
-Commands that take words (`/new`, `/kill`) stay typed.
+`/kill` takes words, so it stays typed (in a terminal's own group, `/kill` alone ends it).
 
 ## Scopes this bot uses
 

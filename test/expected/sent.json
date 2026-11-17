@@ -676,6 +676,41 @@
             ]
           },
           {
+            "tag": "column_set",
+            "flex_mode": "flow",
+            "horizontal_spacing": "small",
+            "columns": [
+              {
+                "tag": "column",
+                "width": "auto",
+                "elements": [
+                  {
+                    "tag": "button",
+                    "type": "default",
+                    "width": "default",
+                    "size": "medium",
+                    "text": {
+                      "tag": "plain_text",
+                      "content": "＋ New terminal"
+                    },
+                    "hover_tips": {
+                      "tag": "plain_text",
+                      "content": "＋ New terminal"
+                    },
+                    "behaviors": [
+                      {
+                        "type": "callback",
+                        "value": {
+                          "open": "new"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
             "tag": "markdown",
             "content": "Updated 10:00",
             "text_size": "notation"
@@ -930,6 +965,16 @@
         "link_preview_options": {
           "is_disabled": true
         },
+        "reply_markup": {
+          "inline_keyboard": [
+            [
+              {
+                "text": "＋ New terminal",
+                "callback_data": "<id3>"
+              }
+            ]
+          ]
+        },
         "text": "<b>⚠️ 1 needs you · herdrchat · 3 terminals</b>\n\n<b>This computer</b>\n• <b>alpha</b>\n      ◦ docs · ✅ done\n      ◦ shell · zsh\n\n<b>box</b>\n• <b>beta</b>\n      ◦ T1_ABC-2 · ⚠️ needs you",
         "parse_mode": "HTML"
       }
@@ -942,6 +987,16 @@
         "disable_notification": false,
         "link_preview_options": {
           "is_disabled": true
+        },
+        "reply_markup": {
+          "inline_keyboard": [
+            [
+              {
+                "text": "＋ New terminal",
+                "callback_data": "<id3>"
+              }
+            ]
+          ]
         },
         "text": "<b>⚠️ 1 needs you · herdrchat · 3 terminals</b>\n\n<b>Waiting for you</b>\n• <b>beta / T1_ABC-2</b> · ⚠️ needs you · <i>00:00: Allow ls?</i>\n• <b>alpha / docs</b> · ✅ done · <i>00:00: Fixed *it* &lt;now&gt;.</i>\n\n<b>This computer</b>\n• <b>alpha</b>\n      ◦ docs · ✅ done\n      ◦ shell · zsh\n\n<b>box</b>\n• <b>beta</b>\n      ◦ T1_ABC-2 · ⚠️ needs you",
         "parse_mode": "HTML"
@@ -969,6 +1024,35 @@
         "link_preview_options": {
           "is_disabled": true
         }
+      }
+    },
+    {
+      "method": "sendMessage",
+      "body": {
+        "chat_id": "42",
+        "message_thread_id": 77,
+        "disable_notification": false,
+        "link_preview_options": {
+          "is_disabled": true
+        },
+        "reply_markup": {
+          "inline_keyboard": [
+            [
+              {
+                "text": "alpha · This computer",
+                "callback_data": "<id4>:0"
+              }
+            ],
+            [
+              {
+                "text": "＋ New space on box",
+                "callback_data": "<id4>:1"
+              }
+            ]
+          ]
+        },
+        "text": "<b>＋ New terminal</b>\n\nWhere it goes and what runs in it.\n\n<b>Space?</b>",
+        "parse_mode": "HTML"
       }
     }
   ],
@@ -1312,7 +1396,7 @@
       "data": {
         "receive_id": "ou_owner",
         "msg_type": "interactive",
-        "content": "{\"schema\":\"2.0\",\"config\":{\"update_multi\":true,\"summary\":{\"content\":\"herdrchat · 1 terminals\"}},\"header\":{\"title\":{\"tag\":\"plain_text\",\"content\":\"herdrchat · 1 terminals\"},\"template\":\"green\",\"icon\":{\"tag\":\"standard_icon\",\"token\":\"done_outlined\",\"color\":\"green\"}},\"body\":{\"elements\":[{\"tag\":\"markdown\",\"content\":\"### This computer\"},{\"tag\":\"table\",\"page_size\":10,\"row_height\":\"auto\",\"row_max_height\":\"64px\",\"header_style\":{\"background_style\":\"grey\",\"text_color\":\"grey\",\"bold\":true},\"columns\":[{\"name\":\"room\",\"display_name\":\"Room\",\"data_type\":\"lark_md\",\"width\":\"auto\"},{\"name\":\"state\",\"display_name\":\"State\",\"data_type\":\"options\",\"width\":\"auto\"},{\"name\":\"latest\",\"display_name\":\"Latest\",\"data_type\":\"text\",\"width\":\"auto\"}],\"rows\":[{\"room\":\"[proj / master](https://applink.feishu.cn/client/chat/open?openChatId=oc_2)\",\"state\":[{\"text\":\"idle\",\"color\":\"neutral\"}],\"latest\":\"\"}]},{\"tag\":\"markdown\",\"content\":\"Updated <time>\",\"text_size\":\"notation\"},{\"tag\":\"markdown\",\"content\":\"Your groups ring on every post too: send /auth, so herdrchat mutes them and only this chat rings.\",\"text_size\":\"notation\"}]}}"
+        "content": "{\"schema\":\"2.0\",\"config\":{\"update_multi\":true,\"summary\":{\"content\":\"herdrchat · 1 terminals\"}},\"header\":{\"title\":{\"tag\":\"plain_text\",\"content\":\"herdrchat · 1 terminals\"},\"template\":\"green\",\"icon\":{\"tag\":\"standard_icon\",\"token\":\"done_outlined\",\"color\":\"green\"}},\"body\":{\"elements\":[{\"tag\":\"markdown\",\"content\":\"### This computer\"},{\"tag\":\"table\",\"page_size\":10,\"row_height\":\"auto\",\"row_max_height\":\"64px\",\"header_style\":{\"background_style\":\"grey\",\"text_color\":\"grey\",\"bold\":true},\"columns\":[{\"name\":\"room\",\"display_name\":\"Room\",\"data_type\":\"lark_md\",\"width\":\"auto\"},{\"name\":\"state\",\"display_name\":\"State\",\"data_type\":\"options\",\"width\":\"auto\"},{\"name\":\"latest\",\"display_name\":\"Latest\",\"data_type\":\"text\",\"width\":\"auto\"}],\"rows\":[{\"room\":\"[proj / master](https://applink.feishu.cn/client/chat/open?openChatId=oc_2)\",\"state\":[{\"text\":\"idle\",\"color\":\"neutral\"}],\"latest\":\"\"}]},{\"tag\":\"column_set\",\"flex_mode\":\"flow\",\"horizontal_spacing\":\"small\",\"columns\":[{\"tag\":\"column\",\"width\":\"auto\",\"elements\":[{\"tag\":\"button\",\"type\":\"default\",\"width\":\"default\",\"size\":\"medium\",\"text\":{\"tag\":\"plain_text\",\"content\":\"＋ New terminal\"},\"hover_tips\":{\"tag\":\"plain_text\",\"content\":\"＋ New terminal\"},\"behaviors\":[{\"type\":\"callback\",\"value\":{\"open\":\"new\"}}]}]}]},{\"tag\":\"markdown\",\"content\":\"Updated <time>\",\"text_size\":\"notation\"},{\"tag\":\"markdown\",\"content\":\"Your groups ring on every post too: send /auth, so herdrchat mutes them and only this chat rings.\",\"text_size\":\"notation\"}]}}"
       }
     },
     {
@@ -1356,7 +1440,7 @@
       "data": {
         "receive_id": "ou_owner",
         "msg_type": "interactive",
-        "content": "{\"schema\":\"2.0\",\"config\":{\"update_multi\":true,\"summary\":{\"content\":\"⚠️ needs you · proj / master\"}},\"header\":{\"title\":{\"tag\":\"plain_text\",\"content\":\"herdrchat · 1 terminals\"},\"template\":\"orange\",\"icon\":{\"tag\":\"standard_icon\",\"token\":\"warning_outlined\",\"color\":\"orange\"}},\"body\":{\"elements\":[{\"tag\":\"markdown\",\"content\":\"### Waiting for you\"},{\"tag\":\"table\",\"page_size\":10,\"row_height\":\"auto\",\"row_max_height\":\"64px\",\"header_style\":{\"background_style\":\"grey\",\"text_color\":\"grey\",\"bold\":true},\"columns\":[{\"name\":\"room\",\"display_name\":\"Room\",\"data_type\":\"lark_md\",\"width\":\"auto\"},{\"name\":\"state\",\"display_name\":\"State\",\"data_type\":\"options\",\"width\":\"auto\"},{\"name\":\"latest\",\"display_name\":\"Latest\",\"data_type\":\"text\",\"width\":\"auto\"}],\"rows\":[{\"room\":\"[proj / master](https://applink.feishu.cn/client/chat/open?openChatId=oc_2)\",\"state\":[{\"text\":\"needs you\",\"color\":\"orange\"}],\"latest\":\"\"}]},{\"tag\":\"markdown\",\"content\":\"### This computer\"},{\"tag\":\"table\",\"page_size\":10,\"row_height\":\"auto\",\"row_max_height\":\"64px\",\"header_style\":{\"background_style\":\"grey\",\"text_color\":\"grey\",\"bold\":true},\"columns\":[{\"name\":\"room\",\"display_name\":\"Room\",\"data_type\":\"lark_md\",\"width\":\"auto\"},{\"name\":\"state\",\"display_name\":\"State\",\"data_type\":\"options\",\"width\":\"auto\"},{\"name\":\"latest\",\"display_name\":\"Latest\",\"data_type\":\"text\",\"width\":\"auto\"}],\"rows\":[{\"room\":\"[proj / master](https://applink.feishu.cn/client/chat/open?openChatId=oc_2)\",\"state\":[{\"text\":\"idle\",\"color\":\"neutral\"}],\"latest\":\"\"}]},{\"tag\":\"markdown\",\"content\":\"Updated <time>\",\"text_size\":\"notation\"},{\"tag\":\"markdown\",\"content\":\"Your groups ring on every post too: send /auth, so herdrchat mutes them and only this chat rings.\",\"text_size\":\"notation\"}]}}"
+        "content": "{\"schema\":\"2.0\",\"config\":{\"update_multi\":true,\"summary\":{\"content\":\"⚠️ needs you · proj / master\"}},\"header\":{\"title\":{\"tag\":\"plain_text\",\"content\":\"herdrchat · 1 terminals\"},\"template\":\"orange\",\"icon\":{\"tag\":\"standard_icon\",\"token\":\"warning_outlined\",\"color\":\"orange\"}},\"body\":{\"elements\":[{\"tag\":\"markdown\",\"content\":\"### Waiting for you\"},{\"tag\":\"table\",\"page_size\":10,\"row_height\":\"auto\",\"row_max_height\":\"64px\",\"header_style\":{\"background_style\":\"grey\",\"text_color\":\"grey\",\"bold\":true},\"columns\":[{\"name\":\"room\",\"display_name\":\"Room\",\"data_type\":\"lark_md\",\"width\":\"auto\"},{\"name\":\"state\",\"display_name\":\"State\",\"data_type\":\"options\",\"width\":\"auto\"},{\"name\":\"latest\",\"display_name\":\"Latest\",\"data_type\":\"text\",\"width\":\"auto\"}],\"rows\":[{\"room\":\"[proj / master](https://applink.feishu.cn/client/chat/open?openChatId=oc_2)\",\"state\":[{\"text\":\"needs you\",\"color\":\"orange\"}],\"latest\":\"\"}]},{\"tag\":\"markdown\",\"content\":\"### This computer\"},{\"tag\":\"table\",\"page_size\":10,\"row_height\":\"auto\",\"row_max_height\":\"64px\",\"header_style\":{\"background_style\":\"grey\",\"text_color\":\"grey\",\"bold\":true},\"columns\":[{\"name\":\"room\",\"display_name\":\"Room\",\"data_type\":\"lark_md\",\"width\":\"auto\"},{\"name\":\"state\",\"display_name\":\"State\",\"data_type\":\"options\",\"width\":\"auto\"},{\"name\":\"latest\",\"display_name\":\"Latest\",\"data_type\":\"text\",\"width\":\"auto\"}],\"rows\":[{\"room\":\"[proj / master](https://applink.feishu.cn/client/chat/open?openChatId=oc_2)\",\"state\":[{\"text\":\"idle\",\"color\":\"neutral\"}],\"latest\":\"\"}]},{\"tag\":\"column_set\",\"flex_mode\":\"flow\",\"horizontal_spacing\":\"small\",\"columns\":[{\"tag\":\"column\",\"width\":\"auto\",\"elements\":[{\"tag\":\"button\",\"type\":\"default\",\"width\":\"default\",\"size\":\"medium\",\"text\":{\"tag\":\"plain_text\",\"content\":\"＋ New terminal\"},\"hover_tips\":{\"tag\":\"plain_text\",\"content\":\"＋ New terminal\"},\"behaviors\":[{\"type\":\"callback\",\"value\":{\"open\":\"new\"}}]}]}]},{\"tag\":\"markdown\",\"content\":\"Updated <time>\",\"text_size\":\"notation\"},{\"tag\":\"markdown\",\"content\":\"Your groups ring on every post too: send /auth, so herdrchat mutes them and only this chat rings.\",\"text_size\":\"notation\"}]}}"
       }
     },
     {
@@ -1414,7 +1498,7 @@
       "data": {
         "receive_id": "ou_owner",
         "msg_type": "interactive",
-        "content": "{\"schema\":\"2.0\",\"config\":{\"update_multi\":true,\"summary\":{\"content\":\"✅ done · proj / master: Fixed it: T1_ABC <now> & done.\"}},\"header\":{\"title\":{\"tag\":\"plain_text\",\"content\":\"herdrchat · 1 terminals\"},\"template\":\"green\",\"icon\":{\"tag\":\"standard_icon\",\"token\":\"done_outlined\",\"color\":\"green\"}},\"body\":{\"elements\":[{\"tag\":\"markdown\",\"content\":\"### Waiting for you\"},{\"tag\":\"table\",\"page_size\":10,\"row_height\":\"auto\",\"row_max_height\":\"64px\",\"header_style\":{\"background_style\":\"grey\",\"text_color\":\"grey\",\"bold\":true},\"columns\":[{\"name\":\"room\",\"display_name\":\"Room\",\"data_type\":\"lark_md\",\"width\":\"auto\"},{\"name\":\"state\",\"display_name\":\"State\",\"data_type\":\"options\",\"width\":\"auto\"},{\"name\":\"latest\",\"display_name\":\"Latest\",\"data_type\":\"text\",\"width\":\"auto\"}],\"rows\":[{\"room\":\"[proj / master](https://applink.feishu.cn/client/chat/open?openChatId=oc_2)\",\"state\":[{\"text\":\"done\",\"color\":\"green\"}],\"latest\":\"<time>: Fixed it: T1_ABC <now> & done.\"}]},{\"tag\":\"markdown\",\"content\":\"### This computer\"},{\"tag\":\"table\",\"page_size\":10,\"row_height\":\"auto\",\"row_max_height\":\"64px\",\"header_style\":{\"background_style\":\"grey\",\"text_color\":\"grey\",\"bold\":true},\"columns\":[{\"name\":\"room\",\"display_name\":\"Room\",\"data_type\":\"lark_md\",\"width\":\"auto\"},{\"name\":\"state\",\"display_name\":\"State\",\"data_type\":\"options\",\"width\":\"auto\"},{\"name\":\"latest\",\"display_name\":\"Latest\",\"data_type\":\"text\",\"width\":\"auto\"}],\"rows\":[{\"room\":\"[proj / master](https://applink.feishu.cn/client/chat/open?openChatId=oc_2)\",\"state\":[{\"text\":\"idle\",\"color\":\"neutral\"}],\"latest\":\"<time>: Fixed it: T1_ABC <now> & done.\"}]},{\"tag\":\"markdown\",\"content\":\"Updated <time>\",\"text_size\":\"notation\"},{\"tag\":\"markdown\",\"content\":\"Your groups ring on every post too: send /auth, so herdrchat mutes them and only this chat rings.\",\"text_size\":\"notation\"}]}}"
+        "content": "{\"schema\":\"2.0\",\"config\":{\"update_multi\":true,\"summary\":{\"content\":\"✅ done · proj / master: Fixed it: T1_ABC <now> & done.\"}},\"header\":{\"title\":{\"tag\":\"plain_text\",\"content\":\"herdrchat · 1 terminals\"},\"template\":\"green\",\"icon\":{\"tag\":\"standard_icon\",\"token\":\"done_outlined\",\"color\":\"green\"}},\"body\":{\"elements\":[{\"tag\":\"markdown\",\"content\":\"### Waiting for you\"},{\"tag\":\"table\",\"page_size\":10,\"row_height\":\"auto\",\"row_max_height\":\"64px\",\"header_style\":{\"background_style\":\"grey\",\"text_color\":\"grey\",\"bold\":true},\"columns\":[{\"name\":\"room\",\"display_name\":\"Room\",\"data_type\":\"lark_md\",\"width\":\"auto\"},{\"name\":\"state\",\"display_name\":\"State\",\"data_type\":\"options\",\"width\":\"auto\"},{\"name\":\"latest\",\"display_name\":\"Latest\",\"data_type\":\"text\",\"width\":\"auto\"}],\"rows\":[{\"room\":\"[proj / master](https://applink.feishu.cn/client/chat/open?openChatId=oc_2)\",\"state\":[{\"text\":\"done\",\"color\":\"green\"}],\"latest\":\"<time>: Fixed it: T1_ABC <now> & done.\"}]},{\"tag\":\"markdown\",\"content\":\"### This computer\"},{\"tag\":\"table\",\"page_size\":10,\"row_height\":\"auto\",\"row_max_height\":\"64px\",\"header_style\":{\"background_style\":\"grey\",\"text_color\":\"grey\",\"bold\":true},\"columns\":[{\"name\":\"room\",\"display_name\":\"Room\",\"data_type\":\"lark_md\",\"width\":\"auto\"},{\"name\":\"state\",\"display_name\":\"State\",\"data_type\":\"options\",\"width\":\"auto\"},{\"name\":\"latest\",\"display_name\":\"Latest\",\"data_type\":\"text\",\"width\":\"auto\"}],\"rows\":[{\"room\":\"[proj / master](https://applink.feishu.cn/client/chat/open?openChatId=oc_2)\",\"state\":[{\"text\":\"idle\",\"color\":\"neutral\"}],\"latest\":\"<time>: Fixed it: T1_ABC <now> & done.\"}]},{\"tag\":\"column_set\",\"flex_mode\":\"flow\",\"horizontal_spacing\":\"small\",\"columns\":[{\"tag\":\"column\",\"width\":\"auto\",\"elements\":[{\"tag\":\"button\",\"type\":\"default\",\"width\":\"default\",\"size\":\"medium\",\"text\":{\"tag\":\"plain_text\",\"content\":\"＋ New terminal\"},\"hover_tips\":{\"tag\":\"plain_text\",\"content\":\"＋ New terminal\"},\"behaviors\":[{\"type\":\"callback\",\"value\":{\"open\":\"new\"}}]}]}]},{\"tag\":\"markdown\",\"content\":\"Updated <time>\",\"text_size\":\"notation\"},{\"tag\":\"markdown\",\"content\":\"Your groups ring on every post too: send /auth, so herdrchat mutes them and only this chat rings.\",\"text_size\":\"notation\"}]}}"
       }
     },
     {
@@ -1430,7 +1514,7 @@
       "path": "/open-apis/im/v1/messages/om_16",
       "params": {},
       "data": {
-        "content": "{\"schema\":\"2.0\",\"config\":{\"update_multi\":true,\"summary\":{\"content\":\"herdrchat · 1 terminals\"}},\"header\":{\"title\":{\"tag\":\"plain_text\",\"content\":\"herdrchat · 1 terminals\"},\"template\":\"green\",\"icon\":{\"tag\":\"standard_icon\",\"token\":\"done_outlined\",\"color\":\"green\"}},\"body\":{\"elements\":[{\"tag\":\"markdown\",\"content\":\"### This computer\"},{\"tag\":\"table\",\"page_size\":10,\"row_height\":\"auto\",\"row_max_height\":\"64px\",\"header_style\":{\"background_style\":\"grey\",\"text_color\":\"grey\",\"bold\":true},\"columns\":[{\"name\":\"room\",\"display_name\":\"Room\",\"data_type\":\"lark_md\",\"width\":\"auto\"},{\"name\":\"state\",\"display_name\":\"State\",\"data_type\":\"options\",\"width\":\"auto\"},{\"name\":\"latest\",\"display_name\":\"Latest\",\"data_type\":\"text\",\"width\":\"auto\"}],\"rows\":[{\"room\":\"[proj / master](https://applink.feishu.cn/client/chat/open?openChatId=oc_2)\",\"state\":[{\"text\":\"idle\",\"color\":\"neutral\"}],\"latest\":\"<time>: Fixed it: T1_ABC <now> & done.\"}]},{\"tag\":\"markdown\",\"content\":\"Updated <time>\",\"text_size\":\"notation\"},{\"tag\":\"markdown\",\"content\":\"Your groups ring on every post too: send /auth, so herdrchat mutes them and only this chat rings.\",\"text_size\":\"notation\"}]}}"
+        "content": "{\"schema\":\"2.0\",\"config\":{\"update_multi\":true,\"summary\":{\"content\":\"herdrchat · 1 terminals\"}},\"header\":{\"title\":{\"tag\":\"plain_text\",\"content\":\"herdrchat · 1 terminals\"},\"template\":\"green\",\"icon\":{\"tag\":\"standard_icon\",\"token\":\"done_outlined\",\"color\":\"green\"}},\"body\":{\"elements\":[{\"tag\":\"markdown\",\"content\":\"### This computer\"},{\"tag\":\"table\",\"page_size\":10,\"row_height\":\"auto\",\"row_max_height\":\"64px\",\"header_style\":{\"background_style\":\"grey\",\"text_color\":\"grey\",\"bold\":true},\"columns\":[{\"name\":\"room\",\"display_name\":\"Room\",\"data_type\":\"lark_md\",\"width\":\"auto\"},{\"name\":\"state\",\"display_name\":\"State\",\"data_type\":\"options\",\"width\":\"auto\"},{\"name\":\"latest\",\"display_name\":\"Latest\",\"data_type\":\"text\",\"width\":\"auto\"}],\"rows\":[{\"room\":\"[proj / master](https://applink.feishu.cn/client/chat/open?openChatId=oc_2)\",\"state\":[{\"text\":\"idle\",\"color\":\"neutral\"}],\"latest\":\"<time>: Fixed it: T1_ABC <now> & done.\"}]},{\"tag\":\"column_set\",\"flex_mode\":\"flow\",\"horizontal_spacing\":\"small\",\"columns\":[{\"tag\":\"column\",\"width\":\"auto\",\"elements\":[{\"tag\":\"button\",\"type\":\"default\",\"width\":\"default\",\"size\":\"medium\",\"text\":{\"tag\":\"plain_text\",\"content\":\"＋ New terminal\"},\"hover_tips\":{\"tag\":\"plain_text\",\"content\":\"＋ New terminal\"},\"behaviors\":[{\"type\":\"callback\",\"value\":{\"open\":\"new\"}}]}]}]},{\"tag\":\"markdown\",\"content\":\"Updated <time>\",\"text_size\":\"notation\"},{\"tag\":\"markdown\",\"content\":\"Your groups ring on every post too: send /auth, so herdrchat mutes them and only this chat rings.\",\"text_size\":\"notation\"}]}}"
       }
     },
     {
@@ -1438,7 +1522,7 @@
       "path": "/open-apis/im/v1/messages/om_16",
       "params": {},
       "data": {
-        "content": "{\"schema\":\"2.0\",\"config\":{\"update_multi\":true,\"summary\":{\"content\":\"1 needs you · herdrchat · 1 terminals\"}},\"header\":{\"title\":{\"tag\":\"plain_text\",\"content\":\"1 needs you · herdrchat · 1 terminals\"},\"template\":\"orange\",\"icon\":{\"tag\":\"standard_icon\",\"token\":\"warning_outlined\",\"color\":\"orange\"}},\"body\":{\"elements\":[{\"tag\":\"markdown\",\"content\":\"### This computer\"},{\"tag\":\"table\",\"page_size\":10,\"row_height\":\"auto\",\"row_max_height\":\"64px\",\"header_style\":{\"background_style\":\"grey\",\"text_color\":\"grey\",\"bold\":true},\"columns\":[{\"name\":\"room\",\"display_name\":\"Room\",\"data_type\":\"lark_md\",\"width\":\"auto\"},{\"name\":\"state\",\"display_name\":\"State\",\"data_type\":\"options\",\"width\":\"auto\"},{\"name\":\"latest\",\"display_name\":\"Latest\",\"data_type\":\"text\",\"width\":\"auto\"}],\"rows\":[{\"room\":\"[proj / master](https://applink.feishu.cn/client/chat/open?openChatId=oc_2)\",\"state\":[{\"text\":\"needs you\",\"color\":\"orange\"}],\"latest\":\"<time>: Fixed it: T1_ABC <now> & done.\"}]},{\"tag\":\"markdown\",\"content\":\"Updated <time>\",\"text_size\":\"notation\"},{\"tag\":\"markdown\",\"content\":\"Your groups ring on every post too: send /auth, so herdrchat mutes them and only this chat rings.\",\"text_size\":\"notation\"}]}}"
+        "content": "{\"schema\":\"2.0\",\"config\":{\"update_multi\":true,\"summary\":{\"content\":\"1 needs you · herdrchat · 1 terminals\"}},\"header\":{\"title\":{\"tag\":\"plain_text\",\"content\":\"1 needs you · herdrchat · 1 terminals\"},\"template\":\"orange\",\"icon\":{\"tag\":\"standard_icon\",\"token\":\"warning_outlined\",\"color\":\"orange\"}},\"body\":{\"elements\":[{\"tag\":\"markdown\",\"content\":\"### This computer\"},{\"tag\":\"table\",\"page_size\":10,\"row_height\":\"auto\",\"row_max_height\":\"64px\",\"header_style\":{\"background_style\":\"grey\",\"text_color\":\"grey\",\"bold\":true},\"columns\":[{\"name\":\"room\",\"display_name\":\"Room\",\"data_type\":\"lark_md\",\"width\":\"auto\"},{\"name\":\"state\",\"display_name\":\"State\",\"data_type\":\"options\",\"width\":\"auto\"},{\"name\":\"latest\",\"display_name\":\"Latest\",\"data_type\":\"text\",\"width\":\"auto\"}],\"rows\":[{\"room\":\"[proj / master](https://applink.feishu.cn/client/chat/open?openChatId=oc_2)\",\"state\":[{\"text\":\"needs you\",\"color\":\"orange\"}],\"latest\":\"<time>: Fixed it: T1_ABC <now> & done.\"}]},{\"tag\":\"column_set\",\"flex_mode\":\"flow\",\"horizontal_spacing\":\"small\",\"columns\":[{\"tag\":\"column\",\"width\":\"auto\",\"elements\":[{\"tag\":\"button\",\"type\":\"default\",\"width\":\"default\",\"size\":\"medium\",\"text\":{\"tag\":\"plain_text\",\"content\":\"＋ New terminal\"},\"hover_tips\":{\"tag\":\"plain_text\",\"content\":\"＋ New terminal\"},\"behaviors\":[{\"type\":\"callback\",\"value\":{\"open\":\"new\"}}]}]}]},{\"tag\":\"markdown\",\"content\":\"Updated <time>\",\"text_size\":\"notation\"},{\"tag\":\"markdown\",\"content\":\"Your groups ring on every post too: send /auth, so herdrchat mutes them and only this chat rings.\",\"text_size\":\"notation\"}]}}"
       }
     },
     {
@@ -1462,7 +1546,7 @@
       "data": {
         "receive_id": "ou_owner",
         "msg_type": "interactive",
-        "content": "{\"schema\":\"2.0\",\"config\":{\"update_multi\":true,\"summary\":{\"content\":\"⚠️ needs you · proj / master: Allow ls?\"}},\"header\":{\"title\":{\"tag\":\"plain_text\",\"content\":\"1 needs you · herdrchat · 1 terminals\"},\"template\":\"orange\",\"icon\":{\"tag\":\"standard_icon\",\"token\":\"warning_outlined\",\"color\":\"orange\"}},\"body\":{\"elements\":[{\"tag\":\"markdown\",\"content\":\"### Waiting for you\"},{\"tag\":\"table\",\"page_size\":10,\"row_height\":\"auto\",\"row_max_height\":\"64px\",\"header_style\":{\"background_style\":\"grey\",\"text_color\":\"grey\",\"bold\":true},\"columns\":[{\"name\":\"room\",\"display_name\":\"Room\",\"data_type\":\"lark_md\",\"width\":\"auto\"},{\"name\":\"state\",\"display_name\":\"State\",\"data_type\":\"options\",\"width\":\"auto\"},{\"name\":\"latest\",\"display_name\":\"Latest\",\"data_type\":\"text\",\"width\":\"auto\"}],\"rows\":[{\"room\":\"[proj / master](https://applink.feishu.cn/client/chat/open?openChatId=oc_2)\",\"state\":[{\"text\":\"needs you\",\"color\":\"orange\"}],\"latest\":\"<time>: Allow ls?\"}]},{\"tag\":\"markdown\",\"content\":\"### This computer\"},{\"tag\":\"table\",\"page_size\":10,\"row_height\":\"auto\",\"row_max_height\":\"64px\",\"header_style\":{\"background_style\":\"grey\",\"text_color\":\"grey\",\"bold\":true},\"columns\":[{\"name\":\"room\",\"display_name\":\"Room\",\"data_type\":\"lark_md\",\"width\":\"auto\"},{\"name\":\"state\",\"display_name\":\"State\",\"data_type\":\"options\",\"width\":\"auto\"},{\"name\":\"latest\",\"display_name\":\"Latest\",\"data_type\":\"text\",\"width\":\"auto\"}],\"rows\":[{\"room\":\"[proj / master](https://applink.feishu.cn/client/chat/open?openChatId=oc_2)\",\"state\":[{\"text\":\"needs you\",\"color\":\"orange\"}],\"latest\":\"<time>: Allow ls?\"}]},{\"tag\":\"markdown\",\"content\":\"Updated <time>\",\"text_size\":\"notation\"},{\"tag\":\"markdown\",\"content\":\"Your groups ring on every post too: send /auth, so herdrchat mutes them and only this chat rings.\",\"text_size\":\"notation\"}]}}"
+        "content": "{\"schema\":\"2.0\",\"config\":{\"update_multi\":true,\"summary\":{\"content\":\"⚠️ needs you · proj / master: Allow ls?\"}},\"header\":{\"title\":{\"tag\":\"plain_text\",\"content\":\"1 needs you · herdrchat · 1 terminals\"},\"template\":\"orange\",\"icon\":{\"tag\":\"standard_icon\",\"token\":\"warning_outlined\",\"color\":\"orange\"}},\"body\":{\"elements\":[{\"tag\":\"markdown\",\"content\":\"### Waiting for you\"},{\"tag\":\"table\",\"page_size\":10,\"row_height\":\"auto\",\"row_max_height\":\"64px\",\"header_style\":{\"background_style\":\"grey\",\"text_color\":\"grey\",\"bold\":true},\"columns\":[{\"name\":\"room\",\"display_name\":\"Room\",\"data_type\":\"lark_md\",\"width\":\"auto\"},{\"name\":\"state\",\"display_name\":\"State\",\"data_type\":\"options\",\"width\":\"auto\"},{\"name\":\"latest\",\"display_name\":\"Latest\",\"data_type\":\"text\",\"width\":\"auto\"}],\"rows\":[{\"room\":\"[proj / master](https://applink.feishu.cn/client/chat/open?openChatId=oc_2)\",\"state\":[{\"text\":\"needs you\",\"color\":\"orange\"}],\"latest\":\"<time>: Allow ls?\"}]},{\"tag\":\"markdown\",\"content\":\"### This computer\"},{\"tag\":\"table\",\"page_size\":10,\"row_height\":\"auto\",\"row_max_height\":\"64px\",\"header_style\":{\"background_style\":\"grey\",\"text_color\":\"grey\",\"bold\":true},\"columns\":[{\"name\":\"room\",\"display_name\":\"Room\",\"data_type\":\"lark_md\",\"width\":\"auto\"},{\"name\":\"state\",\"display_name\":\"State\",\"data_type\":\"options\",\"width\":\"auto\"},{\"name\":\"latest\",\"display_name\":\"Latest\",\"data_type\":\"text\",\"width\":\"auto\"}],\"rows\":[{\"room\":\"[proj / master](https://applink.feishu.cn/client/chat/open?openChatId=oc_2)\",\"state\":[{\"text\":\"needs you\",\"color\":\"orange\"}],\"latest\":\"<time>: Allow ls?\"}]},{\"tag\":\"column_set\",\"flex_mode\":\"flow\",\"horizontal_spacing\":\"small\",\"columns\":[{\"tag\":\"column\",\"width\":\"auto\",\"elements\":[{\"tag\":\"button\",\"type\":\"default\",\"width\":\"default\",\"size\":\"medium\",\"text\":{\"tag\":\"plain_text\",\"content\":\"＋ New terminal\"},\"hover_tips\":{\"tag\":\"plain_text\",\"content\":\"＋ New terminal\"},\"behaviors\":[{\"type\":\"callback\",\"value\":{\"open\":\"new\"}}]}]}]},{\"tag\":\"markdown\",\"content\":\"Updated <time>\",\"text_size\":\"notation\"},{\"tag\":\"markdown\",\"content\":\"Your groups ring on every post too: send /auth, so herdrchat mutes them and only this chat rings.\",\"text_size\":\"notation\"}]}}"
       }
     },
     {
@@ -1486,7 +1570,7 @@
       "path": "/open-apis/im/v1/messages/om_21",
       "params": {},
       "data": {
-        "content": "{\"schema\":\"2.0\",\"config\":{\"update_multi\":true,\"summary\":{\"content\":\"herdrchat · 1 terminals\"}},\"header\":{\"title\":{\"tag\":\"plain_text\",\"content\":\"herdrchat · 1 terminals\"},\"template\":\"blue\",\"icon\":{\"tag\":\"standard_icon\",\"token\":\"loading_outlined\",\"color\":\"blue\"}},\"body\":{\"elements\":[{\"tag\":\"markdown\",\"content\":\"### This computer\"},{\"tag\":\"table\",\"page_size\":10,\"row_height\":\"auto\",\"row_max_height\":\"64px\",\"header_style\":{\"background_style\":\"grey\",\"text_color\":\"grey\",\"bold\":true},\"columns\":[{\"name\":\"room\",\"display_name\":\"Room\",\"data_type\":\"lark_md\",\"width\":\"auto\"},{\"name\":\"state\",\"display_name\":\"State\",\"data_type\":\"options\",\"width\":\"auto\"},{\"name\":\"latest\",\"display_name\":\"Latest\",\"data_type\":\"text\",\"width\":\"auto\"}],\"rows\":[{\"room\":\"[proj / master](https://applink.feishu.cn/client/chat/open?openChatId=oc_2)\",\"state\":[{\"text\":\"working\",\"color\":\"blue\"}],\"latest\":\"<time>: Allow ls?\"}]},{\"tag\":\"markdown\",\"content\":\"Updated <time>\",\"text_size\":\"notation\"},{\"tag\":\"markdown\",\"content\":\"Your groups ring on every post too: send /auth, so herdrchat mutes them and only this chat rings.\",\"text_size\":\"notation\"}]}}"
+        "content": "{\"schema\":\"2.0\",\"config\":{\"update_multi\":true,\"summary\":{\"content\":\"herdrchat · 1 terminals\"}},\"header\":{\"title\":{\"tag\":\"plain_text\",\"content\":\"herdrchat · 1 terminals\"},\"template\":\"blue\",\"icon\":{\"tag\":\"standard_icon\",\"token\":\"loading_outlined\",\"color\":\"blue\"}},\"body\":{\"elements\":[{\"tag\":\"markdown\",\"content\":\"### This computer\"},{\"tag\":\"table\",\"page_size\":10,\"row_height\":\"auto\",\"row_max_height\":\"64px\",\"header_style\":{\"background_style\":\"grey\",\"text_color\":\"grey\",\"bold\":true},\"columns\":[{\"name\":\"room\",\"display_name\":\"Room\",\"data_type\":\"lark_md\",\"width\":\"auto\"},{\"name\":\"state\",\"display_name\":\"State\",\"data_type\":\"options\",\"width\":\"auto\"},{\"name\":\"latest\",\"display_name\":\"Latest\",\"data_type\":\"text\",\"width\":\"auto\"}],\"rows\":[{\"room\":\"[proj / master](https://applink.feishu.cn/client/chat/open?openChatId=oc_2)\",\"state\":[{\"text\":\"working\",\"color\":\"blue\"}],\"latest\":\"<time>: Allow ls?\"}]},{\"tag\":\"column_set\",\"flex_mode\":\"flow\",\"horizontal_spacing\":\"small\",\"columns\":[{\"tag\":\"column\",\"width\":\"auto\",\"elements\":[{\"tag\":\"button\",\"type\":\"default\",\"width\":\"default\",\"size\":\"medium\",\"text\":{\"tag\":\"plain_text\",\"content\":\"＋ New terminal\"},\"hover_tips\":{\"tag\":\"plain_text\",\"content\":\"＋ New terminal\"},\"behaviors\":[{\"type\":\"callback\",\"value\":{\"open\":\"new\"}}]}]}]},{\"tag\":\"markdown\",\"content\":\"Updated <time>\",\"text_size\":\"notation\"},{\"tag\":\"markdown\",\"content\":\"Your groups ring on every post too: send /auth, so herdrchat mutes them and only this chat rings.\",\"text_size\":\"notation\"}]}}"
       }
     },
     {
@@ -1541,7 +1625,7 @@
       "path": "/open-apis/im/v1/messages/om_21",
       "params": {},
       "data": {
-        "content": "{\"schema\":\"2.0\",\"config\":{\"update_multi\":true,\"summary\":{\"content\":\"herdrchat · 0 terminals\"}},\"header\":{\"title\":{\"tag\":\"plain_text\",\"content\":\"herdrchat · 0 terminals\"},\"template\":\"green\",\"icon\":{\"tag\":\"standard_icon\",\"token\":\"done_outlined\",\"color\":\"green\"}},\"body\":{\"elements\":[{\"tag\":\"markdown\",\"content\":\"No terminal is shown in herdr-app.\"},{\"tag\":\"markdown\",\"content\":\"Updated <time>\",\"text_size\":\"notation\"},{\"tag\":\"markdown\",\"content\":\"Your groups ring on every post too: send /auth, so herdrchat mutes them and only this chat rings.\",\"text_size\":\"notation\"}]}}"
+        "content": "{\"schema\":\"2.0\",\"config\":{\"update_multi\":true,\"summary\":{\"content\":\"herdrchat · 0 terminals\"}},\"header\":{\"title\":{\"tag\":\"plain_text\",\"content\":\"herdrchat · 0 terminals\"},\"template\":\"green\",\"icon\":{\"tag\":\"standard_icon\",\"token\":\"done_outlined\",\"color\":\"green\"}},\"body\":{\"elements\":[{\"tag\":\"markdown\",\"content\":\"No terminal is shown in herdr-app.\"},{\"tag\":\"column_set\",\"flex_mode\":\"flow\",\"horizontal_spacing\":\"small\",\"columns\":[{\"tag\":\"column\",\"width\":\"auto\",\"elements\":[{\"tag\":\"button\",\"type\":\"default\",\"width\":\"default\",\"size\":\"medium\",\"text\":{\"tag\":\"plain_text\",\"content\":\"＋ New terminal\"},\"hover_tips\":{\"tag\":\"plain_text\",\"content\":\"＋ New terminal\"},\"behaviors\":[{\"type\":\"callback\",\"value\":{\"open\":\"new\"}}]}]}]},{\"tag\":\"markdown\",\"content\":\"Updated <time>\",\"text_size\":\"notation\"},{\"tag\":\"markdown\",\"content\":\"Your groups ring on every post too: send /auth, so herdrchat mutes them and only this chat rings.\",\"text_size\":\"notation\"}]}}"
       }
     },
     {
@@ -1647,6 +1731,16 @@
         "link_preview_options": {
           "is_disabled": true
         },
+        "reply_markup": {
+          "inline_keyboard": [
+            [
+              {
+                "text": "＋ New terminal",
+                "callback_data": "<id0>"
+              }
+            ]
+          ]
+        },
         "text": "<b>herdrchat · 1 terminals</b>\n\n<b>This computer</b>\n• <b>proj</b>\n      ◦ master · idle",
         "parse_mode": "HTML"
       }
@@ -1672,6 +1766,16 @@
         "disable_notification": false,
         "link_preview_options": {
           "is_disabled": true
+        },
+        "reply_markup": {
+          "inline_keyboard": [
+            [
+              {
+                "text": "＋ New terminal",
+                "callback_data": "<id0>"
+              }
+            ]
+          ]
         },
         "text": "<b>herdrchat · 1 terminals</b>\n\n<b>Waiting for you</b>\n• <b>proj / master</b> · ⚠️ needs you\n\n<b>This computer</b>\n• <b>proj</b>\n      ◦ master · idle",
         "parse_mode": "HTML"
@@ -1732,6 +1836,16 @@
         "link_preview_options": {
           "is_disabled": true
         },
+        "reply_markup": {
+          "inline_keyboard": [
+            [
+              {
+                "text": "＋ New terminal",
+                "callback_data": "<id0>"
+              }
+            ]
+          ]
+        },
         "text": "<b>herdrchat · 1 terminals</b>\n\n<b>Waiting for you</b>\n• <b>proj / master</b> · ✅ done · <i><time>: Fixed it: T1_ABC &lt;now&gt; &amp; done.</i>\n\n<b>This computer</b>\n• <b>proj</b>\n      ◦ master · idle · <i><time>: Fixed it: T1_ABC &lt;now&gt; &amp; done.</i>",
         "parse_mode": "HTML"
       }
@@ -1750,19 +1864,19 @@
             [
               {
                 "text": "1. Yes",
-                "callback_data": "<id0>:1"
+                "callback_data": "<id1>:1"
               }
             ],
             [
               {
                 "text": "2. No",
-                "callback_data": "<id0>:2"
+                "callback_data": "<id1>:2"
               }
             ],
             [
               {
                 "text": "Esc (cancel)",
-                "callback_data": "<id0>:esc"
+                "callback_data": "<id1>:esc"
               }
             ]
           ]
@@ -1800,6 +1914,16 @@
         "parse_mode": "HTML",
         "link_preview_options": {
           "is_disabled": true
+        },
+        "reply_markup": {
+          "inline_keyboard": [
+            [
+              {
+                "text": "＋ New terminal",
+                "callback_data": "<id0>"
+              }
+            ]
+          ]
         }
       }
     },
@@ -1819,6 +1943,16 @@
         "parse_mode": "HTML",
         "link_preview_options": {
           "is_disabled": true
+        },
+        "reply_markup": {
+          "inline_keyboard": [
+            [
+              {
+                "text": "＋ New terminal",
+                "callback_data": "<id0>"
+              }
+            ]
+          ]
         }
       }
     },
@@ -1845,6 +1979,16 @@
         "disable_notification": false,
         "link_preview_options": {
           "is_disabled": true
+        },
+        "reply_markup": {
+          "inline_keyboard": [
+            [
+              {
+                "text": "＋ New terminal",
+                "callback_data": "<id0>"
+              }
+            ]
+          ]
         },
         "text": "<b>herdrchat · 1 terminals</b>\n\n<b>This computer</b>\n• <b>proj</b>\n      ◦ master · ⏳ working · <i><time>: Allow ls?</i>",
         "parse_mode": "HTML"
@@ -1896,6 +2040,16 @@
         "parse_mode": "HTML",
         "link_preview_options": {
           "is_disabled": true
+        },
+        "reply_markup": {
+          "inline_keyboard": [
+            [
+              {
+                "text": "＋ New terminal",
+                "callback_data": "<id0>"
+              }
+            ]
+          ]
         }
       }
     },
@@ -2106,6 +2260,41 @@
             ]
           },
           {
+            "tag": "column_set",
+            "flex_mode": "flow",
+            "horizontal_spacing": "small",
+            "columns": [
+              {
+                "tag": "column",
+                "width": "auto",
+                "elements": [
+                  {
+                    "tag": "button",
+                    "type": "default",
+                    "width": "default",
+                    "size": "medium",
+                    "text": {
+                      "tag": "plain_text",
+                      "content": "＋ New terminal"
+                    },
+                    "hover_tips": {
+                      "tag": "plain_text",
+                      "content": "＋ New terminal"
+                    },
+                    "behaviors": [
+                      {
+                        "type": "callback",
+                        "value": {
+                          "open": "new"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
             "tag": "markdown",
             "content": "Updated 10:00",
             "text_size": "notation"
@@ -2154,5 +2343,137 @@
         ]
       }
     }
-  ]
+  ],
+  "feishu.formCard": {
+    "schema": "2.0",
+    "config": {
+      "update_multi": true
+    },
+    "header": {
+      "title": {
+        "tag": "plain_text",
+        "content": "＋ New terminal"
+      },
+      "template": "blue",
+      "icon": {
+        "tag": "standard_icon",
+        "token": "loading_outlined",
+        "color": "blue"
+      }
+    },
+    "body": {
+      "elements": [
+        {
+          "tag": "markdown",
+          "content": "Where it goes and what runs in it."
+        },
+        {
+          "tag": "form",
+          "name": "new",
+          "elements": [
+            {
+              "tag": "markdown",
+              "content": "**Space**"
+            },
+            {
+              "tag": "select_static",
+              "name": "space",
+              "width": "fill",
+              "required": true,
+              "placeholder": {
+                "tag": "plain_text",
+                "content": "Space"
+              },
+              "initial_option": "s0",
+              "options": [
+                {
+                  "text": {
+                    "tag": "plain_text",
+                    "content": "alpha · This computer"
+                  },
+                  "value": "s0"
+                },
+                {
+                  "text": {
+                    "tag": "plain_text",
+                    "content": "＋ New space on box"
+                  },
+                  "value": "n1"
+                }
+              ]
+            },
+            {
+              "tag": "markdown",
+              "content": "**New space's name**"
+            },
+            {
+              "tag": "input",
+              "name": "name",
+              "width": "fill",
+              "required": false,
+              "placeholder": {
+                "tag": "plain_text",
+                "content": "only for a new space"
+              }
+            },
+            {
+              "tag": "markdown",
+              "content": "**Agent**"
+            },
+            {
+              "tag": "select_static",
+              "name": "agent",
+              "width": "fill",
+              "required": true,
+              "placeholder": {
+                "tag": "plain_text",
+                "content": "Agent"
+              },
+              "initial_option": "claude",
+              "options": [
+                {
+                  "text": {
+                    "tag": "plain_text",
+                    "content": "Claude Code"
+                  },
+                  "value": "claude"
+                },
+                {
+                  "text": {
+                    "tag": "plain_text",
+                    "content": "Shell"
+                  },
+                  "value": "shell"
+                }
+              ]
+            },
+            {
+              "tag": "button",
+              "type": "primary_filled",
+              "width": "default",
+              "size": "medium",
+              "text": {
+                "tag": "plain_text",
+                "content": "Start"
+              },
+              "hover_tips": {
+                "tag": "plain_text",
+                "content": "Start"
+              },
+              "behaviors": [
+                {
+                  "type": "callback",
+                  "value": {
+                    "form": "f1"
+                  }
+                }
+              ],
+              "name": "submit",
+              "form_action_type": "submit"
+            }
+          ]
+        }
+      ]
+    }
+  }
 }

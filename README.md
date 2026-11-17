@@ -87,8 +87,9 @@ instead: the [guide](docs/guide.md#set-up-telegram).
 ## Use
 
 In your chat app: type in a terminal's group or topic to talk to it; tap a card's buttons
-to answer a question. In the direct chat with the bot: `/ls` for the overview, `/new` to
-start a terminal, `/kill` to end one (or `/kill` in its own group or topic), `/usage` for
+to answer a question. In the direct chat with the bot: `/ls` for the overview, `/new` (or
+the overview's ＋ New terminal button) for a form that starts a terminal, here or on a
+machine reached over a link, `/kill` to end one (or `/kill` in its own group or topic), `/usage` for
 every account's limits.
 
 | Ask your agent | What it does |

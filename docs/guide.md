@@ -31,7 +31,7 @@ herdr-app, moved into one Feishu bot:
 | a space | one avatar for all of its groups: the space's first letter on a color of its own |
 | a terminal on another machine | a group named `<space> / <tab>`, tagged `herdr`, made once |
 | a terminal that is gone | its group stays, with its history; its tag `herdr` becomes `herdr-ended` (and back if it comes back) |
-| the sidebar | the direct chat with the bot: an overview card (what is waiting for you first; then a heading per machine, this computer first, and a table of its tabs: Room, a link to its group; State, a colored tag; Latest, the time and the first line of what it last said), kept up to date in place, sent anew when something rings; `/ls`, `/new`, `/kill`, `/usage` |
+| the sidebar | the direct chat with the bot: an overview card (what is waiting for you first; then a heading per machine, this computer first, and a table of its tabs: Room, a link to its group; State, a colored tag; Latest, the time and the first line of what it last said; under them a ＋ New terminal button), kept up to date in place, sent anew when something rings; `/ls`, `/new`, `/kill`, `/usage` |
 
 A tab herdr-app only numbered (`2`) is named after the terminal's title instead (what the
 program sets; Claude Code sets its session name or topic), else its hc name.
@@ -50,7 +50,7 @@ the bot, Threaded Mode):
 | a tab | a topic named `<space> / <tab>` in the bot's private chat; type there to talk to it |
 | a space | one topic icon color for all of its topics (Telegram offers six) |
 | a terminal that is gone | its topic stays, its name starting with 🔚 (taken off if it comes back) |
-| the sidebar | a topic of the bot's own, `📋 herdr`, made at the first start: the overview message, edited in place, sent anew when something rings; `/ls`, `/new`, `/kill`, `/usage`; `/` shows the commands. Outside any topic it would land in "All Messages", mixed with every room's posts |
+| the sidebar | a topic of the bot's own, `📋 herdr`, made at the first start: the overview message (with a ＋ New terminal button), edited in place, sent anew when something rings; `/ls`, `/new`, `/kill`, `/usage`; `/` shows the commands. Outside any topic it would land in "All Messages", mixed with every room's posts |
 
 What differs is in "Feishu and Telegram side by side" below. Telegram takes about one
 message a second in a chat, so the bot queues and waits as Telegram asks. Setting it up:
@@ -420,12 +420,24 @@ is never updated from here: pull it, and the running bots follow the version in 
 ## Commands
 
 - Direct chat: `/ls` (the overview again at the bottom of the chat; the old one says it
-  is old: nothing is recalled, which in Feishu leaves a "recalled a message" line), `/new <session> <space>/<tab> [command]` (start one; default `claude`;
-  `--cwd <dir>` first to pick its folder), `/kill <session> <address>` (or `/kill` in the
+  is old: nothing is recalled, which in Feishu leaves a "recalled a message" line), `/new` (start one,
+  from a form, below; or with words, on this computer: `/new <session> <space>/<tab>
+  [command]`, default `claude`, `--cwd <dir>` first to pick its folder), `/kill <session> <address>` (or `/kill` in the
   terminal's own room), `/usage` (every
   account's limits, above), `/auth` (Feishu; see below). Telegram lists them when you
   type `/`; Feishu can have a bot menu for `/ls`, `/usage`, help and `/auth` (set in the
   developer console: `skills/herdrchat/references/feishu.md`, "The bot menu").
+- The new-terminal form (`/new` alone, the overview's **＋ New terminal** button, or
+  Feishu's bot menu item `new`): the **space** (one there is, each machine's by name, or
+  a new space on this computer or on a machine reached over a link, which then needs a
+  name), the **agent** (Claude Code, Codex, OpenCode, Pi, or a shell), the **tab** (empty:
+  the agent's name, numbered past the tabs the space has) and the **folder** (empty: the
+  space's, a new space's home). Feishu shows it as one form on a card; Telegram, a field
+  at a time: buttons for a pick, your next message in its topic for a text, with Skip. hc
+  starts it (`hc run`, `--on` for another machine, through that machine's own login
+  shell) with the labels herdr-app reads, so it works on a server with no herdr-app;
+  herdr-app, when it runs here, names the tab. The card then says it started, or why not.
+  A form is used once; one from before a restart says it is old.
 - In a terminal's room: any text goes to it (marked once typed in, and again when the
   turn that took it is over); an image (alone or in a rich text message) is sent
   beside the terminal with `hc put`, on its machine, and its path is typed in with your

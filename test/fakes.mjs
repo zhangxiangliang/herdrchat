@@ -49,6 +49,7 @@ export function fakeChat() {
     foldedBytes: 3500,
     download: async (...a) => record('download', ...a),
     tellOwner: async (...a) => record('tellOwner', ...a),
+    showForm: async (where, form) => { record('showForm', where, form); return id('f'); },
     overview: null,
     showOverview: async (rows, opts = {}) => {
       record('showOverview', rows, opts);

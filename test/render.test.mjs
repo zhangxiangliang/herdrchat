@@ -11,7 +11,7 @@ import test, { after } from 'node:test';
 import { fileURLToPath } from 'node:url';
 import { createEngine } from '../lib/core/engine.mjs';
 import { sendMarkdown } from '../lib/chats/feishu/client.mjs';
-import { doneCard, foldedCard, header, menuCard, ownerCard, textCard } from '../lib/chats/feishu/render.mjs';
+import { doneCard, foldedCard, formCard, header, menuCard, ownerCard, textCard } from '../lib/chats/feishu/render.mjs';
 import { overviewCard, overviewText, recordCard } from '../lib/chats/feishu/overview.mjs';
 import { fakeChat, fakeHc, fakeReaders, fakeStore, terminal } from './fakes.mjs';
 
@@ -48,6 +48,18 @@ const NOTED = [
   { ...ROWS[1], note: { kind: 'needs', line: 'Allow ls?', at: 2 } },
   ROWS[2],
 ];
+// the new-terminal form, as engine/create.mjs makes it
+const FORM = {
+  id: 'f1',
+  title: '＋ New terminal',
+  markdown: 'Where it goes and what runs in it.',
+  submit: 'Start',
+  fields: [
+    { name: 'space', label: 'Space', kind: 'pick', options: [{ label: 'alpha · This computer', value: 's0' }, { label: '＋ New space on box', value: 'n1' }], initial: 's0' },
+    { name: 'name', label: 'New space\'s name', kind: 'text', optional: true, placeholder: 'only for a new space', when: { field: 'space', values: ['n1'] } },
+    { name: 'agent', label: 'Agent', kind: 'pick', options: [{ label: 'Claude Code', value: 'claude' }, { label: 'Shell', value: 'shell' }], initial: 'claude' },
+  ],
+};
 
 test('Feishu: every kind of card', async () => {
   same('feishu.header', ['working', 'closed', 'needs', 'done', 'good', 'bad'].map((tone) => header('✅ A title', tone)));
@@ -57,6 +69,7 @@ test('Feishu: every kind of card', async () => {
   same('feishu.doneCard', doneCard('✅ Done', 'Run ls?', '✔ Yes', { app: 'claude', model: 'm' }));
   same('feishu.ownerCard', ownerCard({ title: '⬆️ herdrchat 9.9.9 is out', tone: 'working', markdown: 'You run 1.0.0.', buttons: [{ label: 'Update to 9.9.9', value: { update: '9.9.9' } }] }));
   same('feishu.foldedCard', foldedCard('📜 Before this room', '**You:**\n> hi\n\nHello.'));
+  same('feishu.formCard', formCard(FORM));
   same('feishu.overview', { text: overviewText(ROWS), card: overviewCard(ROWS, Date.UTC(2026, 0, 1, 10, 0)) });
   const note = { kind: 'needs', name: 'beta / T1_ABC-2', room: 'oc_b', line: 'Run *ls* <now>?', at: Date.UTC(2026, 0, 1, 10, 0) };
   same('feishu.recordCard', [recordCard([note, { ...note, kind: 'done', line: '', room: null, handled: { how: 'answered', at: Date.UTC(2026, 0, 1, 10, 3) } }]), recordCard([])]);
@@ -96,6 +109,7 @@ test('Telegram: every kind of message', async () => {
     const sentAnew = await chat.showOverview(NOTED.map((r) => ({ ...r, room: r.room ? '11' : null })), { fresh: true, ring: true });
     await chat.showRecord(sentAnew.old, [{ kind: 'done', name: 'work / master', room: '11', line: 'Fixed *it* <now>.', at: Date.UTC(2026, 0, 1, 10, 0), handled: { how: 'replied', at: Date.UTC(2026, 0, 1, 10, 3) } }]);
     await chat.showRecord(sentAnew.message, []);
+    await chat.showForm(null, FORM);
   } finally {
     globalThis.fetch = realFetch;
   }
