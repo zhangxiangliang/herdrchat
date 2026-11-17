@@ -11,10 +11,10 @@ const ROWS = [
   { name: 'gamma / master', address: 'gamma t1', state: 'idle', room: 'oc_g', note: { kind: 'done', line: 'Fixed it.', at: 1 } },
 ];
 
-test('the overview\'s shape: what waits for you first, then by machine (this computer first), space and tab', () => {
-  const { waiting, machines } = groupsOf(ROWS);
+test('the overview\'s shape: what waits for you first, then this computer, machines after, by space and tab', () => {
+  const { waiting, groups } = groupsOf(ROWS);
   assert.deepEqual(waiting.map((r) => r.name), ['gamma / master']);
-  assert.deepEqual(machines.map((m) => [m.machine, m.spaces.map((s) => [s.space, s.tabs.map((t) => t.tab)])]), [
+  assert.deepEqual(groups.map((m) => [m.name, m.spaces.map((s) => [s.space, s.tabs.map((t) => t.tab)])]), [
     [null, [['alpha', ['build', 'docs', 'shell']], ['gamma', ['master']]]],
     ['box', [['beta', ['1']]]],
   ]);
@@ -22,12 +22,31 @@ test('the overview\'s shape: what waits for you first, then by machine (this com
 
 test('what needs you comes first: needs you, error, working, done, idle, no agent; within one state the one that spoke last; a space by its most urgent tab', () => {
   const row = (name, state, latestAt) => ({ name, address: 't1', state, latestAt, room: name });
-  const { machines } = groupsOf([
+  const { groups: machines } = groupsOf([
     row('a / idle', 'idle', 9), row('a / done-old', 'done', 1), row('a / shell', undefined, 0),
     row('b / done-new', 'done', 5), row('b / working', 'working', 2), row('c / asks', 'blocked', 0), row('c / broke', 'error', 3),
   ]);
   assert.deepEqual(machines[0].tabs.map((t) => t.name), ['c / asks', 'c / broke', 'b / working', 'b / done-new', 'a / done-old', 'a / idle', 'a / shell']);
   assert.deepEqual(machines[0].spaces.map((s) => [s.space, s.tabs.map((t) => t.tab)]), [['c', ['asks', 'broke']], ['b', ['working', 'done-new']], ['a', ['done-old', 'idle', 'shell']]]);
+});
+
+test('by session, in the order they come (HERDR_SESSIONS\'s), a machine reached over a link after them; a tab in a space named as its session is called by the tab alone', () => {
+  const { groups } = groupsOf([
+    { name: 'takewalks / master', address: 'takewalks t2', session: 'takewalks', state: 'working' },
+    { name: 'herdrchat / master', address: 't1', session: 'herdrchat', state: 'done' },
+    { name: 'scratch / x', address: 't9', session: 'herdrchat', state: 'idle' },
+    { name: 'tw-worker / T1', address: 'box/t6', session: 'takewalks', state: 'done' },
+    { name: 'takewalks / super', address: 'takewalks t3', session: 'takewalks', state: 'idle' },
+    { name: 'brain / a', address: 'abox/t1', session: 'herdrchat', state: 'idle' },
+  ]);
+  assert.deepEqual(groups.map((g) => [g.name, g.tabs.map((t) => t.short)]), [
+    ['takewalks', ['master', 'super']],
+    ['herdrchat', ['master', 'scratch / x']],
+    ['abox', ['brain / a']],
+    ['box', ['tw-worker / T1']],
+  ]);
+  const one = groupsOf([{ name: 'herdrchat / master', address: 't1', session: 'herdrchat', state: 'done' }]);
+  assert.deepEqual(one.groups.map((g) => [g.name, g.tabs[0].short]), [[null, 'herdrchat / master']], 'one session alone is this computer');
 });
 
 test('the Feishu overview: what waits for you, then a heading and a table per machine, every table Room / State / Latest', () => {
@@ -58,7 +77,20 @@ test('the Feishu overview: what waits for you, then a heading and a table per ma
   assert.equal(card.header.icon.token, 'warning_outlined', 'an icon says what it is, not an emoji');
 });
 
-test('a card holds five tables at most, "waiting for you" first: a machine past them is a list', () => {
+test('a card holds five tables at most, "waiting for you" first: past them the smallest groups are lists, each where it is', () => {
+  const rows = [['a', 3], ['b', 1], ['c', 4], ['d', 2], ['e', 5], ['f', 1]].flatMap(([s, n]) => Array.from({ length: n }, (_, i) => ({ name: `${s} / t${i}`, address: `${s} t${i}`, session: s, state: 'idle', room: `oc_${s}${i}` })));
+  const kinds = (elements) => elements.filter((e) => e.tag === 'table' || !e.content.startsWith('###')).map((e) => e.tag);
+  let elements = overviewElements(rows);
+  assert.deepEqual(elements.filter((e) => e.content?.startsWith('###')).map((e) => e.content), ['### a', '### b', '### c', '### d', '### e', '### f']);
+  assert.deepEqual(kinds(elements), ['table', 'table', 'table', 'table', 'table', 'markdown'], 'f (1 tab, after b) is the list');
+  rows[0].note = { kind: 'done', line: 'x', at: 1 };
+  elements = overviewElements(rows);
+  assert.deepEqual(kinds(elements).slice(1), ['table', 'markdown', 'table', 'table', 'table', 'markdown'], 'and b too, with "waiting for you"');
+  assert.equal(elements.filter((e) => e.tag === 'table').length, 5);
+  assert.deepEqual(elements.find((e) => e.content === '### a') && elements[elements.findIndex((e) => e.content === '### a') + 1].rows.map((r) => r.room.split(']')[0]), ['[t0', '[t1', '[t2'], 'in a space named as its session, the tab alone');
+});
+
+test('a card holds five tables at most: machines past them are lists too', () => {
   const rows = ['a', 'b', 'c', 'd', 'e', 'f'].map((m) => ({ name: `s${m} / t`, address: `${m}/t1`, state: 'idle', room: `oc_${m}` }));
   let elements = overviewElements(rows);
   assert.equal(elements.filter((e) => e.tag === 'table').length, 5);
@@ -92,4 +124,17 @@ test('a name in a table cell or a link keeps its own marks; only what would brea
     { name: 'a*b / [x]', address: 't7', program: 'my_prog <x>' },
   ]);
   assert.deepEqual(table.rows.map((r) => r.room), ['[worker / T1_ABC-2](https://applink.feishu.cn/client/chat/open?openChatId=oc_a)', 'a*b / x']);
+});
+
+test('the Telegram overview by session: a session with one space named as itself has its tabs right under it; others a bullet per space', async () => {
+  const { overviewHtml } = await import('../lib/chats/telegram/render.mjs');
+  const html = overviewHtml([
+    { name: 'takewalks / master', address: 'takewalks t2', session: 'takewalks', state: 'working', room: '11' },
+    { name: 'herdrchat / master', address: 't1', session: 'herdrchat', state: 'done', room: '12' },
+    { name: 'scratch / x', address: 't9', session: 'herdrchat', state: 'idle', room: '13' },
+  ], 'bot');
+  assert.deepEqual(html.split('\n\n').slice(1), [
+    '<b>takewalks</b>\n• <a href="https://t.me/bot/11">master</a> · ⏳ working',
+    '<b>herdrchat</b>\n• <b>herdrchat</b>\n      ◦ <a href="https://t.me/bot/12">master</a> · ✅ done\n• <b>scratch</b>\n      ◦ <a href="https://t.me/bot/13">x</a> · idle',
+  ]);
 });
