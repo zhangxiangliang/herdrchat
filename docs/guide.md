@@ -453,7 +453,11 @@ is never updated from here: pull it, and the running bots follow the version in 
   Feishu a card: each pick a drop-down that redraws the card the moment it changes, then
   the text boxes and Start (pick first, then type: a box is not kept when a pick changes);
   in Telegram a field at a time: buttons for a pick, your next message in its topic for a
-  text, with Skip. hc
+  text, with Skip. An agent starts through the project's own launcher when the folder has
+  one: `<agent>.sh` there, `scripts/<agent>.sh` or `script/<agent>.sh` (`claude.sh`,
+  `codex.sh`, `pi.sh`, `opencode.sh`), the first that may be run, looked for on the
+  folder's machine; else its own command (`claude`). What the project sets up first
+  (secrets through `op run`, git hooks, flags) comes with it, and the card says which ran. hc
   starts it (`hc run`, `--on` for another machine, through that machine's own login
   shell) with the labels that say where it is (herdr-app reads them too, and numbers the
   tab in its sidebar), so it needs nothing but hc. The card then says it started, or why not.

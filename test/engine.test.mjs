@@ -841,6 +841,45 @@ test('a pick changed on the card (Feishu) draws it again: a folder on another ma
   done();
 });
 
+test('an agent starts through the project\'s own launcher when its folder has one (<agent>.sh, scripts/, script/), looked for on the folder\'s machine; else its command', async () => {
+  const asked = [];
+  const launchers = { '/work/proj': './scripts/claude.sh', '~/app': './codex.sh' };
+  const shell = async (session, machine, script) => {
+    asked.push({ machine, script });
+    const folder = Object.keys(launchers).find((f) => script.includes(f.startsWith('~') ? `cd ~/'${f.slice(2)}'` : `cd '${f}'`));
+    return folder && script.includes(`${launchers[folder].split('/').pop()}`) ? `${launchers[folder]}\n` : '';
+  };
+  const t1 = terminal('t1', { space: 'proj', program: 'fake', agent: true });
+  t1.foreground.cwd = '/work/proj';
+  const { chat, hc, engine, done } = await setup([t1], { shell });
+  hc.cores = async () => ({ self: 'core-s', links: [{ name: 'box', id: 'core-box', state: 'connected' }] });
+  const send = async (form) => {
+    await engine.onMessage({ room: null, where: 'dm', message: 'm-in', text: '/new', images: [] });
+    const f = formOf(chat);
+    await engine.onAction({ value: { form: f.id }, message: 'f1', form: { ...form, space: optionOf(f, 'space', form.space) } });
+    await settle(engine);
+  };
+  await send({ space: 'proj · This computer', agent: 'claude' });
+  assert.deepEqual(hc.ran.argv, ['/bin/zsh', '-lc', 'exec ./scripts/claude.sh']);
+  assert.equal(asked.at(-1).machine, null);
+  assert.match(asked.at(-1).script, /for p in \.\/claude\.sh \.\/scripts\/claude\.sh \.\/script\/claude\.sh;/, 'the folder itself first, then scripts/, then script/');
+  assert.match(chat.of('editCard').at(-1).args[1].markdown, /Started `\.\/scripts\/claude\.sh`/, 'the card says which');
+  await send({ space: 'proj · This computer', agent: 'pi' });
+  assert.deepEqual(hc.ran.argv, ['/bin/zsh', '-lc', 'exec pi'], 'no launcher: the agent\'s own command');
+  await send({ space: '＋ New space on box', name: 'api', agent: 'codex', folder: 'other', path: '~/app' });
+  assert.equal(asked.at(-1).machine, 'box', 'looked for there');
+  assert.deepEqual(hc.ran.argv, ['sh', '-c', 'cd ~/\'app\' && exec "${SHELL:-sh}" -lc "$0"', 'exec ./codex.sh']);
+  // what a lookup prints is taken only when it is a launcher's path
+  const odd = await setup([t1], { shell: async () => 'rm -rf /; ./x.sh' });
+  await odd.engine.onMessage({ room: null, where: 'dm', message: 'm-in', text: '/new', images: [] });
+  const f = formOf(odd.chat);
+  await odd.engine.onAction({ value: { form: f.id }, message: 'f1', form: { space: optionOf(f, 'space', 'proj'), agent: 'claude' } });
+  await settle(odd.engine);
+  assert.deepEqual(odd.hc.ran.argv, ['/bin/zsh', '-lc', 'exec claude']);
+  odd.done();
+  done();
+});
+
 test('the form: the tab as named; a start that fails says why on the card', async () => {
   const { chat, hc, engine, done } = await setup([terminal('t1', { space: 'proj' })], { logError: () => {} });
   await engine.onMessage({ room: null, where: 'dm', message: 'm-in', text: '/new', images: [] });
