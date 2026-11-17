@@ -1,3 +1,10 @@
+## [1.25.1](https://github.com/zhangxiangliang/herdrchat/compare/v1.25.0...v1.25.1) (2026-11-17)
+
+
+### Bug Fixes
+
+* a terminal with no agent gets no room ([01c8f46](https://github.com/zhangxiangliang/herdrchat/commit/01c8f464a79eecde43d8cef1b95add01e553d8c4))
+
 # [1.25.0](https://github.com/zhangxiangliang/herdrchat/compare/v1.24.0...v1.25.0) (2026-11-17)
 
 
