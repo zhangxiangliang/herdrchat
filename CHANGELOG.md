@@ -1,3 +1,10 @@
+# [1.22.0](https://github.com/zhangxiangliang/herdrchat/compare/v1.21.0...v1.22.0) (2026-11-17)
+
+
+### Features
+
+* every group of the overview is a table, and a cell wraps ([9414b33](https://github.com/zhangxiangliang/herdrchat/commit/9414b33a56e3a58d846a99b6f1c700f3f9de70fe))
+
 # [1.21.0](https://github.com/zhangxiangliang/herdrchat/compare/v1.20.1...v1.21.0) (2026-11-17)
 
 
