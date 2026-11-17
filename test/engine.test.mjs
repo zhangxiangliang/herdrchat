@@ -1744,17 +1744,25 @@ test('Telegram: the new-terminal form a field at a time: buttons for a pick, you
       { name: 'tab', label: 'Tab', kind: 'text', optional: true },
     ],
   };
+  // each update is sent once the one before it is fully handled: a tap is answered last
+  // (answerCallbackQuery), a text for the form edits it, one that is not reaches onMessage
+  // (got, below); the bot's own queue spaces its calls, so this waits on the event, not a time
   let n = 0;
-  const send = async (u) => { updates.push({ update_id: (n += 1), ...u }); const before = sent.length; for (let i = 0; i < 100 && !sent.slice(before).some((x) => x.method === 'answerCallbackQuery' || x.method === 'editMessageText'); i += 1) await new Promise((r) => setTimeout(r, 10)); };
-  const tap = (data) => send({ callback_query: { id: `q${n}`, from: { id: 42 }, data, message: { message_id: 70 } } });
-  const say = (text) => send({ message: { message_id: 100 + n, from: { id: 42 }, chat: { id: 42, type: 'private' }, is_topic_message: true, message_thread_id: 900, text } });
+  const count = (method) => sent.filter((x) => x.method === method).length;
+  const until = async (done) => { for (let i = 0; i < 1000 && !done(); i += 1) await new Promise((r) => setTimeout(r, 10)); assert.ok(done(), 'the bot answered'); };
+  const tap = async (data) => { const before = count('answerCallbackQuery'); updates.push({ update_id: (n += 1), callback_query: { id: `q${n}`, from: { id: 42 }, data, message: { message_id: 70 } } }); await until(() => count('answerCallbackQuery') > before); };
+  const say = async (text, { form = true } = {}) => {
+    const [edits, messages] = [count('editMessageText'), got.length];
+    updates.push({ update_id: (n += 1), message: { message_id: 100 + n, from: { id: 42 }, chat: { id: 42, type: 'private' }, is_topic_message: true, message_thread_id: 900, text } });
+    await until(() => (form ? count('editMessageText') > edits : got.length > messages));
+  };
+  const got = [];
   const lastEdit = () => sent.filter((x) => x.method === 'editMessageText').at(-1).body;
   const datas = (body) => body.reply_markup.inline_keyboard.flat().map((b) => b.callback_data);
   try {
     const chat = telegram.create({ cfg, store, log: quiet, logWarn: quiet, logError: quiet, stateDir: os.tmpdir(), lane: () => {}, scopeOf: () => 'a' });
     const back = [];
     let answer = { toast: { type: 'error', text: 'A new space needs a name.' } };
-    const got = [];
     chat.start({ onMessage: async (m) => { got.push(m); }, onAction: async (a) => { back.push(a); return answer; } });
     await chat.showForm(null, form);
     const first = sent.filter((x) => x.method === 'sendMessage').at(-1).body;
@@ -1782,7 +1790,7 @@ test('Telegram: the new-terminal form a field at a time: buttons for a pick, you
     assert.deepEqual(lastEdit().reply_markup.inline_keyboard, []);
     await tap('#f1:0');
     assert.equal(sent.filter((x) => x.method === 'answerCallbackQuery').at(-1).body.text, 'This form is old (the bot restarted, or it was used). Send /new for a new one.');
-    await say('hello');
+    await say('hello', { form: false });
     assert.deepEqual(got.map((m) => m.text), ['hello'], 'once it is done, your words are yours again');
   } finally {
     stopped = true;
