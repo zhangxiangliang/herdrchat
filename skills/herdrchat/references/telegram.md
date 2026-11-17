@@ -48,7 +48,7 @@ The same settings as Feishu, in the Telegram profile's own config.env:
   the overview that rings for it; a "needs you" until answered; one line each: topic, state, the
   time and its first line); the overview before it is edited into the record of what it
   rang for (never deleted), each note in full and "handled" once dealt with. Below,
-  each session (and each machine reached over a link) lists its spaces and tabs the same way (Telegram has no tables). "done" (and "needs you" while the user is in that topic) waits `HERDR_DONE_WAIT`
+  each machine (this computer first, all its sessions, then each reached over a link) lists its spaces and tabs the same way (Telegram has no tables). "done" (and "needs you" while the user is in that topic) waits `HERDR_DONE_WAIT`
   seconds (60) and rings nothing if the user wrote in that topic, or the terminal moved
   on, meanwhile (docs/guide.md, "What rings: the overview, sent anew").
 - `HERDR_MUTED_SPACES` (default `all`): in these spaces posts go silently (a notification

@@ -31,7 +31,7 @@ herdr-app, moved into one Feishu bot:
 | a space | one avatar for all of its groups: the space's first letter on a color of its own |
 | a terminal on another machine | a group named `<space> / <tab>`, tagged `herdr`, made once |
 | a terminal that is gone | its group stays, with its history; its tag `herdr` becomes `herdr-ended` (and back if it comes back) |
-| the sidebar | the direct chat with the bot: an overview card (what is waiting for you first; then a heading per session and a table of its tabs: Room, a link to its group; State, a colored tag; Latest, the time and the first line of what it last said), kept up to date in place, sent anew when something rings; `/ls`, `/new`, `/kill`, `/usage` |
+| the sidebar | the direct chat with the bot: an overview card (what is waiting for you first; then a heading per machine, this computer first, and a table of its tabs: Room, a link to its group; State, a colored tag; Latest, the time and the first line of what it last said), kept up to date in place, sent anew when something rings; `/ls`, `/new`, `/kill`, `/usage` |
 
 A tab herdr-app only numbered (`2`) is named after the terminal's title instead (what the
 program sets; Claude Code sets its session name or topic), else its hc name.
@@ -69,7 +69,7 @@ Both do the same things; where an app cannot, something stands in.
 | what it says while working | one live card per turn, edited | one live message per turn, edited |
 | a dialog | a card with buttons, a text box for its own words | a message with buttons; its own words are typed in the topic |
 | needs you | the overview sent anew, the group on top of it | the dialog card pinned in its topic, the overview sent anew |
-| the overview | "waiting for you" and a table per session, each Room / State / Latest | the same as lists: a line per note, a bullet per space and a line per tab, each with its topic (a link), state and latest |
+| the overview | "waiting for you" and a table per machine, each Room / State / Latest | the same as lists: a line per note, a bullet per space and a line per tab, each with its topic (a link), state and latest |
 | what rang | the card's summary (the lock screen) and the "waiting for you" table | the "waiting for you" lines, just under the title (a notification shows a message's first lines) |
 | an overview a newer one replaced | edited into the record of what it rang for, in full, never recalled | edited into the record of what it rang for, in full, never deleted |
 | quiet spaces (`HERDR_MUTED_SPACES`) | groups muted (after `/auth`); only the notes ring | posts silent; only the notes ring |
@@ -229,16 +229,15 @@ same three columns:
 | Latest | the time and the first line of what it last said: `11:49: Fixed it.` (cut to fit; a tap shows it whole) |
 
 First "waiting for you" (what asks you something and is not answered yet; the overview
-that rings for a "done" shows it there too, once), then a heading per session (in
-`HERDR_SESSIONS`'s order; with one session, "This computer"; a machine reached over a
-link is a heading of its own, after them) and its table, what needs you first: needs you, error, working, done, then idle and terminals
+that rings for a "done" shows it there too, once), then a heading per machine ("This
+computer" first, every session in `HERDR_SESSIONS` in one table; then each machine reached
+over a link, by name) and its table, what needs you first: needs you, error, working, done, then idle and terminals
 with no agent; within one state the one that spoke last first. (Telegram's lists order
 their spaces and tabs the same way.) A room's latest is kept from what it says; one with none yet gets the last answer
-in its agent's own records. In a space named as its session, a room is called by its tab
-alone (`master` under `takewalks`). A table shows ten rows a page, and a cell wraps to a
+in its agent's own records. A table shows ten rows a page, and a cell wraps to a
 second line (a phone shows a third of a narrow card a column). A card holds five tables,
-so with more groups than that the smallest share one, its heading naming them all
-(`yiquiz · babyagecalculator`), its rooms by their whole names. Telegram has no tables: the same as lists, each line its
+so with more machines than that the smallest share one, its heading naming them all
+(`box · nas`). Telegram has no tables: the same as lists, each line its
 mark, its topic (a link), its state and its latest.
 
 - The overview before it is never taken back (in Feishu a recall leaves a "recalled a
