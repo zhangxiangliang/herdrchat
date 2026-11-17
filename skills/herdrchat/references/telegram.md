@@ -64,7 +64,7 @@ mutes the overview too; `HERDR_SILENT_SPACES` quiets a whole space without that.
 | Feishu | Telegram, and what stands in |
 |---|---|
 | a group per tab | a topic per tab, in the bot's private chat |
-| an ended group gets the "herdr-ended" tag | an ended topic's name starts with 🔚 (closing a topic is documented for supergroups only) |
+| an ended group's tag "herdr" becomes "herdr-ended" | an ended topic's name starts with 🔚 (closing a topic is documented for supergroups only) |
 | an image inside a card | each image as its own photo after the text |
 | a text box on a dialog card | type the answer in the topic |
 | puts the group that needs you on top of the overview | pins the dialog card in its topic until it is answered |

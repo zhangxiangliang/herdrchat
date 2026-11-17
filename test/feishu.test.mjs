@@ -113,7 +113,7 @@ test('a post is quoted by its first line with words, not by its footer', () => {
   assert.equal(summaryOf('x'.repeat(100)).length, 80);
 });
 
-test('bot tags: "herdr" on every group, "herdr-ended" too once ended (with /auth or not); a tag from before is taken off for them', async () => {
+test('bot tags: one only, "herdr" while live, "herdr-ended" once ended (with /auth or not); a tag from before is taken off', async () => {
   const { createDecor } = await import('../lib/chats/feishu/rooms/decor.mjs');
   const calls = [];
   const ok = async () => ({ code: 0 });
@@ -130,8 +130,14 @@ test('bot tags: "herdr" on every group, "herdr-ended" too once ended (with /auth
   const decor = createDecor({ client, cfg, store, log: quiet, logError: (...a) => { throw new Error(a.join(' ')); }, userAuth: {}, asYou: async () => true });
   const old = entryFor({ chat: 'oc_1', name: 'herdrchat / x', tag: 'tag-herdrchat', ended: true, endedTag: true });
   await decor.botTags(old);
-  assert.deepEqual(calls, [['unbind', 'tag-herdrchat'], ['bind', 'tag-herdr'], ['unbind', 'tag-ended'], ['bind', 'tag-herdr-ended']]);
-  assert.deepEqual([old.get().tag, old.get().endedTag], ['tag-herdr', 'tag-herdr-ended']);
+  assert.deepEqual(calls, [['unbind', 'tag-herdrchat'], ['unbind', 'tag-ended'], ['bind', 'tag-herdr-ended']]);
+  assert.deepEqual([old.get().tag, old.get().endedTag], ['tag-herdr-ended', null]);
+  calls.length = 0;
+  // the last version's: an ended group with both
+  const both = entryFor({ chat: 'oc_3', name: 'herdrchat / z', tag: 'tag-herdr', ended: true, endedTag: 'tag-herdr-ended' });
+  await decor.botTags(both);
+  assert.deepEqual(calls, [['unbind', 'tag-herdr']], 'both: "herdr" off, "herdr-ended" stays');
+  assert.deepEqual([both.get().tag, both.get().endedTag], ['tag-herdr-ended', null]);
   calls.length = 0;
   const live = entryFor({ chat: 'oc_2', name: 'herdrchat / y' });
   await decor.botTags(live);
@@ -139,9 +145,18 @@ test('bot tags: "herdr" on every group, "herdr-ended" too once ended (with /auth
   calls.length = 0;
   await decor.botTags(old);
   assert.deepEqual(calls, [], 'nothing to change');
+  live.set({ ended: true });
+  await decor.botTags(live);
+  assert.deepEqual(calls, [['unbind', 'tag-herdr'], ['bind', 'tag-herdr-ended']], 'ended: one for the other');
+  calls.length = 0;
+  live.set({ ended: false });
+  await decor.botTags(live);
+  assert.deepEqual(calls, [['unbind', 'tag-herdr-ended'], ['bind', 'tag-herdr']], 'live again: back');
+  calls.length = 0;
   cfg.botTags = false;
   await decor.botTags(old);
-  assert.deepEqual(calls, [['unbind', 'tag-herdr'], ['unbind', 'tag-herdr-ended']], 'off: both off');
+  assert.deepEqual(calls, [['unbind', 'tag-herdr-ended']], 'off: off');
+  assert.equal(old.get().tag, null);
 });
 
 test('acting as you, every group is in "herdr", an ended one in "herdr-ended" too; one in a label from before is taken out; off takes it out of both', async () => {

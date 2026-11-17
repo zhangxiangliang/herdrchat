@@ -30,7 +30,7 @@ herdr-app, moved into one Feishu bot:
 | a tab | a group named `<space> / <tab>`, tagged `herdr`; type there to talk to it |
 | a space | one avatar for all of its groups: the space's first letter on a color of its own |
 | a terminal on another machine | a group named `<space> / <tab>`, tagged `herdr`, made once |
-| a terminal that is gone | its group stays, with its history, tagged `herdr-ended` too (untagged if it comes back) |
+| a terminal that is gone | its group stays, with its history; its tag `herdr` becomes `herdr-ended` (and back if it comes back) |
 | the sidebar | the direct chat with the bot: an overview card (what is waiting for you first; then a heading per machine and a table of its tabs: Room, a link to its group; State, a colored tag; Latest, the time and the first line of what it last said), kept up to date in place, sent anew when something rings; `/ls`, `/new`, `/kill`, `/usage` |
 
 A tab herdr-app only numbered (`2`) is named after the terminal's title instead (what the
@@ -97,7 +97,7 @@ In the profile's `config.env` (`herdrchat status` prints where it is):
 | `HERDR_REDACT_WORDS` | both | (none) | words hidden too, comma-separated: a client's name, a codename |
 | `FEISHU_APP_ID`, `FEISHU_APP_SECRET` | Feishu | (required) | the Feishu app |
 | `FEISHU_OWNER_OPEN_ID` | Feishu | (empty) | you; the bot tells you yours when you message it |
-| `HERDR_BOT_TAGS` | Feishu | `on` | the `herdr` tag next to a group's name, and `herdr-ended` once its terminal is gone |
+| `HERDR_BOT_TAGS` | Feishu | `on` | one tag next to a group's name: `herdr` while its terminal lives, `herdr-ended` once it is gone |
 | `HERDR_USER_TAGS` | Feishu | `on` | your sidebar labels, once `/auth` is done |
 | `TELEGRAM_BOT_TOKEN` | Telegram | (required) | the bot's token from @BotFather |
 | `TELEGRAM_OWNER_ID` | Telegram | (empty) | you; the bot tells you yours when you message it |
@@ -523,7 +523,8 @@ Then:
   overview in the direct chat rings ("What rings: the overview, sent anew" above;
   `HERDR_SILENT_SPACES` rings nothing);
 - each group is also in your own label `herdr`, and once its terminal is gone in
-  `herdr-ended` too (the same two names as the bot's tags), to filter the chat list by.
+  `herdr-ended` too (the bot's tags have the same two names, one at a time: `herdr`
+  while live, `herdr-ended` once ended), to filter the chat list by.
   To keep the bot's groups out of the message list, so it holds only the direct chat
   (which rings for what needs you) and your other chats: right click `herdr` >
   消息展示设置 > 始终不展示 (or 有新消息时展示), once; new groups go into it by themselves

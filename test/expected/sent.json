@@ -1523,14 +1523,14 @@
       }
     },
     {
-      "method": "post",
+      "method": "put",
       "path": "/open-apis/im/v2/biz_entity_tag_relation",
       "params": {},
       "data": {
         "tag_biz_type": "chat",
         "biz_entity_id": "oc_2",
         "tag_ids": [
-          "tag_27"
+          "tag_4"
         ]
       }
     },
@@ -1540,6 +1540,18 @@
       "params": {},
       "data": {
         "content": "{\"schema\":\"2.0\",\"config\":{\"update_multi\":true,\"summary\":{\"content\":\"herdrchat · 0 terminals\"}},\"header\":{\"title\":{\"tag\":\"plain_text\",\"content\":\"herdrchat · 0 terminals\"},\"template\":\"green\",\"icon\":{\"tag\":\"standard_icon\",\"token\":\"done_outlined\",\"color\":\"green\"}},\"body\":{\"elements\":[{\"tag\":\"markdown\",\"content\":\"No terminal is shown in herdr-app.\"},{\"tag\":\"markdown\",\"content\":\"Updated <time>\",\"text_size\":\"notation\"},{\"tag\":\"markdown\",\"content\":\"Your groups ring on every post too: send /auth, so herdrchat mutes them and only this chat rings.\",\"text_size\":\"notation\"}]}}"
+      }
+    },
+    {
+      "method": "post",
+      "path": "/open-apis/im/v2/biz_entity_tag_relation",
+      "params": {},
+      "data": {
+        "tag_biz_type": "chat",
+        "biz_entity_id": "oc_2",
+        "tag_ids": [
+          "tag_27"
+        ]
       }
     },
     {
