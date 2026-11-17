@@ -1,3 +1,10 @@
+# [1.23.0](https://github.com/zhangxiangliang/herdrchat/compare/v1.22.0...v1.23.0) (2026-11-17)
+
+
+### Features
+
+* the overview is grouped by machine again ([bb10545](https://github.com/zhangxiangliang/herdrchat/commit/bb1054552c431a75b0f539a5e0247506fa57ba85))
+
 # [1.22.0](https://github.com/zhangxiangliang/herdrchat/compare/v1.21.0...v1.22.0) (2026-11-17)
 
 
