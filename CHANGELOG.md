@@ -1,3 +1,10 @@
+# [1.25.0](https://github.com/zhangxiangliang/herdrchat/compare/v1.24.0...v1.25.0) (2026-11-17)
+
+
+### Features
+
+* a form starts a terminal, here or on a machine over a link ([5229a43](https://github.com/zhangxiangliang/herdrchat/commit/5229a43904a7f60ac782368ad8371efbf1557074))
+
 # [1.24.0](https://github.com/zhangxiangliang/herdrchat/compare/v1.23.0...v1.24.0) (2026-11-17)
 
 
