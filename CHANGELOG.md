@@ -1,3 +1,16 @@
+# [1.26.0](https://github.com/zhangxiangliang/herdrchat/compare/v1.25.1...v1.26.0) (2026-11-17)
+
+
+### Bug Fixes
+
+* the form has no shell, and its folders go home first ([b09cbb1](https://github.com/zhangxiangliang/herdrchat/commit/b09cbb17ee16e88accddd4e7444008c083aa81e3))
+
+
+### Features
+
+* herdrchat runs nothing but hc ([c6fa016](https://github.com/zhangxiangliang/herdrchat/commit/c6fa016a360bdde052abff11b8e5e940f8015711))
+* the form shows what applies, and its folder is picked ([d6836e8](https://github.com/zhangxiangliang/herdrchat/commit/d6836e8b4ab790fd59da745b8f867b0c91a27e58))
+
 ## [1.25.1](https://github.com/zhangxiangliang/herdrchat/compare/v1.25.0...v1.25.1) (2026-11-17)
 
 
