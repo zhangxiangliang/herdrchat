@@ -47,8 +47,10 @@ test('the fake chat app keeps the contract the real ones keep', () => {
   assert.throws(() => checkChat({ name: 'half', ready: () => true }), /does not give: .*openRoom/);
 });
 
+const AGENT = { program: 'fake', agent: true };
+
 test('a tab gets one room, named after where herdr-app shows it', async () => {
-  const { chat, store, done } = await setup([terminal('t1')]);
+  const { chat, store, done } = await setup([terminal('t1', AGENT)]);
   assert.equal(chat.of('openRoom').length, 1);
   assert.equal(chat.of('openRoom')[0].args[0].name, 'proj / master');
   assert.equal(rooms(store)['s|t1'].tab, 'tb1');
@@ -56,12 +58,12 @@ test('a tab gets one room, named after where herdr-app shows it', async () => {
 });
 
 test('a new terminal in the same tab takes over the tab\'s room after the old one ends', async () => {
-  const { chat, hc, store, engine, done } = await setup([terminal('t1')]);
+  const { chat, hc, store, engine, done } = await setup([terminal('t1', AGENT)]);
   const room = rooms(store)['s|t1'].chat;
   hc.change('s', 'finished', { address: 't1' });
   await settle(engine);
   assert.equal(chat.of('endRoom').length, 1);
-  hc.change('s', 'created', terminal('t2'));
+  hc.change('s', 'created', terminal('t2', AGENT));
   await settle(engine);
   assert.equal(chat.of('openRoom').length, 1, 'no second room');
   assert.equal(rooms(store)['s|t2'].chat, room);
@@ -72,9 +74,9 @@ test('a new terminal in the same tab takes over the tab\'s room after the old on
 });
 
 test('while the old terminal still runs, the new one waits for it, then takes the room', async () => {
-  const { chat, hc, store, engine, done } = await setup([terminal('t1')]);
+  const { chat, hc, store, engine, done } = await setup([terminal('t1', AGENT)]);
   const room = rooms(store)['s|t1'].chat;
-  hc.change('s', 'created', terminal('t2'));
+  hc.change('s', 'created', terminal('t2', AGENT));
   await settle(engine);
   assert.equal(chat.of('openRoom').length, 1, 'no room for t2 while t1 runs');
   assert.equal(rooms(store)['s|t2'], undefined);
@@ -86,9 +88,9 @@ test('while the old terminal still runs, the new one waits for it, then takes th
 });
 
 test('a tab that was made again (a new tab id) gets a new room', async () => {
-  const { chat, hc, store, engine, done } = await setup([terminal('t1')]);
+  const { chat, hc, store, engine, done } = await setup([terminal('t1', AGENT)]);
   hc.change('s', 'finished', { address: 't1' });
-  hc.change('s', 'created', terminal('t2', { tabId: 'tb2' }));
+  hc.change('s', 'created', terminal('t2', { ...AGENT, tabId: 'tb2' }));
   await settle(engine);
   assert.equal(chat.of('openRoom').length, 2);
   assert.notEqual(rooms(store)['s|t2'].chat, rooms(store)['s|t1'].chat);
@@ -96,7 +98,7 @@ test('a tab that was made again (a new tab id) gets a new room', async () => {
 });
 
 test('a message to an ended terminal says so plainly and types nothing', async () => {
-  const { chat, hc, store, engine, done } = await setup([terminal('t1')]);
+  const { chat, hc, store, engine, done } = await setup([terminal('t1', AGENT)]);
   const room = rooms(store)['s|t1'].chat;
   hc.change('s', 'finished', { address: 't1' });
   await settle(engine);
@@ -107,18 +109,59 @@ test('a message to an ended terminal says so plainly and types nothing', async (
   done();
 });
 
-test('a terminal with no agent posts nothing by itself and answers what you type with its tidy screen', async () => {
-  const { chat, hc, store, engine, done } = await setup([terminal('t1', { program: 'zsh' })]);
-  const room = rooms(store)['s|t1'].chat;
+test('a terminal no agent ever ran in gets no room: its title (the command it runs) never names a group; once an agent runs, it gets one', async () => {
+  const shell = terminal('t1', { program: 'zsh' });
+  shell.title = 'export TOKEN=abc123';
+  const { chat, hc, store, engine, done } = await setup([shell]);
+  hc.change('s', 'title', shell);
+  await settle(engine);
+  assert.equal(chat.of('openRoom').length, 0);
+  assert.equal(rooms(store)['s|t1'], undefined);
+  hc.snapshot('s', [{ ...terminal('t1', AGENT), title: 'Fix the bug' }]);
+  await settle(engine);
+  assert.equal(chat.of('openRoom').length, 1);
+  assert.equal(rooms(store)['s|t1'].agent, true);
+  done();
+});
+
+test('a room whose agent quit stays, keeps its name while the shell runs, and answers what you type with the tidy screen', async () => {
+  const { chat, hc, store, engine, done } = await setup([terminal('t1', AGENT)]);
+  const room = rooms(store)['s|t1'];
+  const shell = { ...terminal('t1', { program: 'zsh', tab: '3' }), title: 'curl -H "Authorization: x"' };
+  hc.snapshot('s', [shell]);
+  hc.change('s', 'title', shell);
+  await settle(engine);
+  assert.equal(chat.of('renameRoom').length, 0, 'a shell\'s title names nothing');
+  assert.equal(chat.of('endRoom').length, 0);
+  assert.equal(rooms(store)['s|t1'].name, room.name);
   hc.turn('s', 't1', 'done');
   await settle(engine);
-  assert.equal(chat.of('post').length, 0);
+  assert.equal(chat.of('post').length, 0, 'a shell posts nothing by itself');
   hc.screens.set('s|t1', '\n\n$ ls\nREADME.md\n\n\n\n$ \n\n');
-  await engine.onMessage({ room, where: room, message: 'm-in', text: 'ls', images: [] });
+  await engine.onMessage({ room: room.chat, where: room.chat, message: 'm-in', text: 'ls', images: [] });
   assert.equal(hc.sent[0].text, 'ls');
   assert.equal(said(chat.of('reply').at(-1).args[1]), '```\n$ ls\nREADME.md\n\n$\n```');
   assert.deepEqual(chat.of('markDone').map((c) => c.args), [['m-in', 'r-m-in']]);
   done();
+});
+
+test('a room made before the rule for a terminal no agent ran in is ended, not deleted', async () => {
+  const chat = fakeChat();
+  const hc = fakeHc();
+  const store = fakeStore();
+  const state = store.read();
+  state.chats = { 's|t1': { chat: 'oc_old', name: 'proj / 2', session: 's', tab: 'tb1' } };
+  store.write(state);
+  const r = fakeReaders();
+  const engine = createEngine({ cfg: { sessions: ['s'], doneWaitMs: 0 }, chat, hc, readers: r.readers, store, log: quiet, logWarn: quiet, logError: quiet, startedAt: '2026-01-01T00:00:00.000Z', inbox: os.tmpdir(), quick: true });
+  running.add(engine);
+  const started = engine.start();
+  hc.snapshot('s', [terminal('t1', { program: 'zsh' })]);
+  await started;
+  await settle(engine);
+  assert.equal(store.read().chats['s|t1'].ended, true);
+  assert.deepEqual(chat.of('endRoom').map((c) => c.args[0]), ['s|t1']);
+  engine.stop();
 });
 
 test('an agent\'s turn is posted from its reader, and what you sent is not repeated', async () => {

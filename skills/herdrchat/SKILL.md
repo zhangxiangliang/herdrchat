@@ -12,8 +12,8 @@ description: >-
 
 # herdrchat
 
-herdrchat mirrors every herdr-app tab into a chat app: a group per tab in Feishu, a topic
-per tab in the bot's private chat in Telegram; the conversation as it happens, dialogs as
+herdrchat mirrors every herdr-app tab that runs an agent into a chat app: a group per tab
+in Feishu, a topic per tab in the bot's private chat in Telegram (a shell alone gets none); the conversation as it happens, dialogs as
 buttons, an overview in the direct chat. One profile is one chat app (`HERDRCHAT_CHAT`):
 one app uses the default profile; a second app beside it gets its own (`--profile <name>`).
 

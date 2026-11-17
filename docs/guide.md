@@ -233,7 +233,7 @@ that rings for a "done" shows it there too, once), then a heading per machine ("
 computer" first, every session in `HERDR_SESSIONS` in one table; then each machine reached
 over a link, by name) and its table, what needs you first: needs you, error, working, done, then idle;
 within one state the one that spoke last first. A terminal with no agent (a shell, a
-server such as `node`) is left out: it has nothing to tell you; its group stays. (Telegram's lists order
+server such as `node`) is left out: it has nothing to tell you. (Telegram's lists order
 their spaces and tabs the same way.) A room's latest is kept from what it says; one with none yet gets the last answer
 in its agent's own records. A table shows ten rows a page, and a cell wraps to a
 second line (a phone shows a third of a narrow card a column). A card holds five tables,
@@ -389,8 +389,13 @@ and its newest part in one folded post, silent and never repeated (`HERDR_HISTOR
 which: `file,folded` by default, `file`, `folded`, or empty for neither). `/history` in a
 room posts both again.
 
-In a terminal that runs no agent, what you type gets one reply: its screen a moment
-later, without blank lines.
+A room is an agent's: a terminal gets one once an agent runs in it (or is starting), never
+a shell or another program alone (`node`, a tunnel): it has nothing to say, and its title,
+the command it runs, would name the group (a token on a command line in a group's name).
+Type `claude` in a shell tab and its room comes once hc sees the agent. When the agent
+quits, its room stays and keeps its name while the shell runs; what you type there gets
+one reply, the screen a moment later, without blank lines. A group made by an older
+version for a terminal no agent ran in is ended (tagged `herdr-ended`), never deleted.
 
 A group belongs to its herdr-app tab (by the tab's id): when the tab's terminal is
 replaced, the new terminal carries on in the same group. A message that cannot be
