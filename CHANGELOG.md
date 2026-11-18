@@ -1,3 +1,10 @@
+## [1.27.1](https://github.com/zhangxiangliang/herdrchat/compare/v1.27.0...v1.27.1) (2026-11-18)
+
+
+### Bug Fixes
+
+* a command Claude Code runs itself is answered with what it printed, not the screen ([a8e374f](https://github.com/zhangxiangliang/herdrchat/commit/a8e374fd04dc7d0edd72516daf8920d052baf857))
+
 # [1.27.0](https://github.com/zhangxiangliang/herdrchat/compare/v1.26.0...v1.27.0) (2026-11-17)
 
 
