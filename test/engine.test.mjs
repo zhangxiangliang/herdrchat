@@ -1251,6 +1251,25 @@ test('a message sent while the last turn\'s end is still being read is the next 
   done();
 });
 
+test('a command the agent runs itself, answered in its records, gets that answer at once, not the screen', async () => {
+  const t = terminal('t1', { program: 'fake', agent: true });
+  t.status = { app: 'fake-agent', state: 'idle' };
+  const { chat, hc, store, engine, r, done } = await setup([t]);
+  const room = rooms(store)['s|t1'].chat;
+  hc.screens.set('s|t1', '❯ ');
+  await engine.onMessage({ room, where: room, message: 'm-in', text: '/rename english', images: [] });
+  hc.screens.set('s|t1', '❯ /rename english\n  ⎿  Session renamed to: english\n\n───\n❯\n───\n M1 branch:main');
+  r.queue('t1', [{ role: 'you', text: '/rename english', at: '2026-01-02T00:00:00.000Z', id: 'a' },
+    { role: 'ai', text: 'Session renamed to: english', at: '2026-01-02T00:00:00.000Z', id: 'b', end: true }]);
+  await new Promise((ok) => setTimeout(ok, 60));
+  await settle(engine);
+  const posts = chat.of('post').map((c) => said(c.args[1]));
+  assert.equal(posts.at(-1), 'Session renamed to: english');
+  assert.equal(posts.filter((p) => p.includes('```')).length, 0, 'no screen');
+  assert.deepEqual(rung(chat), ['done']);
+  done();
+});
+
 test('a message an agent never starts working on (Codex: "Unrecognized command") gets the screen and a note, not silence', async () => {
   const t = terminal('t1', { program: 'fake', agent: true });
   t.status = { app: 'fake-agent', state: 'idle' };
