@@ -54,7 +54,7 @@ test('Claude stopped by you (Esc, at a dialog or while it works): the turn ends 
   ]);
 });
 
-test('a command Claude Code runs itself is your line and its printed answer, which ends the turn', () => {
+test('a command Claude Code runs itself is your line and its printed answer, which ends the turn; its note that a turn ended is a meta item', () => {
   const local = (s, uuid, content) => entry({ type: 'system', subtype: 'local_command', uuid, timestamp: at(s), content });
   const lines = [
     local(1, 'c1', '<command-name>/rename</command-name>\n            <command-message>rename</command-message>\n            <command-args>english</command-args>'),
@@ -62,12 +62,14 @@ test('a command Claude Code runs itself is your line and its printed answer, whi
     local(2, 'c3', '<command-name>/cost</command-name>'),
     local(2, 'c4', '<local-command-stdout>\u001b[1mTotal cost:\u001b[22m $0.12</local-command-stdout>'),
     local(3, 'c5', '<local-command-stdout></local-command-stdout>'),
+    entry({ type: 'system', subtype: 'turn_duration', uuid: 'c6', timestamp: at(4), durationMs: 10 }),
   ];
   assert.deepEqual(conversationAfter(lines, startCursor(at(0))).items.map((x) => [x.role, x.text, Boolean(x.end)]), [
     ['you', '/rename english', false],
     ['ai', 'Session renamed to: english', true],
     ['you', '/cost', false],
     ['ai', 'Total cost: $0.12', true],
+    ['meta', undefined, false],
   ]);
 });
 

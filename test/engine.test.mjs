@@ -1450,6 +1450,24 @@ test('an agent stopped at its dialog (Esc) goes from asking to waiting without w
   done();
 });
 
+test('a turn that ends while hc still says it works (a background agent runs) is posted once its records say it ended', async () => {
+  const { chat, engine, r, done } = await setup([terminal('t1', { program: 'fake', agent: true, state: 'working' })]);
+  r.queue('t1', [{ role: 'tool', text: '▸ bash: ls', at: '2026-01-02T00:00:01.000Z', id: 'a' },
+    { role: 'ai', text: 'Started the review in the background.', at: '2026-01-02T00:00:02.000Z', id: 'b', end: true }]);
+  engine.tick.live();
+  await settle(engine);
+  assert.equal(chat.of('post').length, 0, 'an answer alone may be followed by more: it waits');
+  r.queue('t1', [{ role: 'meta', at: '2026-01-02T00:00:03.000Z', id: 'c' }, { role: 'you', text: 'and the PR?', at: '2026-01-02T00:00:04.000Z', id: 'd' }]);
+  engine.tick.live();
+  await settle(engine);
+  assert.deepEqual(chat.of('post').map((c) => said(c.args[1])), ['Started the review in the background.']);
+  assert.equal(chat.of('editCard').at(-1).args[1].tone, 'closed', 'its live card is closed');
+  assert.deepEqual(rung(chat), ['done']);
+  // what came after is the next turn's live card
+  assert.match(said(chat.of('postCard').at(-1).args[1].body), /and the PR\?/);
+  done();
+});
+
 test('a live card kept from before blocks (its text) goes on with what comes, its text kept; a full one is the chat app\'s to say', async () => {
   const { chat, store, engine, r, done } = await setup([terminal('t1', { program: 'fake', agent: true, state: 'working' })]);
   const state = store.read();
