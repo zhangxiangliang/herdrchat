@@ -1,3 +1,10 @@
+## [1.27.2](https://github.com/zhangxiangliang/herdrchat/compare/v1.27.1...v1.27.2) (2026-11-19)
+
+
+### Bug Fixes
+
+* a turn Claude Code ends while a background agent runs is posted, though hc still says it works ([b615689](https://github.com/zhangxiangliang/herdrchat/commit/b615689a0c4e3c173fad57bbdbb16c6cdd935abc))
+
 ## [1.27.1](https://github.com/zhangxiangliang/herdrchat/compare/v1.27.0...v1.27.1) (2026-11-18)
 
 
