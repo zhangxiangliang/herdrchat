@@ -1,3 +1,10 @@
+## [1.27.6](https://github.com/zhangxiangliang/herdrchat/compare/v1.27.5...v1.27.6) (2026-11-23)
+
+
+### Bug Fixes
+
+* a hook request left behind is not taken as open when its pid is used again ([968b33c](https://github.com/zhangxiangliang/herdrchat/commit/968b33c49a94460b87eb99b98dce78a4e8d85b20))
+
 ## [1.27.5](https://github.com/zhangxiangliang/herdrchat/compare/v1.27.4...v1.27.5) (2026-11-23)
 
 
