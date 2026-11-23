@@ -1,3 +1,10 @@
+## [1.27.5](https://github.com/zhangxiangliang/herdrchat/compare/v1.27.4...v1.27.5) (2026-11-23)
+
+
+### Bug Fixes
+
+* a shell command run with "!" in Claude Code is answered with its output, not the screen ([60d9731](https://github.com/zhangxiangliang/herdrchat/commit/60d97312d0faf53eba1a18cb0963c50902c9eb6e))
+
 ## [1.27.4](https://github.com/zhangxiangliang/herdrchat/compare/v1.27.3...v1.27.4) (2026-11-23)
 
 
