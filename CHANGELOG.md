@@ -1,3 +1,10 @@
+## [1.27.7](https://github.com/zhangxiangliang/herdrchat/compare/v1.27.6...v1.27.7) (2026-11-23)
+
+
+### Bug Fixes
+
+* Codex that resumed a named thread is read from that thread's log ([282c23c](https://github.com/zhangxiangliang/herdrchat/commit/282c23c467fd7ccc5a7ca9e5284f5d6cf154cc34))
+
 ## [1.27.6](https://github.com/zhangxiangliang/herdrchat/compare/v1.27.5...v1.27.6) (2026-11-23)
 
 
