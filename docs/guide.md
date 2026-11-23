@@ -119,7 +119,9 @@ setting changed in `config.env` takes effect at the next `herdrchat start`.
 **hc is the backbone.** The bot follows `hc events --json` for each session (its format:
 `hc schema`). From hc it learns which terminals exist, where
 they are (labels), their status, and when a turn ends (`turn` event: the status left
-`working`). Typing from a group goes through `hc send`. Nothing else is run: herdr-app
+`working`). Typing from a group goes through `hc send`, which holds a message while the
+terminal's input box has a draft (hc's `draft_wait`, 60 s after the last key): past 10 s the
+group is told it is held, and it goes in once the draft is done. Nothing else is run: herdr-app
 is a client of hc as herdrchat is, and they meet only in hc's labels.
 
 **Which terminals count, from hc alone.** A terminal with a `where` label (`<space> /

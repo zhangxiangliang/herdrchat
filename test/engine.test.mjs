@@ -97,6 +97,29 @@ test('a tab that was made again (a new tab id) gets a new room', async () => {
   done();
 });
 
+test('a message hc holds (a draft in the input box) is said to be held; one hc gave up on is not called undelivered', async () => {
+  const { chat, hc, store, engine, done } = await setup([terminal('t1', AGENT)]);
+  const room = rooms(store)['s|t1'].chat;
+  const send = hc.send;
+  hc.send = async (...a) => { await new Promise((ok) => setTimeout(ok, 60)); return send(...a); };
+  await engine.onMessage({ room, where: room, message: 'm-1', text: 'hello', images: [] });
+  assert.match(chat.of('reply').at(-1).args[1], /holds a draft/);
+  assert.equal(hc.sent.at(-1).text, 'hello');
+  const replies = chat.of('reply').length;
+  hc.send = async () => { await new Promise((ok) => setTimeout(ok, 30)); throw Object.assign(new Error('hc send t1 -- hi: Command failed: hc send t1 -- hi'), { killed: true }); };
+  await engine.onMessage({ room, where: room, message: 'm-2', text: 'hi', images: [] });
+  const said2 = chat.of('reply').slice(replies).map((c) => c.args[1]);
+  assert.ok(said2.some((t) => /may still go in/.test(t)));
+  assert.ok(!said2.some((t) => /Not delivered/.test(t)));
+  // a quick send says nothing
+  hc.send = send;
+  const before = chat.of('reply').length;
+  await engine.onMessage({ room, where: room, message: 'm-3', text: 'quick', images: [] });
+  await new Promise((ok) => setTimeout(ok, 40));
+  assert.equal(chat.of('reply').length, before);
+  done();
+});
+
 test('a message to an ended terminal says so plainly and types nothing', async () => {
   const { chat, hc, store, engine, done } = await setup([terminal('t1', AGENT)]);
   const room = rooms(store)['s|t1'].chat;
