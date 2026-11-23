@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { conversationAfter, leftInput, pickLog, titleOf } from '../lib/core/readers/codex.mjs';
+import { conversationAfter, leftInput, pickLog, threadIds, titleOf } from '../lib/core/readers/codex.mjs';
 import { seconds } from '../lib/core/shell.mjs';
 import { LISTED, agentOf, startingOf } from '../lib/core/readers/index.mjs';
 import { descendantNamed } from '../lib/core/home.mjs';
@@ -67,6 +67,28 @@ test('the log of a codex is the one in its folder that began as it started', () 
   assert.equal(pickLog(list, '/w', started), 'c.jsonl');
   assert.equal(pickLog('a.jsonl\t"cwd":"/w"\t"timestamp":"2026-01-02T09:00:00.000Z"', '/w', started), 'a.jsonl', 'resumed: the one there is');
   assert.equal(pickLog(list, '/none', started), null);
+});
+
+test('the log of a codex that resumed a named thread is that thread\'s, not one a launcher\'s check began as it started', () => {
+  const started = Date.parse('2026-01-02T10:00:00.000Z');
+  const list = [
+    'rollout-a-0001-aaaa.jsonl\t"cwd":"/w"\t"timestamp":"2026-01-02T09:00:00.000Z"', // the thread, resumed
+    'rollout-b-0002-bbbb.jsonl\t"cwd":"/w"\t"timestamp":"2026-01-02T09:59:58.000Z"', // a check run just before
+    'rollout-c-0003-cccc.jsonl\t"cwd":"/other"\t"timestamp":"2026-01-02T08:00:00.000Z"', // same name, another folder
+  ].join('\n');
+  const index = [
+    '{"id":"0003-cccc","thread_name":"master","updated_at":"2026-01-02T08:00:00Z"}',
+    '{"id":"0001-aaaa","thread_name":"first words","updated_at":"2026-01-02T09:00:00Z"}',
+    '{"id":"0001-aaaa","thread_name":"master","updated_at":"2026-01-02T09:00:05Z"}', // renamed
+    '{"id":"0002-bbbb","thread_name":"List one log group","updated_at":"2026-01-02T09:59:59Z"}',
+    '{"id":"half',
+  ].join('\n');
+  const ids = threadIds(index, 'master');
+  assert.deepEqual(ids, ['0001-aaaa', '0003-cccc']);
+  assert.equal(pickLog(list, '/w', started, ids), 'rollout-a-0001-aaaa.jsonl');
+  assert.equal(pickLog(list, '/w', started), 'rollout-b-0002-bbbb.jsonl', 'with no thread: the one that began as it started');
+  assert.deepEqual(threadIds(index, 'codex'), [], 'a thread not named yet names none');
+  assert.equal(pickLog(list, '/w', started, threadIds(index, 'gone')), 'rollout-b-0002-bbbb.jsonl');
 });
 
 test('a Codex room is named after its thread, and the name does not follow its state', () => {
