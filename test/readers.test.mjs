@@ -73,6 +73,22 @@ test('a command Claude Code runs itself is your line and its printed answer, whi
   ]);
 });
 
+test('a shell command you ran with "!" is your line and its output, as code, which ends the turn', () => {
+  const user = (s, uuid, content) => entry({ type: 'user', uuid, timestamp: at(s), message: { role: 'user', content } });
+  const lines = [
+    user(1, 'b1', '<bash-input> sh build.sh 123</bash-input>'),
+    user(3, 'b2', '<bash-stdout>\u001b[32mbuilt\u001b[39m ok</bash-stdout><bash-stderr>warn: x</bash-stderr>'),
+    user(4, 'b3', '<bash-input>true</bash-input>'),
+    user(5, 'b4', '<bash-stdout></bash-stdout><bash-stderr></bash-stderr>'),
+  ];
+  assert.deepEqual(conversationAfter(lines, startCursor(at(0))).items.map((x) => [x.role, x.text, Boolean(x.end)]), [
+    ['you', '! sh build.sh 123', false],
+    ['ai', '```\nbuilt ok\nwarn: x\n```', true],
+    ['you', '! true', false],
+    ['ai', '_(no output)_', true],
+  ]);
+});
+
 test('narration blocks count as answers, plain thinking does not', () => {
   const sig = (word) => Buffer.from(`\u0008\u0004${word}\u0012xyz`).toString('base64');
   const lines = [

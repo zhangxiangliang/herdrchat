@@ -1293,6 +1293,25 @@ test('a command the agent runs itself, answered in its records, gets that answer
   done();
 });
 
+test('a command its records show it took, still running (a shell command run with "!"), gets no screen: its output comes when it ends', async () => {
+  const t = terminal('t1', { program: 'fake', agent: true });
+  t.status = { app: 'fake-agent', state: 'idle' };
+  const { chat, hc, store, engine, r, done } = await setup([t]);
+  const room = rooms(store)['s|t1'].chat;
+  hc.screens.set('s|t1', '❯ ');
+  await engine.onMessage({ room, where: room, message: 'm-in', text: '! sh build.sh', images: [] });
+  hc.screens.set('s|t1', '! sh build.sh\n  ⎿  Running…\n❯ ');
+  r.queue('t1', [{ role: 'you', text: '! sh build.sh', at: '2026-01-02T00:00:00.000Z', id: 'a' }]);
+  await new Promise((ok) => setTimeout(ok, 60));
+  await settle(engine);
+  assert.equal(chat.of('post').filter((c) => /Running/.test(said(c.args[1]))).length, 0, 'no screen');
+  r.queue('t1', [{ role: 'ai', text: '```\nbuilt\n```', at: '2026-01-02T00:02:00.000Z', id: 'b', end: true }]);
+  engine.tick.sweep();
+  await settle(engine);
+  assert.equal(said(chat.of('post').at(-1).args[1]), '```\nbuilt\n```');
+  done();
+});
+
 test('a message an agent never starts working on (Codex: "Unrecognized command") gets the screen and a note, not silence', async () => {
   const t = terminal('t1', { program: 'fake', agent: true });
   t.status = { app: 'fake-agent', state: 'idle' };
