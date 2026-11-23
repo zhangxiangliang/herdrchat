@@ -1,3 +1,10 @@
+## [1.27.4](https://github.com/zhangxiangliang/herdrchat/compare/v1.27.3...v1.27.4) (2026-11-23)
+
+
+### Bug Fixes
+
+* a message hc holds for a draft is said to be held, not called undelivered ([e09c0f9](https://github.com/zhangxiangliang/herdrchat/commit/e09c0f9f8b3ca9709141c5a87ad6661e11d10e02))
+
 ## [1.27.3](https://github.com/zhangxiangliang/herdrchat/compare/v1.27.2...v1.27.3) (2026-11-23)
 
 
