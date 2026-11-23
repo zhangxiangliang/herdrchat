@@ -2,7 +2,8 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { conversationAfter, leftInput, pickLog, titleOf } from '../lib/core/readers/codex.mjs';
 import { seconds } from '../lib/core/shell.mjs';
-import { LISTED, agentOf } from '../lib/core/readers/index.mjs';
+import { LISTED, agentOf, startingOf } from '../lib/core/readers/index.mjs';
+import { descendantNamed } from '../lib/core/home.mjs';
 import { startCursor } from '../lib/core/cursor.mjs';
 import { menuOf } from '../lib/core/menu.mjs';
 
@@ -39,6 +40,18 @@ test('a Codex terminal is read by the Codex reader, and only while codex runs in
   assert.ok(LISTED.some((r) => r.app === 'codex'));
   assert.equal(agentOf({ status: { app: 'codex' }, foreground: { name: 'codex', argv: ['codex'] } })?.app, 'codex');
   assert.equal(agentOf({ status: { app: 'codex' }, foreground: { name: 'zsh', argv: ['/bin/zsh'] } }), null);
+  // a launcher that runs it under a wrapper (1Password's op run): the wrapper is the foreground
+  const wrapped = { name: 'op', argv: ['op', 'run', '--env-file=.env.x', '--', 'bash', '-c', 'set -a; exec codex "$@"', 'bash'] };
+  assert.equal(agentOf({ status: { app: 'codex' }, foreground: wrapped })?.app, 'codex');
+  assert.equal(startingOf({ state: 'live', foreground: wrapped })?.app, 'codex');
+  assert.equal(agentOf({ status: { app: 'codex' }, foreground: { name: 'vim', argv: ['vim', 'codex.md'] } }), null, 'a file named after it is no wrapper');
+});
+
+test('the agent a wrapper runs is found among its descendants', () => {
+  const ps = ['  1 0 /sbin/launchd', ' 90 1 /bin/zsh', ' 91 90 op', ' 92 91 /bin/bash', ' 93 92 /opt/bin/codex', ' 94 93 node'].join('\n');
+  assert.deepEqual(descendantNamed(ps, 91, ['codex']), { pid: 93, name: 'codex' });
+  assert.equal(descendantNamed(ps, 93, ['codex']), null, 'only below the wrapper');
+  assert.equal(descendantNamed(ps, 91, ['claude']), null);
 });
 
 test('the log of a codex is the one in its folder that began as it started', () => {
