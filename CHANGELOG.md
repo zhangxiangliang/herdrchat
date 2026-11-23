@@ -1,3 +1,10 @@
+## [1.27.3](https://github.com/zhangxiangliang/herdrchat/compare/v1.27.2...v1.27.3) (2026-11-23)
+
+
+### Bug Fixes
+
+* an agent a launcher runs under a wrapper (op run) is known as that agent and read ([5e3f3a3](https://github.com/zhangxiangliang/herdrchat/commit/5e3f3a3a6e6bdabe6ca85b71382ad81dc6457315))
+
 ## [1.27.2](https://github.com/zhangxiangliang/herdrchat/compare/v1.27.1...v1.27.2) (2026-11-19)
 
 
